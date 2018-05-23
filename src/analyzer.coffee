@@ -148,11 +148,11 @@ module.exports =
                     d.wOut = 1
                     d.hOut = 1
                     d.chOut = numout
-                    #computation
-                    d.comp.macc = (d.wIn*d.hIn)*d.chIn*d.chOut*d.batchOut
                     #memory
-                    d.mem.param = d.wIn*d.hIn*d.chIn*d.chOut + has_bias*d.chOut
+                    d.mem.param = (d.wIn*d.hIn*d.chIn + has_bias)*d.chOut
                     d.mem.activation = d.wOut*d.hOut*d.chOut*d.batchOut
+                    #computation
+                    d.comp.macc = d.mem.param * d.batchOut
 
                 when "pooling"
                     #dimensions
