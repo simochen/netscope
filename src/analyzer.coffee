@@ -53,6 +53,16 @@ module.exports =
                     #-- none
                     d.mem.activation = d.wOut*d.hOut*d.chOut*d.batchOut
 
+                when "slice"
+                    params   = n.attribs.slice_param
+                    slich_ch = params.slice_point
+                    axis     = params.axis ? 1
+                    # update output sizes
+                    d.batchOut = if axis == 0 then slich_ch else d.batchIn
+                    d.chOut = if axis == 1 then slich_ch else d.chIn
+                    d.hOut  = if axis == 2 then slich_ch else d.hIn
+                    d.wOut  = if axis == 3 then slich_ch else d.wIn
+
                 when "convolution"
                     #dimensions
                     params   = n.attribs.convolution_param
