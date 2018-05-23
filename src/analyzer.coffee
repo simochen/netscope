@@ -38,7 +38,7 @@ module.exports =
                     else if n.attribs.transform_param?.crop_size?
                         d.wIn = d.hIn = n.attribs.transform_param.crop_size
                         d.chIn = 3  # assume RGB
-                        d.batchOut = 1
+                        d.batchIn = 1
                     else
                         onerror('Unknown Input Dimensions')
                         debugger;
