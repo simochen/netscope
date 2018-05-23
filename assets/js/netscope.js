@@ -1,6 +1,6 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 /*!
- * jQuery JavaScript Library v3.2.1
+ * jQuery JavaScript Library v3.3.1
  * https://jquery.com/
  *
  * Includes Sizzle.js
@@ -10,7 +10,7 @@
  * Released under the MIT license
  * https://jquery.org/license
  *
- * Date: 2017-03-20T18:59Z
+ * Date: 2018-01-20T17:24Z
  */
 ( function( global, factory ) {
 
@@ -72,16 +72,57 @@ var ObjectFunctionString = fnToString.call( Object );
 
 var support = {};
 
+var isFunction = function isFunction( obj ) {
+
+      // Support: Chrome <=57, Firefox <=52
+      // In some browsers, typeof returns "function" for HTML <object> elements
+      // (i.e., `typeof document.createElement( "object" ) === "function"`).
+      // We don't want to classify *any* DOM node as a function.
+      return typeof obj === "function" && typeof obj.nodeType !== "number";
+  };
 
 
-	function DOMEval( code, doc ) {
+var isWindow = function isWindow( obj ) {
+		return obj != null && obj === obj.window;
+	};
+
+
+
+
+	var preservedScriptAttributes = {
+		type: true,
+		src: true,
+		noModule: true
+	};
+
+	function DOMEval( code, doc, node ) {
 		doc = doc || document;
 
-		var script = doc.createElement( "script" );
+		var i,
+			script = doc.createElement( "script" );
 
 		script.text = code;
+		if ( node ) {
+			for ( i in preservedScriptAttributes ) {
+				if ( node[ i ] ) {
+					script[ i ] = node[ i ];
+				}
+			}
+		}
 		doc.head.appendChild( script ).parentNode.removeChild( script );
 	}
+
+
+function toType( obj ) {
+	if ( obj == null ) {
+		return obj + "";
+	}
+
+	// Support: Android <=2.3 only (functionish RegExp)
+	return typeof obj === "object" || typeof obj === "function" ?
+		class2type[ toString.call( obj ) ] || "object" :
+		typeof obj;
+}
 /* global Symbol */
 // Defining this global in .eslintrc.json would create a danger of using the global
 // unguarded in another place, it seems safer to define global only for this module
@@ -89,7 +130,7 @@ var support = {};
 
 
 var
-	version = "3.2.1",
+	version = "3.3.1",
 
 	// Define a local copy of jQuery
 	jQuery = function( selector, context ) {
@@ -101,16 +142,7 @@ var
 
 	// Support: Android <=4.0 only
 	// Make sure we trim BOM and NBSP
-	rtrim = /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g,
-
-	// Matches dashed string for camelizing
-	rmsPrefix = /^-ms-/,
-	rdashAlpha = /-([a-z])/g,
-
-	// Used by jQuery.camelCase as callback to replace()
-	fcamelCase = function( all, letter ) {
-		return letter.toUpperCase();
-	};
+	rtrim = /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g;
 
 jQuery.fn = jQuery.prototype = {
 
@@ -210,7 +242,7 @@ jQuery.extend = jQuery.fn.extend = function() {
 	}
 
 	// Handle case when target is a string or something (possible in deep copy)
-	if ( typeof target !== "object" && !jQuery.isFunction( target ) ) {
+	if ( typeof target !== "object" && !isFunction( target ) ) {
 		target = {};
 	}
 
@@ -276,28 +308,6 @@ jQuery.extend( {
 
 	noop: function() {},
 
-	isFunction: function( obj ) {
-		return jQuery.type( obj ) === "function";
-	},
-
-	isWindow: function( obj ) {
-		return obj != null && obj === obj.window;
-	},
-
-	isNumeric: function( obj ) {
-
-		// As of jQuery 3.0, isNumeric is limited to
-		// strings and numbers (primitives or objects)
-		// that can be coerced to finite numbers (gh-2662)
-		var type = jQuery.type( obj );
-		return ( type === "number" || type === "string" ) &&
-
-			// parseFloat NaNs numeric-cast false positives ("")
-			// ...but misinterprets leading-number strings, particularly hex literals ("0x...")
-			// subtraction forces infinities to NaN
-			!isNaN( obj - parseFloat( obj ) );
-	},
-
 	isPlainObject: function( obj ) {
 		var proto, Ctor;
 
@@ -331,27 +341,9 @@ jQuery.extend( {
 		return true;
 	},
 
-	type: function( obj ) {
-		if ( obj == null ) {
-			return obj + "";
-		}
-
-		// Support: Android <=2.3 only (functionish RegExp)
-		return typeof obj === "object" || typeof obj === "function" ?
-			class2type[ toString.call( obj ) ] || "object" :
-			typeof obj;
-	},
-
 	// Evaluates a script in a global context
 	globalEval: function( code ) {
 		DOMEval( code );
-	},
-
-	// Convert dashed to camelCase; used by the css and data modules
-	// Support: IE <=9 - 11, Edge 12 - 13
-	// Microsoft forgot to hump their vendor prefix (#9572)
-	camelCase: function( string ) {
-		return string.replace( rmsPrefix, "ms-" ).replace( rdashAlpha, fcamelCase );
 	},
 
 	each: function( obj, callback ) {
@@ -474,37 +466,6 @@ jQuery.extend( {
 	// A global GUID counter for objects
 	guid: 1,
 
-	// Bind a function to a context, optionally partially applying any
-	// arguments.
-	proxy: function( fn, context ) {
-		var tmp, args, proxy;
-
-		if ( typeof context === "string" ) {
-			tmp = fn[ context ];
-			context = fn;
-			fn = tmp;
-		}
-
-		// Quick check to determine if target is callable, in the spec
-		// this throws a TypeError, but we will just return undefined.
-		if ( !jQuery.isFunction( fn ) ) {
-			return undefined;
-		}
-
-		// Simulated bind
-		args = slice.call( arguments, 2 );
-		proxy = function() {
-			return fn.apply( context || this, args.concat( slice.call( arguments ) ) );
-		};
-
-		// Set the guid of unique handler to the same of original handler, so it can be removed
-		proxy.guid = fn.guid = fn.guid || jQuery.guid++;
-
-		return proxy;
-	},
-
-	now: Date.now,
-
 	// jQuery.support is not used in Core but other projects attach their
 	// properties to it so it needs to exist.
 	support: support
@@ -527,9 +488,9 @@ function isArrayLike( obj ) {
 	// hasOwn isn't used here due to false negatives
 	// regarding Nodelist length in IE
 	var length = !!obj && "length" in obj && obj.length,
-		type = jQuery.type( obj );
+		type = toType( obj );
 
-	if ( type === "function" || jQuery.isWindow( obj ) ) {
+	if ( isFunction( obj ) || isWindow( obj ) ) {
 		return false;
 	}
 
@@ -2849,11 +2810,9 @@ var rsingleTag = ( /^<([a-z][^\/\0>:\x20\t\r\n\f]*)[\x20\t\r\n\f]*\/?>(?:<\/\1>|
 
 
 
-var risSimple = /^.[^:#\[\.,]*$/;
-
 // Implement the identical functionality for filter and not
 function winnow( elements, qualifier, not ) {
-	if ( jQuery.isFunction( qualifier ) ) {
+	if ( isFunction( qualifier ) ) {
 		return jQuery.grep( elements, function( elem, i ) {
 			return !!qualifier.call( elem, i, elem ) !== not;
 		} );
@@ -2873,16 +2832,8 @@ function winnow( elements, qualifier, not ) {
 		} );
 	}
 
-	// Simple selector that can be filtered directly, removing non-Elements
-	if ( risSimple.test( qualifier ) ) {
-		return jQuery.filter( qualifier, elements, not );
-	}
-
-	// Complex selector, compare the two sets, removing non-Elements
-	qualifier = jQuery.filter( qualifier, elements );
-	return jQuery.grep( elements, function( elem ) {
-		return ( indexOf.call( qualifier, elem ) > -1 ) !== not && elem.nodeType === 1;
-	} );
+	// Filtered directly for both simple and complex selectors
+	return jQuery.filter( qualifier, elements, not );
 }
 
 jQuery.filter = function( expr, elems, not ) {
@@ -3003,7 +2954,7 @@ var rootjQuery,
 						for ( match in context ) {
 
 							// Properties of context are called as methods if possible
-							if ( jQuery.isFunction( this[ match ] ) ) {
+							if ( isFunction( this[ match ] ) ) {
 								this[ match ]( context[ match ] );
 
 							// ...and otherwise set as attributes
@@ -3046,7 +2997,7 @@ var rootjQuery,
 
 		// HANDLE: $(function)
 		// Shortcut for document ready
-		} else if ( jQuery.isFunction( selector ) ) {
+		} else if ( isFunction( selector ) ) {
 			return root.ready !== undefined ?
 				root.ready( selector ) :
 
@@ -3361,11 +3312,11 @@ jQuery.Callbacks = function( options ) {
 
 					( function add( args ) {
 						jQuery.each( args, function( _, arg ) {
-							if ( jQuery.isFunction( arg ) ) {
+							if ( isFunction( arg ) ) {
 								if ( !options.unique || !self.has( arg ) ) {
 									list.push( arg );
 								}
-							} else if ( arg && arg.length && jQuery.type( arg ) !== "string" ) {
+							} else if ( arg && arg.length && toType( arg ) !== "string" ) {
 
 								// Inspect recursively
 								add( arg );
@@ -3480,11 +3431,11 @@ function adoptValue( value, resolve, reject, noValue ) {
 	try {
 
 		// Check for promise aspect first to privilege synchronous behavior
-		if ( value && jQuery.isFunction( ( method = value.promise ) ) ) {
+		if ( value && isFunction( ( method = value.promise ) ) ) {
 			method.call( value ).done( resolve ).fail( reject );
 
 		// Other thenables
-		} else if ( value && jQuery.isFunction( ( method = value.then ) ) ) {
+		} else if ( value && isFunction( ( method = value.then ) ) ) {
 			method.call( value, resolve, reject );
 
 		// Other non-thenables
@@ -3542,14 +3493,14 @@ jQuery.extend( {
 						jQuery.each( tuples, function( i, tuple ) {
 
 							// Map tuples (progress, done, fail) to arguments (done, fail, progress)
-							var fn = jQuery.isFunction( fns[ tuple[ 4 ] ] ) && fns[ tuple[ 4 ] ];
+							var fn = isFunction( fns[ tuple[ 4 ] ] ) && fns[ tuple[ 4 ] ];
 
 							// deferred.progress(function() { bind to newDefer or newDefer.notify })
 							// deferred.done(function() { bind to newDefer or newDefer.resolve })
 							// deferred.fail(function() { bind to newDefer or newDefer.reject })
 							deferred[ tuple[ 1 ] ]( function() {
 								var returned = fn && fn.apply( this, arguments );
-								if ( returned && jQuery.isFunction( returned.promise ) ) {
+								if ( returned && isFunction( returned.promise ) ) {
 									returned.promise()
 										.progress( newDefer.notify )
 										.done( newDefer.resolve )
@@ -3603,7 +3554,7 @@ jQuery.extend( {
 										returned.then;
 
 									// Handle a returned thenable
-									if ( jQuery.isFunction( then ) ) {
+									if ( isFunction( then ) ) {
 
 										// Special processors (notify) just wait for resolution
 										if ( special ) {
@@ -3699,7 +3650,7 @@ jQuery.extend( {
 							resolve(
 								0,
 								newDefer,
-								jQuery.isFunction( onProgress ) ?
+								isFunction( onProgress ) ?
 									onProgress :
 									Identity,
 								newDefer.notifyWith
@@ -3711,7 +3662,7 @@ jQuery.extend( {
 							resolve(
 								0,
 								newDefer,
-								jQuery.isFunction( onFulfilled ) ?
+								isFunction( onFulfilled ) ?
 									onFulfilled :
 									Identity
 							)
@@ -3722,7 +3673,7 @@ jQuery.extend( {
 							resolve(
 								0,
 								newDefer,
-								jQuery.isFunction( onRejected ) ?
+								isFunction( onRejected ) ?
 									onRejected :
 									Thrower
 							)
@@ -3762,8 +3713,15 @@ jQuery.extend( {
 					// fulfilled_callbacks.disable
 					tuples[ 3 - i ][ 2 ].disable,
 
+					// rejected_handlers.disable
+					// fulfilled_handlers.disable
+					tuples[ 3 - i ][ 3 ].disable,
+
 					// progress_callbacks.lock
-					tuples[ 0 ][ 2 ].lock
+					tuples[ 0 ][ 2 ].lock,
+
+					// progress_handlers.lock
+					tuples[ 0 ][ 3 ].lock
 				);
 			}
 
@@ -3833,7 +3791,7 @@ jQuery.extend( {
 
 			// Use .then() to unwrap secondary thenables (cf. gh-3000)
 			if ( master.state() === "pending" ||
-				jQuery.isFunction( resolveValues[ i ] && resolveValues[ i ].then ) ) {
+				isFunction( resolveValues[ i ] && resolveValues[ i ].then ) ) {
 
 				return master.then();
 			}
@@ -3961,7 +3919,7 @@ var access = function( elems, fn, key, value, chainable, emptyGet, raw ) {
 		bulk = key == null;
 
 	// Sets many values
-	if ( jQuery.type( key ) === "object" ) {
+	if ( toType( key ) === "object" ) {
 		chainable = true;
 		for ( i in key ) {
 			access( elems, fn, i, key[ i ], true, emptyGet, raw );
@@ -3971,7 +3929,7 @@ var access = function( elems, fn, key, value, chainable, emptyGet, raw ) {
 	} else if ( value !== undefined ) {
 		chainable = true;
 
-		if ( !jQuery.isFunction( value ) ) {
+		if ( !isFunction( value ) ) {
 			raw = true;
 		}
 
@@ -4013,6 +3971,23 @@ var access = function( elems, fn, key, value, chainable, emptyGet, raw ) {
 
 	return len ? fn( elems[ 0 ], key ) : emptyGet;
 };
+
+
+// Matches dashed string for camelizing
+var rmsPrefix = /^-ms-/,
+	rdashAlpha = /-([a-z])/g;
+
+// Used by camelCase as callback to replace()
+function fcamelCase( all, letter ) {
+	return letter.toUpperCase();
+}
+
+// Convert dashed to camelCase; used by the css and data modules
+// Support: IE <=9 - 11, Edge 12 - 15
+// Microsoft forgot to hump their vendor prefix (#9572)
+function camelCase( string ) {
+	return string.replace( rmsPrefix, "ms-" ).replace( rdashAlpha, fcamelCase );
+}
 var acceptData = function( owner ) {
 
 	// Accepts only:
@@ -4075,14 +4050,14 @@ Data.prototype = {
 		// Handle: [ owner, key, value ] args
 		// Always use camelCase key (gh-2257)
 		if ( typeof data === "string" ) {
-			cache[ jQuery.camelCase( data ) ] = value;
+			cache[ camelCase( data ) ] = value;
 
 		// Handle: [ owner, { properties } ] args
 		} else {
 
 			// Copy the properties one-by-one to the cache object
 			for ( prop in data ) {
-				cache[ jQuery.camelCase( prop ) ] = data[ prop ];
+				cache[ camelCase( prop ) ] = data[ prop ];
 			}
 		}
 		return cache;
@@ -4092,7 +4067,7 @@ Data.prototype = {
 			this.cache( owner ) :
 
 			// Always use camelCase key (gh-2257)
-			owner[ this.expando ] && owner[ this.expando ][ jQuery.camelCase( key ) ];
+			owner[ this.expando ] && owner[ this.expando ][ camelCase( key ) ];
 	},
 	access: function( owner, key, value ) {
 
@@ -4140,9 +4115,9 @@ Data.prototype = {
 
 				// If key is an array of keys...
 				// We always set camelCase keys, so remove that.
-				key = key.map( jQuery.camelCase );
+				key = key.map( camelCase );
 			} else {
-				key = jQuery.camelCase( key );
+				key = camelCase( key );
 
 				// If a key with the spaces exists, use it.
 				// Otherwise, create an array by matching non-whitespace
@@ -4288,7 +4263,7 @@ jQuery.fn.extend( {
 						if ( attrs[ i ] ) {
 							name = attrs[ i ].name;
 							if ( name.indexOf( "data-" ) === 0 ) {
-								name = jQuery.camelCase( name.slice( 5 ) );
+								name = camelCase( name.slice( 5 ) );
 								dataAttr( elem, name, data[ name ] );
 							}
 						}
@@ -4535,8 +4510,7 @@ var swap = function( elem, options, callback, args ) {
 
 
 function adjustCSS( elem, prop, valueParts, tween ) {
-	var adjusted,
-		scale = 1,
+	var adjusted, scale,
 		maxIterations = 20,
 		currentValue = tween ?
 			function() {
@@ -4554,30 +4528,33 @@ function adjustCSS( elem, prop, valueParts, tween ) {
 
 	if ( initialInUnit && initialInUnit[ 3 ] !== unit ) {
 
+		// Support: Firefox <=54
+		// Halve the iteration target value to prevent interference from CSS upper bounds (gh-2144)
+		initial = initial / 2;
+
 		// Trust units reported by jQuery.css
 		unit = unit || initialInUnit[ 3 ];
-
-		// Make sure we update the tween properties later on
-		valueParts = valueParts || [];
 
 		// Iteratively approximate from a nonzero starting point
 		initialInUnit = +initial || 1;
 
-		do {
+		while ( maxIterations-- ) {
 
-			// If previous iteration zeroed out, double until we get *something*.
-			// Use string for doubling so we don't accidentally see scale as unchanged below
-			scale = scale || ".5";
-
-			// Adjust and apply
-			initialInUnit = initialInUnit / scale;
+			// Evaluate and update our best guess (doubling guesses that zero out).
+			// Finish if the scale equals or crosses 1 (making the old*new product non-positive).
 			jQuery.style( elem, prop, initialInUnit + unit );
+			if ( ( 1 - scale ) * ( 1 - ( scale = currentValue() / initial || 0.5 ) ) <= 0 ) {
+				maxIterations = 0;
+			}
+			initialInUnit = initialInUnit / scale;
 
-		// Update scale, tolerating zero or NaN from tween.cur()
-		// Break the loop if scale is unchanged or perfect, or if we've just had enough.
-		} while (
-			scale !== ( scale = currentValue() / initial ) && scale !== 1 && --maxIterations
-		);
+		}
+
+		initialInUnit = initialInUnit * 2;
+		jQuery.style( elem, prop, initialInUnit + unit );
+
+		// Make sure we update the tween properties later on
+		valueParts = valueParts || [];
 	}
 
 	if ( valueParts ) {
@@ -4695,7 +4672,7 @@ var rcheckableType = ( /^(?:checkbox|radio)$/i );
 
 var rtagName = ( /<([a-z][^\/\0>\x20\t\r\n\f]+)/i );
 
-var rscriptType = ( /^$|\/(?:java|ecma)script/i );
+var rscriptType = ( /^$|^module$|\/(?:java|ecma)script/i );
 
 
 
@@ -4777,7 +4754,7 @@ function buildFragment( elems, context, scripts, selection, ignored ) {
 		if ( elem || elem === 0 ) {
 
 			// Add nodes directly
-			if ( jQuery.type( elem ) === "object" ) {
+			if ( toType( elem ) === "object" ) {
 
 				// Support: Android <=4.0 only, PhantomJS 1 only
 				// push.apply(_, arraylike) throws on ancient WebKit
@@ -5287,7 +5264,7 @@ jQuery.event = {
 			enumerable: true,
 			configurable: true,
 
-			get: jQuery.isFunction( hook ) ?
+			get: isFunction( hook ) ?
 				function() {
 					if ( this.originalEvent ) {
 							return hook( this.originalEvent );
@@ -5422,7 +5399,7 @@ jQuery.Event = function( src, props ) {
 	}
 
 	// Create a timestamp if incoming event doesn't have one
-	this.timeStamp = src && src.timeStamp || jQuery.now();
+	this.timeStamp = src && src.timeStamp || Date.now();
 
 	// Mark it as fixed
 	this[ jQuery.expando ] = true;
@@ -5621,14 +5598,13 @@ var
 
 	/* eslint-enable */
 
-	// Support: IE <=10 - 11, Edge 12 - 13
+	// Support: IE <=10 - 11, Edge 12 - 13 only
 	// In IE/Edge using regex groups here causes severe slowdowns.
 	// See https://connect.microsoft.com/IE/feedback/details/1736512/
 	rnoInnerhtml = /<script|<style|<link/i,
 
 	// checked="checked" or checked
 	rchecked = /checked\s*(?:[^=]|=\s*.checked.)/i,
-	rscriptTypeMasked = /^true\/(.*)/,
 	rcleanScript = /^\s*<!(?:\[CDATA\[|--)|(?:\]\]|--)>\s*$/g;
 
 // Prefer a tbody over its parent table for containing new rows
@@ -5636,7 +5612,7 @@ function manipulationTarget( elem, content ) {
 	if ( nodeName( elem, "table" ) &&
 		nodeName( content.nodeType !== 11 ? content : content.firstChild, "tr" ) ) {
 
-		return jQuery( ">tbody", elem )[ 0 ] || elem;
+		return jQuery( elem ).children( "tbody" )[ 0 ] || elem;
 	}
 
 	return elem;
@@ -5648,10 +5624,8 @@ function disableScript( elem ) {
 	return elem;
 }
 function restoreScript( elem ) {
-	var match = rscriptTypeMasked.exec( elem.type );
-
-	if ( match ) {
-		elem.type = match[ 1 ];
+	if ( ( elem.type || "" ).slice( 0, 5 ) === "true/" ) {
+		elem.type = elem.type.slice( 5 );
 	} else {
 		elem.removeAttribute( "type" );
 	}
@@ -5717,15 +5691,15 @@ function domManip( collection, args, callback, ignored ) {
 		l = collection.length,
 		iNoClone = l - 1,
 		value = args[ 0 ],
-		isFunction = jQuery.isFunction( value );
+		valueIsFunction = isFunction( value );
 
 	// We can't cloneNode fragments that contain checked, in WebKit
-	if ( isFunction ||
+	if ( valueIsFunction ||
 			( l > 1 && typeof value === "string" &&
 				!support.checkClone && rchecked.test( value ) ) ) {
 		return collection.each( function( index ) {
 			var self = collection.eq( index );
-			if ( isFunction ) {
+			if ( valueIsFunction ) {
 				args[ 0 ] = value.call( this, index, self.html() );
 			}
 			domManip( self, args, callback, ignored );
@@ -5779,14 +5753,14 @@ function domManip( collection, args, callback, ignored ) {
 						!dataPriv.access( node, "globalEval" ) &&
 						jQuery.contains( doc, node ) ) {
 
-						if ( node.src ) {
+						if ( node.src && ( node.type || "" ).toLowerCase()  !== "module" ) {
 
 							// Optional AJAX dependency, but won't run scripts if not present
 							if ( jQuery._evalUrl ) {
 								jQuery._evalUrl( node.src );
 							}
 						} else {
-							DOMEval( node.textContent.replace( rcleanScript, "" ), doc );
+							DOMEval( node.textContent.replace( rcleanScript, "" ), doc, node );
 						}
 					}
 				}
@@ -6066,8 +6040,6 @@ jQuery.each( {
 		return this.pushStack( ret );
 	};
 } );
-var rmargin = ( /^margin/ );
-
 var rnumnonpx = new RegExp( "^(" + pnum + ")(?!px)[a-z%]+$", "i" );
 
 var getStyles = function( elem ) {
@@ -6084,6 +6056,8 @@ var getStyles = function( elem ) {
 		return view.getComputedStyle( elem );
 	};
 
+var rboxStyle = new RegExp( cssExpand.join( "|" ), "i" );
+
 
 
 ( function() {
@@ -6097,25 +6071,33 @@ var getStyles = function( elem ) {
 			return;
 		}
 
+		container.style.cssText = "position:absolute;left:-11111px;width:60px;" +
+			"margin-top:1px;padding:0;border:0";
 		div.style.cssText =
-			"box-sizing:border-box;" +
-			"position:relative;display:block;" +
+			"position:relative;display:block;box-sizing:border-box;overflow:scroll;" +
 			"margin:auto;border:1px;padding:1px;" +
-			"top:1%;width:50%";
-		div.innerHTML = "";
-		documentElement.appendChild( container );
+			"width:60%;top:1%";
+		documentElement.appendChild( container ).appendChild( div );
 
 		var divStyle = window.getComputedStyle( div );
 		pixelPositionVal = divStyle.top !== "1%";
 
 		// Support: Android 4.0 - 4.3 only, Firefox <=3 - 44
-		reliableMarginLeftVal = divStyle.marginLeft === "2px";
-		boxSizingReliableVal = divStyle.width === "4px";
+		reliableMarginLeftVal = roundPixelMeasures( divStyle.marginLeft ) === 12;
 
-		// Support: Android 4.0 - 4.3 only
+		// Support: Android 4.0 - 4.3 only, Safari <=9.1 - 10.1, iOS <=7.0 - 9.3
 		// Some styles come back with percentage values, even though they shouldn't
-		div.style.marginRight = "50%";
-		pixelMarginRightVal = divStyle.marginRight === "4px";
+		div.style.right = "60%";
+		pixelBoxStylesVal = roundPixelMeasures( divStyle.right ) === 36;
+
+		// Support: IE 9 - 11 only
+		// Detect misreporting of content dimensions for box-sizing:border-box elements
+		boxSizingReliableVal = roundPixelMeasures( divStyle.width ) === 36;
+
+		// Support: IE 9 only
+		// Detect overflow:scroll screwiness (gh-3699)
+		div.style.position = "absolute";
+		scrollboxSizeVal = div.offsetWidth === 36 || "absolute";
 
 		documentElement.removeChild( container );
 
@@ -6124,7 +6106,12 @@ var getStyles = function( elem ) {
 		div = null;
 	}
 
-	var pixelPositionVal, boxSizingReliableVal, pixelMarginRightVal, reliableMarginLeftVal,
+	function roundPixelMeasures( measure ) {
+		return Math.round( parseFloat( measure ) );
+	}
+
+	var pixelPositionVal, boxSizingReliableVal, scrollboxSizeVal, pixelBoxStylesVal,
+		reliableMarginLeftVal,
 		container = document.createElement( "div" ),
 		div = document.createElement( "div" );
 
@@ -6139,26 +6126,26 @@ var getStyles = function( elem ) {
 	div.cloneNode( true ).style.backgroundClip = "";
 	support.clearCloneStyle = div.style.backgroundClip === "content-box";
 
-	container.style.cssText = "border:0;width:8px;height:0;top:0;left:-9999px;" +
-		"padding:0;margin-top:1px;position:absolute";
-	container.appendChild( div );
-
 	jQuery.extend( support, {
-		pixelPosition: function() {
-			computeStyleTests();
-			return pixelPositionVal;
-		},
 		boxSizingReliable: function() {
 			computeStyleTests();
 			return boxSizingReliableVal;
 		},
-		pixelMarginRight: function() {
+		pixelBoxStyles: function() {
 			computeStyleTests();
-			return pixelMarginRightVal;
+			return pixelBoxStylesVal;
+		},
+		pixelPosition: function() {
+			computeStyleTests();
+			return pixelPositionVal;
 		},
 		reliableMarginLeft: function() {
 			computeStyleTests();
 			return reliableMarginLeftVal;
+		},
+		scrollboxSize: function() {
+			computeStyleTests();
+			return scrollboxSizeVal;
 		}
 	} );
 } )();
@@ -6190,7 +6177,7 @@ function curCSS( elem, name, computed ) {
 		// but width seems to be reliably pixels.
 		// This is against the CSSOM draft spec:
 		// https://drafts.csswg.org/cssom/#resolved-values
-		if ( !support.pixelMarginRight() && rnumnonpx.test( ret ) && rmargin.test( name ) ) {
+		if ( !support.pixelBoxStyles() && rnumnonpx.test( ret ) && rboxStyle.test( name ) ) {
 
 			// Remember the original values
 			width = style.width;
@@ -6295,87 +6282,120 @@ function setPositiveNumber( elem, value, subtract ) {
 		value;
 }
 
-function augmentWidthOrHeight( elem, name, extra, isBorderBox, styles ) {
-	var i,
-		val = 0;
+function boxModelAdjustment( elem, dimension, box, isBorderBox, styles, computedVal ) {
+	var i = dimension === "width" ? 1 : 0,
+		extra = 0,
+		delta = 0;
 
-	// If we already have the right measurement, avoid augmentation
-	if ( extra === ( isBorderBox ? "border" : "content" ) ) {
-		i = 4;
-
-	// Otherwise initialize for horizontal or vertical properties
-	} else {
-		i = name === "width" ? 1 : 0;
+	// Adjustment may not be necessary
+	if ( box === ( isBorderBox ? "border" : "content" ) ) {
+		return 0;
 	}
 
 	for ( ; i < 4; i += 2 ) {
 
-		// Both box models exclude margin, so add it if we want it
-		if ( extra === "margin" ) {
-			val += jQuery.css( elem, extra + cssExpand[ i ], true, styles );
+		// Both box models exclude margin
+		if ( box === "margin" ) {
+			delta += jQuery.css( elem, box + cssExpand[ i ], true, styles );
 		}
 
-		if ( isBorderBox ) {
+		// If we get here with a content-box, we're seeking "padding" or "border" or "margin"
+		if ( !isBorderBox ) {
 
-			// border-box includes padding, so remove it if we want content
-			if ( extra === "content" ) {
-				val -= jQuery.css( elem, "padding" + cssExpand[ i ], true, styles );
+			// Add padding
+			delta += jQuery.css( elem, "padding" + cssExpand[ i ], true, styles );
+
+			// For "border" or "margin", add border
+			if ( box !== "padding" ) {
+				delta += jQuery.css( elem, "border" + cssExpand[ i ] + "Width", true, styles );
+
+			// But still keep track of it otherwise
+			} else {
+				extra += jQuery.css( elem, "border" + cssExpand[ i ] + "Width", true, styles );
 			}
 
-			// At this point, extra isn't border nor margin, so remove border
-			if ( extra !== "margin" ) {
-				val -= jQuery.css( elem, "border" + cssExpand[ i ] + "Width", true, styles );
-			}
+		// If we get here with a border-box (content + padding + border), we're seeking "content" or
+		// "padding" or "margin"
 		} else {
 
-			// At this point, extra isn't content, so add padding
-			val += jQuery.css( elem, "padding" + cssExpand[ i ], true, styles );
+			// For "content", subtract padding
+			if ( box === "content" ) {
+				delta -= jQuery.css( elem, "padding" + cssExpand[ i ], true, styles );
+			}
 
-			// At this point, extra isn't content nor padding, so add border
-			if ( extra !== "padding" ) {
-				val += jQuery.css( elem, "border" + cssExpand[ i ] + "Width", true, styles );
+			// For "content" or "padding", subtract border
+			if ( box !== "margin" ) {
+				delta -= jQuery.css( elem, "border" + cssExpand[ i ] + "Width", true, styles );
 			}
 		}
 	}
 
-	return val;
+	// Account for positive content-box scroll gutter when requested by providing computedVal
+	if ( !isBorderBox && computedVal >= 0 ) {
+
+		// offsetWidth/offsetHeight is a rounded sum of content, padding, scroll gutter, and border
+		// Assuming integer scroll gutter, subtract the rest and round down
+		delta += Math.max( 0, Math.ceil(
+			elem[ "offset" + dimension[ 0 ].toUpperCase() + dimension.slice( 1 ) ] -
+			computedVal -
+			delta -
+			extra -
+			0.5
+		) );
+	}
+
+	return delta;
 }
 
-function getWidthOrHeight( elem, name, extra ) {
+function getWidthOrHeight( elem, dimension, extra ) {
 
 	// Start with computed style
-	var valueIsBorderBox,
-		styles = getStyles( elem ),
-		val = curCSS( elem, name, styles ),
-		isBorderBox = jQuery.css( elem, "boxSizing", false, styles ) === "border-box";
+	var styles = getStyles( elem ),
+		val = curCSS( elem, dimension, styles ),
+		isBorderBox = jQuery.css( elem, "boxSizing", false, styles ) === "border-box",
+		valueIsBorderBox = isBorderBox;
 
-	// Computed unit is not pixels. Stop here and return.
+	// Support: Firefox <=54
+	// Return a confounding non-pixel value or feign ignorance, as appropriate.
 	if ( rnumnonpx.test( val ) ) {
-		return val;
+		if ( !extra ) {
+			return val;
+		}
+		val = "auto";
 	}
 
 	// Check for style in case a browser which returns unreliable values
 	// for getComputedStyle silently falls back to the reliable elem.style
-	valueIsBorderBox = isBorderBox &&
-		( support.boxSizingReliable() || val === elem.style[ name ] );
+	valueIsBorderBox = valueIsBorderBox &&
+		( support.boxSizingReliable() || val === elem.style[ dimension ] );
 
-	// Fall back to offsetWidth/Height when value is "auto"
+	// Fall back to offsetWidth/offsetHeight when value is "auto"
 	// This happens for inline elements with no explicit setting (gh-3571)
-	if ( val === "auto" ) {
-		val = elem[ "offset" + name[ 0 ].toUpperCase() + name.slice( 1 ) ];
+	// Support: Android <=4.1 - 4.3 only
+	// Also use offsetWidth/offsetHeight for misreported inline dimensions (gh-3602)
+	if ( val === "auto" ||
+		!parseFloat( val ) && jQuery.css( elem, "display", false, styles ) === "inline" ) {
+
+		val = elem[ "offset" + dimension[ 0 ].toUpperCase() + dimension.slice( 1 ) ];
+
+		// offsetWidth/offsetHeight provide border-box values
+		valueIsBorderBox = true;
 	}
 
-	// Normalize "", auto, and prepare for extra
+	// Normalize "" and auto
 	val = parseFloat( val ) || 0;
 
-	// Use the active box-sizing model to add/subtract irrelevant styles
+	// Adjust for the element's box model
 	return ( val +
-		augmentWidthOrHeight(
+		boxModelAdjustment(
 			elem,
-			name,
+			dimension,
 			extra || ( isBorderBox ? "border" : "content" ),
 			valueIsBorderBox,
-			styles
+			styles,
+
+			// Provide the current computed size to request scroll gutter calculation (gh-3589)
+			val
 		)
 	) + "px";
 }
@@ -6416,9 +6436,7 @@ jQuery.extend( {
 
 	// Add in properties whose names you wish to fix before
 	// setting or getting the value
-	cssProps: {
-		"float": "cssFloat"
-	},
+	cssProps: {},
 
 	// Get and set the style property on a DOM Node
 	style: function( elem, name, value, extra ) {
@@ -6430,7 +6448,7 @@ jQuery.extend( {
 
 		// Make sure that we're working with the right name
 		var ret, type, hooks,
-			origName = jQuery.camelCase( name ),
+			origName = camelCase( name ),
 			isCustomProp = rcustomProp.test( name ),
 			style = elem.style;
 
@@ -6498,7 +6516,7 @@ jQuery.extend( {
 
 	css: function( elem, name, extra, styles ) {
 		var val, num, hooks,
-			origName = jQuery.camelCase( name ),
+			origName = camelCase( name ),
 			isCustomProp = rcustomProp.test( name );
 
 		// Make sure that we're working with the right name. We don't
@@ -6536,8 +6554,8 @@ jQuery.extend( {
 	}
 } );
 
-jQuery.each( [ "height", "width" ], function( i, name ) {
-	jQuery.cssHooks[ name ] = {
+jQuery.each( [ "height", "width" ], function( i, dimension ) {
+	jQuery.cssHooks[ dimension ] = {
 		get: function( elem, computed, extra ) {
 			if ( computed ) {
 
@@ -6553,29 +6571,41 @@ jQuery.each( [ "height", "width" ], function( i, name ) {
 					// in IE throws an error.
 					( !elem.getClientRects().length || !elem.getBoundingClientRect().width ) ?
 						swap( elem, cssShow, function() {
-							return getWidthOrHeight( elem, name, extra );
+							return getWidthOrHeight( elem, dimension, extra );
 						} ) :
-						getWidthOrHeight( elem, name, extra );
+						getWidthOrHeight( elem, dimension, extra );
 			}
 		},
 
 		set: function( elem, value, extra ) {
 			var matches,
-				styles = extra && getStyles( elem ),
-				subtract = extra && augmentWidthOrHeight(
+				styles = getStyles( elem ),
+				isBorderBox = jQuery.css( elem, "boxSizing", false, styles ) === "border-box",
+				subtract = extra && boxModelAdjustment(
 					elem,
-					name,
+					dimension,
 					extra,
-					jQuery.css( elem, "boxSizing", false, styles ) === "border-box",
+					isBorderBox,
 					styles
 				);
+
+			// Account for unreliable border-box dimensions by comparing offset* to computed and
+			// faking a content-box to get border and padding (gh-3699)
+			if ( isBorderBox && support.scrollboxSize() === styles.position ) {
+				subtract -= Math.ceil(
+					elem[ "offset" + dimension[ 0 ].toUpperCase() + dimension.slice( 1 ) ] -
+					parseFloat( styles[ dimension ] ) -
+					boxModelAdjustment( elem, dimension, "border", false, styles ) -
+					0.5
+				);
+			}
 
 			// Convert to pixels if value adjustment is needed
 			if ( subtract && ( matches = rcssNum.exec( value ) ) &&
 				( matches[ 3 ] || "px" ) !== "px" ) {
 
-				elem.style[ name ] = value;
-				value = jQuery.css( elem, name );
+				elem.style[ dimension ] = value;
+				value = jQuery.css( elem, dimension );
 			}
 
 			return setPositiveNumber( elem, value, subtract );
@@ -6619,7 +6649,7 @@ jQuery.each( {
 		}
 	};
 
-	if ( !rmargin.test( prefix ) ) {
+	if ( prefix !== "margin" ) {
 		jQuery.cssHooks[ prefix + suffix ].set = setPositiveNumber;
 	}
 } );
@@ -6790,7 +6820,7 @@ function createFxNow() {
 	window.setTimeout( function() {
 		fxNow = undefined;
 	} );
-	return ( fxNow = jQuery.now() );
+	return ( fxNow = Date.now() );
 }
 
 // Generate parameters to create a standard animation
@@ -6894,9 +6924,10 @@ function defaultPrefilter( elem, props, opts ) {
 	// Restrict "overflow" and "display" styles during box animations
 	if ( isBox && elem.nodeType === 1 ) {
 
-		// Support: IE <=9 - 11, Edge 12 - 13
+		// Support: IE <=9 - 11, Edge 12 - 15
 		// Record all 3 overflow attributes because IE does not infer the shorthand
-		// from identically-valued overflowX and overflowY
+		// from identically-valued overflowX and overflowY and Edge just mirrors
+		// the overflowX value there.
 		opts.overflow = [ style.overflow, style.overflowX, style.overflowY ];
 
 		// Identify a display type, preferring old show/hide data over the CSS cascade
@@ -7004,7 +7035,7 @@ function propFilter( props, specialEasing ) {
 
 	// camelCase, specialEasing and expand cssHook pass
 	for ( index in props ) {
-		name = jQuery.camelCase( index );
+		name = camelCase( index );
 		easing = specialEasing[ name ];
 		value = props[ index ];
 		if ( Array.isArray( value ) ) {
@@ -7129,9 +7160,9 @@ function Animation( elem, properties, options ) {
 	for ( ; index < length; index++ ) {
 		result = Animation.prefilters[ index ].call( animation, elem, props, animation.opts );
 		if ( result ) {
-			if ( jQuery.isFunction( result.stop ) ) {
+			if ( isFunction( result.stop ) ) {
 				jQuery._queueHooks( animation.elem, animation.opts.queue ).stop =
-					jQuery.proxy( result.stop, result );
+					result.stop.bind( result );
 			}
 			return result;
 		}
@@ -7139,7 +7170,7 @@ function Animation( elem, properties, options ) {
 
 	jQuery.map( props, createTween, animation );
 
-	if ( jQuery.isFunction( animation.opts.start ) ) {
+	if ( isFunction( animation.opts.start ) ) {
 		animation.opts.start.call( elem, animation );
 	}
 
@@ -7172,7 +7203,7 @@ jQuery.Animation = jQuery.extend( Animation, {
 	},
 
 	tweener: function( props, callback ) {
-		if ( jQuery.isFunction( props ) ) {
+		if ( isFunction( props ) ) {
 			callback = props;
 			props = [ "*" ];
 		} else {
@@ -7204,9 +7235,9 @@ jQuery.Animation = jQuery.extend( Animation, {
 jQuery.speed = function( speed, easing, fn ) {
 	var opt = speed && typeof speed === "object" ? jQuery.extend( {}, speed ) : {
 		complete: fn || !fn && easing ||
-			jQuery.isFunction( speed ) && speed,
+			isFunction( speed ) && speed,
 		duration: speed,
-		easing: fn && easing || easing && !jQuery.isFunction( easing ) && easing
+		easing: fn && easing || easing && !isFunction( easing ) && easing
 	};
 
 	// Go to the end state if fx are off
@@ -7233,7 +7264,7 @@ jQuery.speed = function( speed, easing, fn ) {
 	opt.old = opt.complete;
 
 	opt.complete = function() {
-		if ( jQuery.isFunction( opt.old ) ) {
+		if ( isFunction( opt.old ) ) {
 			opt.old.call( this );
 		}
 
@@ -7397,7 +7428,7 @@ jQuery.fx.tick = function() {
 		i = 0,
 		timers = jQuery.timers;
 
-	fxNow = jQuery.now();
+	fxNow = Date.now();
 
 	for ( ; i < timers.length; i++ ) {
 		timer = timers[ i ];
@@ -7750,7 +7781,7 @@ jQuery.each( [
 
 
 	// Strip and collapse whitespace according to HTML spec
-	// https://html.spec.whatwg.org/multipage/infrastructure.html#strip-and-collapse-whitespace
+	// https://infra.spec.whatwg.org/#strip-and-collapse-ascii-whitespace
 	function stripAndCollapse( value ) {
 		var tokens = value.match( rnothtmlwhite ) || [];
 		return tokens.join( " " );
@@ -7761,20 +7792,30 @@ function getClass( elem ) {
 	return elem.getAttribute && elem.getAttribute( "class" ) || "";
 }
 
+function classesToArray( value ) {
+	if ( Array.isArray( value ) ) {
+		return value;
+	}
+	if ( typeof value === "string" ) {
+		return value.match( rnothtmlwhite ) || [];
+	}
+	return [];
+}
+
 jQuery.fn.extend( {
 	addClass: function( value ) {
 		var classes, elem, cur, curValue, clazz, j, finalValue,
 			i = 0;
 
-		if ( jQuery.isFunction( value ) ) {
+		if ( isFunction( value ) ) {
 			return this.each( function( j ) {
 				jQuery( this ).addClass( value.call( this, j, getClass( this ) ) );
 			} );
 		}
 
-		if ( typeof value === "string" && value ) {
-			classes = value.match( rnothtmlwhite ) || [];
+		classes = classesToArray( value );
 
+		if ( classes.length ) {
 			while ( ( elem = this[ i++ ] ) ) {
 				curValue = getClass( elem );
 				cur = elem.nodeType === 1 && ( " " + stripAndCollapse( curValue ) + " " );
@@ -7803,7 +7844,7 @@ jQuery.fn.extend( {
 		var classes, elem, cur, curValue, clazz, j, finalValue,
 			i = 0;
 
-		if ( jQuery.isFunction( value ) ) {
+		if ( isFunction( value ) ) {
 			return this.each( function( j ) {
 				jQuery( this ).removeClass( value.call( this, j, getClass( this ) ) );
 			} );
@@ -7813,9 +7854,9 @@ jQuery.fn.extend( {
 			return this.attr( "class", "" );
 		}
 
-		if ( typeof value === "string" && value ) {
-			classes = value.match( rnothtmlwhite ) || [];
+		classes = classesToArray( value );
 
+		if ( classes.length ) {
 			while ( ( elem = this[ i++ ] ) ) {
 				curValue = getClass( elem );
 
@@ -7845,13 +7886,14 @@ jQuery.fn.extend( {
 	},
 
 	toggleClass: function( value, stateVal ) {
-		var type = typeof value;
+		var type = typeof value,
+			isValidValue = type === "string" || Array.isArray( value );
 
-		if ( typeof stateVal === "boolean" && type === "string" ) {
+		if ( typeof stateVal === "boolean" && isValidValue ) {
 			return stateVal ? this.addClass( value ) : this.removeClass( value );
 		}
 
-		if ( jQuery.isFunction( value ) ) {
+		if ( isFunction( value ) ) {
 			return this.each( function( i ) {
 				jQuery( this ).toggleClass(
 					value.call( this, i, getClass( this ), stateVal ),
@@ -7863,12 +7905,12 @@ jQuery.fn.extend( {
 		return this.each( function() {
 			var className, i, self, classNames;
 
-			if ( type === "string" ) {
+			if ( isValidValue ) {
 
 				// Toggle individual class names
 				i = 0;
 				self = jQuery( this );
-				classNames = value.match( rnothtmlwhite ) || [];
+				classNames = classesToArray( value );
 
 				while ( ( className = classNames[ i++ ] ) ) {
 
@@ -7927,7 +7969,7 @@ var rreturn = /\r/g;
 
 jQuery.fn.extend( {
 	val: function( value ) {
-		var hooks, ret, isFunction,
+		var hooks, ret, valueIsFunction,
 			elem = this[ 0 ];
 
 		if ( !arguments.length ) {
@@ -7956,7 +7998,7 @@ jQuery.fn.extend( {
 			return;
 		}
 
-		isFunction = jQuery.isFunction( value );
+		valueIsFunction = isFunction( value );
 
 		return this.each( function( i ) {
 			var val;
@@ -7965,7 +8007,7 @@ jQuery.fn.extend( {
 				return;
 			}
 
-			if ( isFunction ) {
+			if ( valueIsFunction ) {
 				val = value.call( this, i, jQuery( this ).val() );
 			} else {
 				val = value;
@@ -8107,18 +8149,24 @@ jQuery.each( [ "radio", "checkbox" ], function() {
 // Return jQuery for attributes-only inclusion
 
 
-var rfocusMorph = /^(?:focusinfocus|focusoutblur)$/;
+support.focusin = "onfocusin" in window;
+
+
+var rfocusMorph = /^(?:focusinfocus|focusoutblur)$/,
+	stopPropagationCallback = function( e ) {
+		e.stopPropagation();
+	};
 
 jQuery.extend( jQuery.event, {
 
 	trigger: function( event, data, elem, onlyHandlers ) {
 
-		var i, cur, tmp, bubbleType, ontype, handle, special,
+		var i, cur, tmp, bubbleType, ontype, handle, special, lastElement,
 			eventPath = [ elem || document ],
 			type = hasOwn.call( event, "type" ) ? event.type : event,
 			namespaces = hasOwn.call( event, "namespace" ) ? event.namespace.split( "." ) : [];
 
-		cur = tmp = elem = elem || document;
+		cur = lastElement = tmp = elem = elem || document;
 
 		// Don't do events on text and comment nodes
 		if ( elem.nodeType === 3 || elem.nodeType === 8 ) {
@@ -8170,7 +8218,7 @@ jQuery.extend( jQuery.event, {
 
 		// Determine event propagation path in advance, per W3C events spec (#9951)
 		// Bubble up to document, then to window; watch for a global ownerDocument var (#9724)
-		if ( !onlyHandlers && !special.noBubble && !jQuery.isWindow( elem ) ) {
+		if ( !onlyHandlers && !special.noBubble && !isWindow( elem ) ) {
 
 			bubbleType = special.delegateType || type;
 			if ( !rfocusMorph.test( bubbleType + type ) ) {
@@ -8190,7 +8238,7 @@ jQuery.extend( jQuery.event, {
 		// Fire handlers on the event path
 		i = 0;
 		while ( ( cur = eventPath[ i++ ] ) && !event.isPropagationStopped() ) {
-
+			lastElement = cur;
 			event.type = i > 1 ?
 				bubbleType :
 				special.bindType || type;
@@ -8222,7 +8270,7 @@ jQuery.extend( jQuery.event, {
 
 				// Call a native DOM method on the target with the same name as the event.
 				// Don't do default actions on window, that's where global variables be (#6170)
-				if ( ontype && jQuery.isFunction( elem[ type ] ) && !jQuery.isWindow( elem ) ) {
+				if ( ontype && isFunction( elem[ type ] ) && !isWindow( elem ) ) {
 
 					// Don't re-trigger an onFOO event when we call its FOO() method
 					tmp = elem[ ontype ];
@@ -8233,7 +8281,17 @@ jQuery.extend( jQuery.event, {
 
 					// Prevent re-triggering of the same event, since we already bubbled it above
 					jQuery.event.triggered = type;
+
+					if ( event.isPropagationStopped() ) {
+						lastElement.addEventListener( type, stopPropagationCallback );
+					}
+
 					elem[ type ]();
+
+					if ( event.isPropagationStopped() ) {
+						lastElement.removeEventListener( type, stopPropagationCallback );
+					}
+
 					jQuery.event.triggered = undefined;
 
 					if ( tmp ) {
@@ -8279,31 +8337,6 @@ jQuery.fn.extend( {
 } );
 
 
-jQuery.each( ( "blur focus focusin focusout resize scroll click dblclick " +
-	"mousedown mouseup mousemove mouseover mouseout mouseenter mouseleave " +
-	"change select submit keydown keypress keyup contextmenu" ).split( " " ),
-	function( i, name ) {
-
-	// Handle event binding
-	jQuery.fn[ name ] = function( data, fn ) {
-		return arguments.length > 0 ?
-			this.on( name, null, data, fn ) :
-			this.trigger( name );
-	};
-} );
-
-jQuery.fn.extend( {
-	hover: function( fnOver, fnOut ) {
-		return this.mouseenter( fnOver ).mouseleave( fnOut || fnOver );
-	}
-} );
-
-
-
-
-support.focusin = "onfocusin" in window;
-
-
 // Support: Firefox <=44
 // Firefox doesn't have focus(in | out) events
 // Related ticket - https://bugzilla.mozilla.org/show_bug.cgi?id=687787
@@ -8347,7 +8380,7 @@ if ( !support.focusin ) {
 }
 var location = window.location;
 
-var nonce = jQuery.now();
+var nonce = Date.now();
 
 var rquery = ( /\?/ );
 
@@ -8405,7 +8438,7 @@ function buildParams( prefix, obj, traditional, add ) {
 			}
 		} );
 
-	} else if ( !traditional && jQuery.type( obj ) === "object" ) {
+	} else if ( !traditional && toType( obj ) === "object" ) {
 
 		// Serialize object item.
 		for ( name in obj ) {
@@ -8427,7 +8460,7 @@ jQuery.param = function( a, traditional ) {
 		add = function( key, valueOrFunction ) {
 
 			// If value is a function, invoke it and use its return value
-			var value = jQuery.isFunction( valueOrFunction ) ?
+			var value = isFunction( valueOrFunction ) ?
 				valueOrFunction() :
 				valueOrFunction;
 
@@ -8545,7 +8578,7 @@ function addToPrefiltersOrTransports( structure ) {
 			i = 0,
 			dataTypes = dataTypeExpression.toLowerCase().match( rnothtmlwhite ) || [];
 
-		if ( jQuery.isFunction( func ) ) {
+		if ( isFunction( func ) ) {
 
 			// For each dataType in the dataTypeExpression
 			while ( ( dataType = dataTypes[ i++ ] ) ) {
@@ -9017,7 +9050,7 @@ jQuery.extend( {
 		if ( s.crossDomain == null ) {
 			urlAnchor = document.createElement( "a" );
 
-			// Support: IE <=8 - 11, Edge 12 - 13
+			// Support: IE <=8 - 11, Edge 12 - 15
 			// IE throws exception on accessing the href property if url is malformed,
 			// e.g. http://example.com:80x/
 			try {
@@ -9075,8 +9108,8 @@ jQuery.extend( {
 			// Remember the hash so we can put it back
 			uncached = s.url.slice( cacheURL.length );
 
-			// If data is available, append data to url
-			if ( s.data ) {
+			// If data is available and should be processed, append data to url
+			if ( s.data && ( s.processData || typeof s.data === "string" ) ) {
 				cacheURL += ( rquery.test( cacheURL ) ? "&" : "?" ) + s.data;
 
 				// #9682: remove data so that it's not used in an eventual retry
@@ -9313,7 +9346,7 @@ jQuery.each( [ "get", "post" ], function( i, method ) {
 	jQuery[ method ] = function( url, data, callback, type ) {
 
 		// Shift arguments if data argument was omitted
-		if ( jQuery.isFunction( data ) ) {
+		if ( isFunction( data ) ) {
 			type = type || callback;
 			callback = data;
 			data = undefined;
@@ -9351,7 +9384,7 @@ jQuery.fn.extend( {
 		var wrap;
 
 		if ( this[ 0 ] ) {
-			if ( jQuery.isFunction( html ) ) {
+			if ( isFunction( html ) ) {
 				html = html.call( this[ 0 ] );
 			}
 
@@ -9377,7 +9410,7 @@ jQuery.fn.extend( {
 	},
 
 	wrapInner: function( html ) {
-		if ( jQuery.isFunction( html ) ) {
+		if ( isFunction( html ) ) {
 			return this.each( function( i ) {
 				jQuery( this ).wrapInner( html.call( this, i ) );
 			} );
@@ -9397,10 +9430,10 @@ jQuery.fn.extend( {
 	},
 
 	wrap: function( html ) {
-		var isFunction = jQuery.isFunction( html );
+		var htmlIsFunction = isFunction( html );
 
 		return this.each( function( i ) {
-			jQuery( this ).wrapAll( isFunction ? html.call( this, i ) : html );
+			jQuery( this ).wrapAll( htmlIsFunction ? html.call( this, i ) : html );
 		} );
 	},
 
@@ -9492,7 +9525,8 @@ jQuery.ajaxTransport( function( options ) {
 					return function() {
 						if ( callback ) {
 							callback = errorCallback = xhr.onload =
-								xhr.onerror = xhr.onabort = xhr.onreadystatechange = null;
+								xhr.onerror = xhr.onabort = xhr.ontimeout =
+									xhr.onreadystatechange = null;
 
 							if ( type === "abort" ) {
 								xhr.abort();
@@ -9532,7 +9566,7 @@ jQuery.ajaxTransport( function( options ) {
 
 				// Listen to events
 				xhr.onload = callback();
-				errorCallback = xhr.onerror = callback( "error" );
+				errorCallback = xhr.onerror = xhr.ontimeout = callback( "error" );
 
 				// Support: IE 9 only
 				// Use onreadystatechange to replace onabort
@@ -9686,7 +9720,7 @@ jQuery.ajaxPrefilter( "json jsonp", function( s, originalSettings, jqXHR ) {
 	if ( jsonProp || s.dataTypes[ 0 ] === "jsonp" ) {
 
 		// Get callback name, remembering preexisting value associated with it
-		callbackName = s.jsonpCallback = jQuery.isFunction( s.jsonpCallback ) ?
+		callbackName = s.jsonpCallback = isFunction( s.jsonpCallback ) ?
 			s.jsonpCallback() :
 			s.jsonpCallback;
 
@@ -9737,7 +9771,7 @@ jQuery.ajaxPrefilter( "json jsonp", function( s, originalSettings, jqXHR ) {
 			}
 
 			// Call if it was a function and we have a response
-			if ( responseContainer && jQuery.isFunction( overwritten ) ) {
+			if ( responseContainer && isFunction( overwritten ) ) {
 				overwritten( responseContainer[ 0 ] );
 			}
 
@@ -9829,7 +9863,7 @@ jQuery.fn.load = function( url, params, callback ) {
 	}
 
 	// If it's a function
-	if ( jQuery.isFunction( params ) ) {
+	if ( isFunction( params ) ) {
 
 		// We assume that it's the callback
 		callback = params;
@@ -9937,7 +9971,7 @@ jQuery.offset = {
 			curLeft = parseFloat( curCSSLeft ) || 0;
 		}
 
-		if ( jQuery.isFunction( options ) ) {
+		if ( isFunction( options ) ) {
 
 			// Use jQuery.extend here to allow modification of coordinates argument (gh-1848)
 			options = options.call( elem, i, jQuery.extend( {}, curOffset ) );
@@ -9960,6 +9994,8 @@ jQuery.offset = {
 };
 
 jQuery.fn.extend( {
+
+	// offset() relates an element's border box to the document origin
 	offset: function( options ) {
 
 		// Preserve chaining for setter
@@ -9971,7 +10007,7 @@ jQuery.fn.extend( {
 				} );
 		}
 
-		var doc, docElem, rect, win,
+		var rect, win,
 			elem = this[ 0 ];
 
 		if ( !elem ) {
@@ -9986,50 +10022,52 @@ jQuery.fn.extend( {
 			return { top: 0, left: 0 };
 		}
 
+		// Get document-relative position by adding viewport scroll to viewport-relative gBCR
 		rect = elem.getBoundingClientRect();
-
-		doc = elem.ownerDocument;
-		docElem = doc.documentElement;
-		win = doc.defaultView;
-
+		win = elem.ownerDocument.defaultView;
 		return {
-			top: rect.top + win.pageYOffset - docElem.clientTop,
-			left: rect.left + win.pageXOffset - docElem.clientLeft
+			top: rect.top + win.pageYOffset,
+			left: rect.left + win.pageXOffset
 		};
 	},
 
+	// position() relates an element's margin box to its offset parent's padding box
+	// This corresponds to the behavior of CSS absolute positioning
 	position: function() {
 		if ( !this[ 0 ] ) {
 			return;
 		}
 
-		var offsetParent, offset,
+		var offsetParent, offset, doc,
 			elem = this[ 0 ],
 			parentOffset = { top: 0, left: 0 };
 
-		// Fixed elements are offset from window (parentOffset = {top:0, left: 0},
-		// because it is its only offset parent
+		// position:fixed elements are offset from the viewport, which itself always has zero offset
 		if ( jQuery.css( elem, "position" ) === "fixed" ) {
 
-			// Assume getBoundingClientRect is there when computed position is fixed
+			// Assume position:fixed implies availability of getBoundingClientRect
 			offset = elem.getBoundingClientRect();
 
 		} else {
-
-			// Get *real* offsetParent
-			offsetParent = this.offsetParent();
-
-			// Get correct offsets
 			offset = this.offset();
-			if ( !nodeName( offsetParent[ 0 ], "html" ) ) {
-				parentOffset = offsetParent.offset();
-			}
 
-			// Add offsetParent borders
-			parentOffset = {
-				top: parentOffset.top + jQuery.css( offsetParent[ 0 ], "borderTopWidth", true ),
-				left: parentOffset.left + jQuery.css( offsetParent[ 0 ], "borderLeftWidth", true )
-			};
+			// Account for the *real* offset parent, which can be the document or its root element
+			// when a statically positioned element is identified
+			doc = elem.ownerDocument;
+			offsetParent = elem.offsetParent || doc.documentElement;
+			while ( offsetParent &&
+				( offsetParent === doc.body || offsetParent === doc.documentElement ) &&
+				jQuery.css( offsetParent, "position" ) === "static" ) {
+
+				offsetParent = offsetParent.parentNode;
+			}
+			if ( offsetParent && offsetParent !== elem && offsetParent.nodeType === 1 ) {
+
+				// Incorporate borders into its offset, since they are outside its content origin
+				parentOffset = jQuery( offsetParent ).offset();
+				parentOffset.top += jQuery.css( offsetParent, "borderTopWidth", true );
+				parentOffset.left += jQuery.css( offsetParent, "borderLeftWidth", true );
+			}
 		}
 
 		// Subtract parent offsets and element margins
@@ -10071,7 +10109,7 @@ jQuery.each( { scrollLeft: "pageXOffset", scrollTop: "pageYOffset" }, function( 
 
 			// Coalesce documents and windows
 			var win;
-			if ( jQuery.isWindow( elem ) ) {
+			if ( isWindow( elem ) ) {
 				win = elem;
 			} else if ( elem.nodeType === 9 ) {
 				win = elem.defaultView;
@@ -10129,7 +10167,7 @@ jQuery.each( { Height: "height", Width: "width" }, function( name, type ) {
 			return access( this, function( elem, type, value ) {
 				var doc;
 
-				if ( jQuery.isWindow( elem ) ) {
+				if ( isWindow( elem ) ) {
 
 					// $( window ).outerWidth/Height return w/h including scrollbars (gh-1729)
 					return funcName.indexOf( "outer" ) === 0 ?
@@ -10163,6 +10201,28 @@ jQuery.each( { Height: "height", Width: "width" }, function( name, type ) {
 } );
 
 
+jQuery.each( ( "blur focus focusin focusout resize scroll click dblclick " +
+	"mousedown mouseup mousemove mouseover mouseout mouseenter mouseleave " +
+	"change select submit keydown keypress keyup contextmenu" ).split( " " ),
+	function( i, name ) {
+
+	// Handle event binding
+	jQuery.fn[ name ] = function( data, fn ) {
+		return arguments.length > 0 ?
+			this.on( name, null, data, fn ) :
+			this.trigger( name );
+	};
+} );
+
+jQuery.fn.extend( {
+	hover: function( fnOver, fnOut ) {
+		return this.mouseenter( fnOver ).mouseleave( fnOut || fnOver );
+	}
+} );
+
+
+
+
 jQuery.fn.extend( {
 
 	bind: function( types, data, fn ) {
@@ -10184,6 +10244,37 @@ jQuery.fn.extend( {
 	}
 } );
 
+// Bind a function to a context, optionally partially applying any
+// arguments.
+// jQuery.proxy is deprecated to promote standards (specifically Function#bind)
+// However, it is not slated for removal any time soon
+jQuery.proxy = function( fn, context ) {
+	var tmp, args, proxy;
+
+	if ( typeof context === "string" ) {
+		tmp = fn[ context ];
+		context = fn;
+		fn = tmp;
+	}
+
+	// Quick check to determine if target is callable, in the spec
+	// this throws a TypeError, but we will just return undefined.
+	if ( !isFunction( fn ) ) {
+		return undefined;
+	}
+
+	// Simulated bind
+	args = slice.call( arguments, 2 );
+	proxy = function() {
+		return fn.apply( context || this, args.concat( slice.call( arguments ) ) );
+	};
+
+	// Set the guid of unique handler to the same of original handler, so it can be removed
+	proxy.guid = fn.guid = fn.guid || jQuery.guid++;
+
+	return proxy;
+};
+
 jQuery.holdReady = function( hold ) {
 	if ( hold ) {
 		jQuery.readyWait++;
@@ -10194,6 +10285,26 @@ jQuery.holdReady = function( hold ) {
 jQuery.isArray = Array.isArray;
 jQuery.parseJSON = JSON.parse;
 jQuery.nodeName = nodeName;
+jQuery.isFunction = isFunction;
+jQuery.isWindow = isWindow;
+jQuery.camelCase = camelCase;
+jQuery.type = toType;
+
+jQuery.now = Date.now;
+
+jQuery.isNumeric = function( obj ) {
+
+	// As of jQuery 3.0, isNumeric is limited to
+	// strings and numbers (primitives or objects)
+	// that can be coerced to finite numbers (gh-2662)
+	var type = jQuery.type( obj );
+	return ( type === "number" || type === "string" ) &&
+
+		// parseFloat NaNs numeric-cast false positives ("")
+		// ...but misinterprets leading-number strings, particularly hex literals ("0x...")
+		// subtraction forces infinities to NaN
+		!isNaN( obj - parseFloat( obj ) );
+};
 
 
 
@@ -10385,7 +10496,7 @@ function getClass(obj) {
 }
 
 },{}],3:[function(require,module,exports){
-/*! tablesorter (FORK) - updated 07-11-2016 (v2.26.6)*/
+/*! tablesorter (FORK) - updated 2018-05-16 (v2.30.4)*/
 /* Includes widgets ( storage,uitheme,columns,filter,stickyHeaders,resizable,saveSort ) */
 (function(factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -10395,16 +10506,16 @@ function getClass(obj) {
 	} else {
 		factory(jQuery);
 	}
-}(function($) {
+}(function(jQuery) {
 
-/*! TableSorter (FORK) v2.26.6 *//*
+/*! TableSorter (FORK) v2.30.4 *//*
 * Client-side table sorting with ease!
 * @requires jQuery v1.2.6+
 *
 * Copyright (c) 2007 Christian Bach
 * fork maintained by Rob Garrison
 *
-* Examples and docs at: http://tablesorter.com
+* Examples and original docs at: http://tablesorter.com
 * Dual licensed under the MIT and GPL licenses:
 * http://www.opensource.org/licenses/mit-license.php
 * http://www.gnu.org/licenses/gpl.html
@@ -10414,13 +10525,14 @@ function getClass(obj) {
 * @cat Plugins/Tablesorter
 * @author Christian Bach - christian.bach@polyester.se
 * @contributor Rob Garrison - https://github.com/Mottie/tablesorter
+* @docs (fork) - https://mottie.github.io/tablesorter/docs/
 */
 /*jshint browser:true, jquery:true, unused:false, expr: true */
 ;( function( $ ) {
 	'use strict';
 	var ts = $.tablesorter = {
 
-		version : '2.26.6',
+		version : '2.30.4',
 
 		parsers : [],
 		widgets : [],
@@ -10432,8 +10544,8 @@ function getClass(obj) {
 			showProcessing   : false,      // show an indeterminate timer icon in the header when the table is sorted or filtered.
 
 			headerTemplate   : '{content}',// header layout template (HTML ok); {content} = innerHTML, {icon} = <i/> // class from cssIcon
-			onRenderTemplate : null,       // function( index, template ){ return template; }, // template is a string
-			onRenderHeader   : null,       // function( index ){}, // nothing to return
+			onRenderTemplate : null,       // function( index, template ) { return template; }, // template is a string
+			onRenderHeader   : null,       // function( index ) {}, // nothing to return
 
 			// *** functionality
 			cancelSelection  : true,       // prevent text selection in the header
@@ -10462,7 +10574,7 @@ function getClass(obj) {
 			emptyTo          : 'bottom',   // sort empty cell to bottom, top, none, zero, emptyMax, emptyMin
 			stringTo         : 'max',      // sort strings in numerical column as max, min, top, bottom, zero
 			duplicateSpan    : true,       // colspan cells in the tbody will have duplicated content in the cache for each spanned column
-			textExtraction   : 'basic',    // text extraction method/function - function( node, table, cellIndex ){}
+			textExtraction   : 'basic',    // text extraction method/function - function( node, table, cellIndex ) {}
 			textAttribute    : 'data-text',// data-attribute that contains alternate cell text (used in default textExtraction function)
 			textSorter       : null,       // choose overall or specific column sorter function( a, b, direction, table, columnIndex ) [alt: ts.sortText]
 			numberSorter     : null,       // choose overall numeric sorter function( a, b, direction, maxColumnValue )
@@ -10472,11 +10584,11 @@ function getClass(obj) {
 			widgetClass      : 'widget-{name}', // table class name template to match to include a widget
 			widgets          : [],         // method to add widgets, e.g. widgets: ['zebra']
 			widgetOptions    : {
-				zebra : [ 'even', 'odd' ]    // zebra widget alternating row class names
+				zebra : [ 'even', 'odd' ]  // zebra widget alternating row class names
 			},
 
 			// *** callbacks
-			initialized      : null,       // function( table ){},
+			initialized      : null,       // function( table ) {},
 
 			// *** extra css class names
 			tableClass       : '',
@@ -10489,13 +10601,14 @@ function getClass(obj) {
 
 			cssChildRow      : 'tablesorter-childRow', // class name indiciating that a row is to be attached to its parent
 			cssInfoBlock     : 'tablesorter-infoOnly', // don't sort tbody with this class name (only one class name allowed here!)
-			cssNoSort        : 'tablesorter-noSort',      // class name added to element inside header; clicking on it won't cause a sort
-			cssIgnoreRow     : 'tablesorter-ignoreRow',   // header row to ignore; cells within this row will not be added to c.$headers
+			cssNoSort        : 'tablesorter-noSort',   // class name added to element inside header; clicking on it won't cause a sort
+			cssIgnoreRow     : 'tablesorter-ignoreRow',// header row to ignore; cells within this row will not be added to c.$headers
 
 			cssIcon          : 'tablesorter-icon', // if this class does not exist, the {icon} will not be added from the headerTemplate
 			cssIconNone      : '', // class name added to the icon when there is no column sort
 			cssIconAsc       : '', // class name added to the icon when the column has an ascending sort
 			cssIconDesc      : '', // class name added to the icon when the column has a descending sort
+			cssIconDisabled  : '', // class name added to the icon when the column has a disabled sort
 
 			// *** events
 			pointerClick     : 'click',
@@ -10504,7 +10617,7 @@ function getClass(obj) {
 
 			// *** selectors
 			selectorHeaders  : '> thead th, > thead td',
-			selectorSort     : 'th, td',   // jQuery selector of content within selectorHeaders that is clickable to trigger a sort
+			selectorSort     : 'th, td', // jQuery selector of content within selectorHeaders that is clickable to trigger a sort
 			selectorRemove   : '.remove-me',
 
 			// *** advanced
@@ -10514,7 +10627,11 @@ function getClass(obj) {
 			headerList: [],
 			empties: {},
 			strings: {},
-			parsers: []
+			parsers: [],
+
+			// *** parser options for validator; values must be falsy!
+			globalize: 0,
+			imgAttr: 0
 
 			// removed: widgetZebra: { css: ['even', 'odd'] }
 
@@ -10609,7 +10726,7 @@ function getClass(obj) {
 		setup : function( table, c ) {
 			// if no thead or tbody, or tablesorter is already present, quit
 			if ( !table || !table.tHead || table.tBodies.length === 0 || table.hasInitialized === true ) {
-				if ( c.debug ) {
+				if ( ts.debug(c, 'core') ) {
 					if ( table.hasInitialized ) {
 						console.warn( 'Stopping initialization. Tablesorter has already been initialized' );
 					} else {
@@ -10630,8 +10747,8 @@ function getClass(obj) {
 			table.config = c;
 			// save the settings where they read
 			$.data( table, 'tablesorter', c );
-			if ( c.debug ) {
-				console[ console.group ? 'group' : 'log' ]( 'Initializing tablesorter' );
+			if ( ts.debug(c, 'core') ) {
+				console[ console.group ? 'group' : 'log' ]( 'Initializing tablesorter v' + ts.version );
 				$.data( table, 'startoveralltimer', new Date() );
 			}
 
@@ -10648,11 +10765,6 @@ function getClass(obj) {
 			if ( !/tablesorter\-/.test( $table.attr( 'class' ) ) ) {
 				tmp = ( c.theme !== '' ? ' tablesorter-' + c.theme : '' );
 			}
-			c.table = table;
-			c.$table = $table
-				.addClass( ts.css.table + ' ' + c.tableClass + tmp )
-				.attr( 'role', 'grid' );
-			c.$headers = $table.find( c.selectorHeaders );
 
 			// give the table a unique id, which will be used in namespace binding
 			if ( !c.namespace ) {
@@ -10661,6 +10773,14 @@ function getClass(obj) {
 				// make sure namespace starts with a period & doesn't have weird characters
 				c.namespace = '.' + c.namespace.replace( ts.regex.nonWord, '' );
 			}
+
+			c.table = table;
+			c.$table = $table
+				// add namespace to table to allow bindings on extra elements to target
+				// the parent table (e.g. parser-input-select)
+				.addClass( ts.css.table + ' ' + c.tableClass + tmp + ' ' + c.namespace.slice(1) )
+				.attr( 'role', 'grid' );
+			c.$headers = $table.find( c.selectorHeaders );
 
 			c.$table.children().children( 'tr' ).attr( 'role', 'row' );
 			c.$tbodies = $table.children( 'tbody:not(.' + c.cssInfoBlock + ')' ).attr({
@@ -10688,6 +10808,10 @@ function getClass(obj) {
 			ts.setupParsers( c );
 			// start total row count at zero
 			c.totalRows = 0;
+			// only validate options while debugging. See #1528
+			if (c.debug) {
+				ts.validateOptions( c );
+			}
 			// build the cache for the tbody cells
 			// delayInit will delay building the cache until the user starts a sort
 			if ( !c.delayInit ) { ts.buildCache( c ); }
@@ -10732,9 +10856,9 @@ function getClass(obj) {
 			// initialized
 			table.hasInitialized = true;
 			table.isProcessing = false;
-			if ( c.debug ) {
-				console.log( 'Overall initialization time: ' + ts.benchmark( $.data( table, 'startoveralltimer' ) ) );
-				if ( c.debug && console.groupEnd ) { console.groupEnd(); }
+			if ( ts.debug(c, 'core') ) {
+				console.log( 'Overall initialization time:' + ts.benchmark( $.data( table, 'startoveralltimer' ) ) );
+				if ( ts.debug(c, 'core') && console.groupEnd ) { console.groupEnd(); }
 			}
 			$table.triggerHandler( 'tablesorter-initialized', table );
 			if ( typeof c.initialized === 'function' ) {
@@ -10755,7 +10879,17 @@ function getClass(obj) {
 			.bind( 'sortReset' + namespace, function( e, callback ) {
 				e.stopPropagation();
 				// using this.config to ensure functions are getting a non-cached version of the config
-				ts.sortReset( this.config, callback );
+				ts.sortReset( this.config, function( table ) {
+					if (table.isApplyingWidgets) {
+						// multiple triggers in a row... filterReset, then sortReset - see #1361
+						// wait to update widgets
+						setTimeout( function() {
+							ts.applyWidget( table, '', callback );
+						}, 100 );
+					} else {
+						ts.applyWidget( table, '', callback );
+					}
+				});
 			})
 			.bind( 'updateAll' + namespace, function( e, resort, callback ) {
 				e.stopPropagation();
@@ -10800,10 +10934,10 @@ function getClass(obj) {
 				e.stopPropagation();
 				ts.applyWidgetId( this, id );
 			})
-			.bind( 'applyWidgets' + namespace, function( e, init ) {
+			.bind( 'applyWidgets' + namespace, function( e, callback ) {
 				e.stopPropagation();
-				// apply widgets
-				ts.applyWidget( this, init );
+				// apply widgets (false = not initializing)
+				ts.applyWidget( this, false, callback );
 			})
 			.bind( 'refreshWidgets' + namespace, function( e, all, dontapply ) {
 				e.stopPropagation();
@@ -10821,9 +10955,11 @@ function getClass(obj) {
 				e.stopPropagation();
 				// remove all widgets
 				ts.removeWidget( this, true, false );
+				var tmp = $.extend( true, {}, c.originalSettings );
 				// restore original settings; this clears out current settings, but does not clear
 				// values saved to storage.
-				c = $.extend( true, ts.defaults, c.originalSettings );
+				c = $.extend( true, {}, ts.defaults, tmp );
+				c.originalSettings = tmp;
 				this.hasInitialized = false;
 				// setup the entire table again
 				ts.setup( this, c );
@@ -10838,9 +10974,9 @@ function getClass(obj) {
 				downTarget = null;
 			if ( core !== true ) {
 				$headers.addClass( namespace.slice( 1 ) + '_extra_headers' );
-				tmp = $.fn.closest ? $headers.closest( 'table' )[ 0 ] : $headers.parents( 'table' )[ 0 ];
-				if ( tmp && tmp.nodeName === 'TABLE' && tmp !== table ) {
-					$( tmp ).addClass( namespace.slice( 1 ) + '_extra_table' );
+				tmp = ts.getClosest( $headers, 'table' );
+				if ( tmp.length && tmp[ 0 ].nodeName === 'TABLE' && tmp[ 0 ] !== table ) {
+					$( tmp[ 0 ] ).addClass( namespace.slice( 1 ) + '_extra_table' );
 				}
 			}
 			tmp = ( c.pointerDown + ' ' + c.pointerUp + ' ' + c.pointerClick + ' sort keyup ' )
@@ -10891,15 +11027,10 @@ function getClass(obj) {
 				if ( c.delayInit && ts.isEmptyObject( c.cache ) ) {
 					ts.buildCache( c );
 				}
-				// jQuery v1.2.6 doesn't have closest()
-				$cell = $.fn.closest ? $( this ).closest( 'th, td' ) :
-					/TH|TD/.test( this.nodeName ) ? $( this ) : $( this ).parents( 'th, td' );
-				// reference original table headers and find the same cell
-				// don't use $headers or IE8 throws an error - see #987
-				temp = $headers.index( $cell );
-				c.last.clickedIndex = ( temp < 0 ) ? $cell.attr( 'data-column' ) : temp;
-				// use column index if $headers is undefined
-				cell = c.$headers[ c.last.clickedIndex ];
+				$cell = ts.getClosest( $( this ), '.' + ts.css.header );
+				// use column index from data-attribute or index of current row; fixes #1116
+				c.last.clickedIndex = $cell.attr( 'data-column' ) || $cell.index();
+				cell = c.$headerIndexed[ c.last.clickedIndex ][0];
 				if ( cell && !cell.sortDisabled ) {
 					ts.initSort( c, cell, e );
 				}
@@ -10921,7 +11052,7 @@ function getClass(obj) {
 			c.headerList = [];
 			c.headerContent = [];
 			c.sortVars = [];
-			if ( c.debug ) {
+			if ( ts.debug(c, 'core') ) {
 				timer = new Date();
 			}
 			// children tr in tfoot - see issue #196 & #547
@@ -10936,7 +11067,12 @@ function getClass(obj) {
 				var configHeaders, header, column, template, tmp,
 					$elem = $( elem );
 				// ignore cell (don't add it to c.$headers) if row has ignoreRow class
-				if ( $elem.parent().hasClass( c.cssIgnoreRow ) ) { return; }
+				if ( ts.getClosest( $elem, 'tr' ).hasClass( c.cssIgnoreRow ) ) { return; }
+				// transfer data-column to element if not th/td - #1459
+				if ( !/(th|td)/i.test( elem.nodeName ) ) {
+					tmp = ts.getClosest( $elem, 'th, td' );
+					$elem.attr( 'data-column', tmp.attr( 'data-column' ) );
+				}
 				// make sure to get header cell & not column indexed cell
 				configHeaders = ts.getColumnData( c.table, c.headers, index, true );
 				// save original header content
@@ -10961,26 +11097,25 @@ function getClass(obj) {
 				}
 				column = parseInt( $elem.attr( 'data-column' ), 10 );
 				elem.column = column;
-				tmp = ts.getData( $elem, configHeaders, 'sortInitialOrder' ) || c.sortInitialOrder;
+				tmp = ts.getOrder( ts.getData( $elem, configHeaders, 'sortInitialOrder' ) || c.sortInitialOrder );
 				// this may get updated numerous times if there are multiple rows
 				c.sortVars[ column ] = {
 					count : -1, // set to -1 because clicking on the header automatically adds one
-					order: ts.getOrder( tmp ) ?
-						[ 1, 0, 2 ] : // desc, asc, unsorted
-						[ 0, 1, 2 ],  // asc, desc, unsorted
+					order:  tmp ?
+						( c.sortReset ? [ 1, 0, 2 ] : [ 1, 0 ] ) : // desc, asc, unsorted
+						( c.sortReset ? [ 0, 1, 2 ] : [ 0, 1 ] ),  // asc, desc, unsorted
 					lockedOrder : false
 				};
 				tmp = ts.getData( $elem, configHeaders, 'lockedOrder' ) || false;
 				if ( typeof tmp !== 'undefined' && tmp !== false ) {
 					c.sortVars[ column ].lockedOrder = true;
-					c.sortVars[ column ].order = ts.getOrder( tmp ) ? [ 1, 1, 1 ] : [ 0, 0, 0 ];
+					c.sortVars[ column ].order = ts.getOrder( tmp ) ? [ 1, 1 ] : [ 0, 0 ];
 				}
 				// add cell to headerList
 				c.headerList[ index ] = elem;
+				$elem.addClass( ts.css.header + ' ' + c.cssHeader );
 				// add to parent in case there are multiple rows
-				$elem
-					.addClass( ts.css.header + ' ' + c.cssHeader )
-					.parent()
+				ts.getClosest( $elem, 'tr' )
 					.addClass( ts.css.headerRow + ' ' + c.cssHeaderRow )
 					.attr( 'role', 'row' );
 				// allow keyboard cursor to focus on element
@@ -10996,6 +11131,7 @@ function getClass(obj) {
 				if ( ts.isEmptyObject( c.sortVars[ indx ] ) ) {
 					c.sortVars[ indx ] = {};
 				}
+				// Use c.$headers.parent() in case selectorHeaders doesn't point to the th/td
 				$temp = c.$headers.filter( '[data-column="' + indx + '"]' );
 				// target sortable column cells, unless there are none, then use non-sortable cells
 				// .last() added in jQuery 1.4; use .filter(':last') to maintain compatibility with jQuery v1.2.6
@@ -11011,7 +11147,7 @@ function getClass(obj) {
 			});
 			// enable/disable sorting
 			ts.updateHeader( c );
-			if ( c.debug ) {
+			if ( ts.debug(c, 'core') ) {
 				console.log( 'Built headers:' + ts.benchmark( timer ) );
 				console.log( c.$headers );
 			}
@@ -11034,14 +11170,15 @@ function getClass(obj) {
 				noParser, parser, extractor, time, tbody, len,
 				table = c.table,
 				tbodyIndex = 0,
-				debug = {};
+				debug = ts.debug(c, 'core'),
+				debugOutput = {};
 			// update table bodies in case we start with an empty table
 			c.$tbodies = c.$table.children( 'tbody:not(.' + c.cssInfoBlock + ')' );
 			tbody = typeof $tbodies === 'undefined' ? c.$tbodies : $tbodies;
 			len = tbody.length;
 			if ( len === 0 ) {
-				return c.debug ? console.warn( 'Warning: *Empty table!* Not building a parser cache' ) : '';
-			} else if ( c.debug ) {
+				return debug ? console.warn( 'Warning: *Empty table!* Not building a parser cache' ) : '';
+			} else if ( debug ) {
 				time = new Date();
 				console[ console.group ? 'group' : 'log' ]( 'Detecting parsers for each column' );
 			}
@@ -11057,8 +11194,9 @@ function getClass(obj) {
 					for ( indx = 0; indx < max; indx++ ) {
 						header = c.$headerIndexed[ colIndex ];
 						if ( header && header.length ) {
-							// get column indexed table cell
-							configHeaders = ts.getColumnData( table, c.headers, colIndex );
+							// get column indexed table cell; adding true parameter fixes #1362 but
+							// it would break backwards compatibility...
+							configHeaders = ts.getColumnData( table, c.headers, colIndex ); // , true );
 							// get column parser/extractor
 							extractor = ts.getParserById( ts.getData( header, configHeaders, 'extractor' ) );
 							parser = ts.getParserById( ts.getData( header, configHeaders, 'sorter' ) );
@@ -11082,8 +11220,8 @@ function getClass(obj) {
 							if ( !parser ) {
 								parser = ts.detectParserForColumn( c, rows, -1, colIndex );
 							}
-							if ( c.debug ) {
-								debug[ '(' + colIndex + ') ' + header.text() ] = {
+							if ( debug ) {
+								debugOutput[ '(' + colIndex + ') ' + header.text() ] = {
 									parser : parser.id,
 									extractor : extractor ? extractor.id : 'none',
 									string : c.strings[ colIndex ],
@@ -11109,9 +11247,9 @@ function getClass(obj) {
 				}
 				tbodyIndex += ( list.parsers.length ) ? len : 1;
 			}
-			if ( c.debug ) {
-				if ( !ts.isEmptyObject( debug ) ) {
-					console[ console.table ? 'table' : 'log' ]( debug );
+			if ( debug ) {
+				if ( !ts.isEmptyObject( debugOutput ) ) {
+					console[ console.table ? 'table' : 'log' ]( debugOutput );
 				} else {
 					console.warn( '  No parsers detected!' );
 				}
@@ -11137,7 +11275,7 @@ function getClass(obj) {
 		},
 
 		getParserById : function( name ) {
-			/*jshint eqeqeq:false */
+			/*jshint eqeqeq:false */ // eslint-disable-next-line eqeqeq
 			if ( name == 'false' ) { return false; }
 			var indx,
 				len = ts.parsers.length;
@@ -11154,6 +11292,7 @@ function getClass(obj) {
 				indx = ts.parsers.length,
 				node = false,
 				nodeValue = '',
+				debug = ts.debug(c, 'core'),
 				keepLooking = true;
 			while ( nodeValue === '' && keepLooking ) {
 				rowIndex++;
@@ -11164,7 +11303,7 @@ function getClass(obj) {
 						node = rows[ rowIndex ].cells[ cellIndex ];
 						nodeValue = ts.getElementText( c, node, cellIndex );
 						$node = $( node );
-						if ( c.debug ) {
+						if ( debug ) {
 							console.log( 'Checking if value was empty on row ' + rowIndex + ', column: ' +
 								cellIndex + ': "' + nodeValue + '"' );
 						}
@@ -11246,7 +11385,8 @@ function getClass(obj) {
 				cols, $cells, cell, cacheTime, totalRows, rowData, prevRowData,
 				colMax, span, cacheIndex, hasParser, max, len, index,
 				table = c.table,
-				parsers = c.parsers;
+				parsers = c.parsers,
+				debug = ts.debug(c, 'core');
 			// update tbody variable
 			c.$tbodies = c.$table.children( 'tbody:not(.' + c.cssInfoBlock + ')' );
 			$tbody = typeof $tbodies === 'undefined' ? c.$tbodies : $tbodies,
@@ -11254,9 +11394,9 @@ function getClass(obj) {
 			c.totalRows = 0;
 			// if no parsers found, return - it's an empty table.
 			if ( !parsers ) {
-				return c.debug ? console.warn( 'Warning: *Empty table!* Not building a cache' ) : '';
+				return debug ? console.warn( 'Warning: *Empty table!* Not building a cache' ) : '';
 			}
-			if ( c.debug ) {
+			if ( debug ) {
 				cacheTime = new Date();
 			}
 			// processing icon
@@ -11281,6 +11421,10 @@ function getClass(obj) {
 					/** Add the table data to main data array */
 					$row = $( $tbody[ tbodyIndex ].rows[ rowIndex ] );
 					cols = [];
+					// ignore "remove-me" rows
+					if ( $row.hasClass( c.selectorRemove.slice(1) ) ) {
+						continue;
+					}
 					// if this is a child row, add it to the last row's children and continue to the next row
 					// ignore child row class, if it is the first row
 					if ( $row.hasClass( c.cssChildRow ) && rowIndex !== 0 ) {
@@ -11321,7 +11465,7 @@ function getClass(obj) {
 						cell = $row[ 0 ].cells[ colIndex ];
 						if ( cell && cacheIndex < c.columns ) {
 							hasParser = typeof parsers[ cacheIndex ] !== 'undefined';
-							if ( !hasParser && c.debug ) {
+							if ( !hasParser && debug ) {
 								console.warn( 'No parser found for row: ' + rowIndex + ', column: ' + colIndex +
 									'; cell containing: "' + $(cell).text() + '"; does it have a header?' );
 							}
@@ -11369,10 +11513,11 @@ function getClass(obj) {
 			if ( c.showProcessing ) {
 				ts.isProcessing( table ); // remove processing icon
 			}
-			if ( c.debug ) {
+			if ( debug ) {
 				len = Math.min( 5, c.cache[ 0 ].normalized.length );
 				console[ console.group ? 'group' : 'log' ]( 'Building cache for ' + c.totalRows +
-					' rows (showing ' + len + ' rows in log)' + ts.benchmark( cacheTime ) );
+					' rows (showing ' + len + ' rows in log) and ' + c.columns + ' columns' +
+					ts.benchmark( cacheTime ) );
 				val = {};
 				for ( colIndex = 0; colIndex < c.columns; colIndex++ ) {
 					for ( cacheIndex = 0; cacheIndex < len; cacheIndex++ ) {
@@ -11399,7 +11544,7 @@ function getClass(obj) {
 				data = { raw : [], parsed: [], $cell: [] },
 				c = table.config;
 			if ( ts.isEmptyObject( c ) ) {
-				if ( c.debug ) {
+				if ( ts.debug(c, 'core') ) {
 					console.warn( 'No cache found - aborting getColumnText function!' );
 				}
 			} else {
@@ -11446,39 +11591,61 @@ function getClass(obj) {
 		▀████▀ ██     █████▀ ██  ██   ██   ██████
 		*/
 		setHeadersCss : function( c ) {
-			var $sorted, indx, column,
+			var indx, column,
 				list = c.sortList,
 				len = list.length,
 				none = ts.css.sortNone + ' ' + c.cssNone,
 				css = [ ts.css.sortAsc + ' ' + c.cssAsc, ts.css.sortDesc + ' ' + c.cssDesc ],
 				cssIcon = [ c.cssIconAsc, c.cssIconDesc, c.cssIconNone ],
 				aria = [ 'ascending', 'descending' ],
+				updateColumnSort = function($el, index) {
+					$el
+						.removeClass( none )
+						.addClass( css[ index ] )
+						.attr( 'aria-sort', aria[ index ] )
+						.find( '.' + ts.css.icon )
+						.removeClass( cssIcon[ 2 ] )
+						.addClass( cssIcon[ index ] );
+				},
 				// find the footer
-				$headers = c.$table
+				$extras = c.$table
 					.find( 'tfoot tr' )
 					.children( 'td, th' )
 					.add( $( c.namespace + '_extra_headers' ) )
-					.removeClass( css.join( ' ' ) );
-			// remove all header information
-			c.$headers
-				.removeClass( css.join( ' ' ) )
-				.addClass( none )
-				.attr( 'aria-sort', 'none' )
+					.removeClass( css.join( ' ' ) ),
+				// remove all header information
+				$sorted = c.$headers
+					.add( $( 'thead ' + c.namespace + '_extra_headers' ) )
+					.removeClass( css.join( ' ' ) )
+					.addClass( none )
+					.attr( 'aria-sort', 'none' )
+					.find( '.' + ts.css.icon )
+					.removeClass( cssIcon.join( ' ' ) )
+					.end();
+			// add css none to all sortable headers
+			$sorted
+				.not( '.sorter-false' )
 				.find( '.' + ts.css.icon )
-				.removeClass( cssIcon.join( ' ' ) )
 				.addClass( cssIcon[ 2 ] );
+			// add disabled css icon class
+			if ( c.cssIconDisabled ) {
+				$sorted
+					.filter( '.sorter-false' )
+					.find( '.' + ts.css.icon )
+					.addClass( c.cssIconDisabled );
+			}
 			for ( indx = 0; indx < len; indx++ ) {
 				// direction = 2 means reset!
 				if ( list[ indx ][ 1 ] !== 2 ) {
 					// multicolumn sorting updating - see #1005
-					// .not(function(){}) needs jQuery 1.4
-					// filter(function(i, el){}) <- el is undefined in jQuery v1.2.6
+					// .not(function() {}) needs jQuery 1.4
+					// filter(function(i, el) {}) <- el is undefined in jQuery v1.2.6
 					$sorted = c.$headers.filter( function( i ) {
 						// only include headers that are in the sortList (this includes colspans)
 						var include = true,
 							$el = c.$headers.eq( i ),
 							col = parseInt( $el.attr( 'data-column' ), 10 ),
-							end = col + c.$headers[ i ].colSpan;
+							end = col + ts.getClosest( $el, 'th, td' )[0].colSpan;
 						for ( ; col < end; col++ ) {
 							include = include ? include || ts.isValueInArray( col, c.sortList ) > -1 : false;
 						}
@@ -11492,23 +11659,13 @@ function getClass(obj) {
 					if ( $sorted.length ) {
 						for ( column = 0; column < $sorted.length; column++ ) {
 							if ( !$sorted[ column ].sortDisabled ) {
-								$sorted
-									.eq( column )
-									.removeClass( none )
-									.addClass( css[ list[ indx ][ 1 ] ] )
-									.attr( 'aria-sort', aria[ list[ indx ][ 1 ] ] )
-									.find( '.' + ts.css.icon )
-									.removeClass( cssIcon[ 2 ] )
-									.addClass( cssIcon[ list[ indx ][ 1 ] ] );
+								updateColumnSort( $sorted.eq( column ), list[ indx ][ 1 ] );
 							}
 						}
-						// add sorted class to footer & extra headers, if they exist
-						if ( $headers.length ) {
-							$headers
-								.filter( '[data-column="' + list[ indx ][ 0 ] + '"]' )
-								.removeClass( none )
-								.addClass( css[ list[ indx ][ 1 ] ] );
-						}
+					}
+					// add sorted class to footer & extra headers, if they exist
+					if ( $extras.length ) {
+						updateColumnSort( $extras.filter( '[data-column="' + list[ indx ][ 0 ] + '"]' ), list[ indx ][ 1 ] );
 					}
 				}
 			}
@@ -11519,10 +11676,21 @@ function getClass(obj) {
 			}
 		},
 
+		getClosest : function( $el, selector ) {
+			// jQuery v1.2.6 doesn't have closest()
+			if ( $.fn.closest ) {
+				return $el.closest( selector );
+			}
+			return $el.is( selector ) ?
+				$el :
+				$el.parents( selector ).filter( ':first' );
+		},
+
 		// nextSort (optional), lets you disable next sort text
 		setColumnAriaLabel : function( c, $header, nextSort ) {
 			if ( $header.length ) {
 				var column = parseInt( $header.attr( 'data-column' ), 10 ),
+					vars = c.sortVars[ column ],
 					tmp = $header.hasClass( ts.css.sortAsc ) ?
 						'sortAsc' :
 						$header.hasClass( ts.css.sortDesc ) ? 'sortDesc' : 'sortNone',
@@ -11530,7 +11698,8 @@ function getClass(obj) {
 				if ( $header.hasClass( 'sorter-false' ) || nextSort === false ) {
 					txt += ts.language.sortDisabled;
 				} else {
-					nextSort = c.sortVars[ column ].order[ ( c.sortVars[ column ].count + 1 ) % ( c.sortReset ? 3 : 2 ) ];
+					tmp = ( vars.count + 1 ) % vars.order.length;
+					nextSort = vars.order[ tmp ];
 					// if nextSort
 					txt += ts.language[ nextSort === 0 ? 'nextAsc' : nextSort === 1 ? 'nextDesc' : 'nextNone' ];
 				}
@@ -11589,7 +11758,12 @@ function getClass(obj) {
 					// set order if not already defined - due to colspan header without associated header cell
 					// adding this check prevents a javascript error
 					if ( !c.sortVars[ col ].order ) {
-						order = c.sortVars[ col ].order = ts.getOrder( c.sortInitialOrder ) ? [ 1, 0, 2 ] : [ 0, 1, 2 ];
+						if ( ts.getOrder( c.sortInitialOrder ) ) {
+							order = c.sortReset ? [ 1, 0, 2 ] : [ 1, 0 ];
+						} else {
+							order = c.sortReset ? [ 0, 1, 2 ] : [ 0, 1 ];
+						}
+						c.sortVars[ col ].order = order;
 						c.sortVars[ col ].count = 0;
 					}
 
@@ -11606,12 +11780,12 @@ function getClass(obj) {
 							dir = primary || 0;
 							break;
 						case 'o' :
-							temp = order[ ( primary || 0 ) % ( c.sortReset ? 3 : 2 ) ];
+							temp = order[ ( primary || 0 ) % order.length ];
 							// opposite of primary column; but resets if primary resets
 							dir = temp === 0 ? 1 : temp === 1 ? 0 : 2;
 							break;
 						case 'n' :
-							dir = order[ ( ++c.sortVars[ col ].count ) % ( c.sortReset ? 3 : 2 ) ];
+							dir = order[ ( ++c.sortVars[ col ].count ) % order.length ];
 							break;
 						default : // ascending
 							dir = 0;
@@ -11621,7 +11795,7 @@ function getClass(obj) {
 					group = [ col, parseInt( dir, 10 ) || 0 ];
 					c.sortList[ c.sortList.length ] = group;
 					dir = $.inArray( group[ 1 ], order ); // fixes issue #167
-					c.sortVars[ col ].count = dir >= 0 ? dir : group[ 1 ] % ( c.sortReset ? 3 : 2 );
+					c.sortVars[ col ].count = dir >= 0 ? dir : group[ 1 ] % order.length;
 				}
 			}
 		},
@@ -11653,6 +11827,12 @@ function getClass(obj) {
 		},
 
 		updateCell : function( c, cell, resort, callback ) {
+			// updateCell for child rows is a mess - we'll ignore them for now
+			// eventually I'll break out the "update" row cache code to make everything consistent
+			if ( $( cell ).closest( 'tr' ).hasClass( c.cssChildRow ) ) {
+				console.warn('Tablesorter Warning! "updateCell" for child row content has been disabled, use "update" instead');
+				return;
+			}
 			if ( ts.isEmptyObject( c.cache ) ) {
 				// empty table, do an update instead - fixes #1099
 				ts.updateHeader( c );
@@ -11667,14 +11847,13 @@ function getClass(obj) {
 				$cell = $( cell ),
 				// update cache - format: function( s, table, cell, cellIndex )
 				// no closest in jQuery v1.2.6
-				tbodyIndex = $tbodies
-					.index( $.fn.closest ? $cell.closest( 'tbody' ) : $cell.parents( 'tbody' ).filter( ':first' ) ),
+				tbodyIndex = $tbodies.index( ts.getClosest( $cell, 'tbody' ) ),
 				tbcache = c.cache[ tbodyIndex ],
-				$row = $.fn.closest ? $cell.closest( 'tr' ) : $cell.parents( 'tr' ).filter( ':first' );
+				$row = ts.getClosest( $cell, 'tr' );
 			cell = $cell[ 0 ]; // in case cell is a jQuery object
 			// tbody may not exist if update is initialized while tbody is removed for processing
 			if ( $tbodies.length && tbodyIndex >= 0 ) {
-				row = $tbodies.eq( tbodyIndex ).find( 'tr' ).index( $row );
+				row = $tbodies.eq( tbodyIndex ).find( 'tr' ).not( '.' + c.cssChildRow ).index( $row );
 				cache = tbcache.normalized[ row ];
 				len = $row[ 0 ].cells.length;
 				if ( len !== c.columns ) {
@@ -11695,7 +11874,6 @@ function getClass(obj) {
 				cache[ c.columns ].raw[ icell ] = tmp;
 				tmp = ts.getParsedText( c, cell, icell, tmp );
 				cache[ icell ] = tmp; // parsed
-				cache[ c.columns ].$row = $row;
 				if ( ( c.parsers[ icell ].type || '' ).toLowerCase() === 'numeric' ) {
 					// update column max value (ignore sign)
 					tbcache.colMax[ icell ] = Math.max( Math.abs( tmp ) || 0, tbcache.colMax[ icell ] || 0 );
@@ -11710,7 +11888,7 @@ function getClass(obj) {
 					ts.resortComplete( c, callback );
 				}
 			} else {
-				if ( c.debug ) {
+				if ( ts.debug(c, 'core') ) {
 					console.error( 'updateCell aborted, tbody missing or not within the indicated table' );
 				}
 				c.table.isUpdating = false;
@@ -11726,12 +11904,14 @@ function getClass(obj) {
 			if ( valid ) {
 				$row = $( $row );
 				c.$tbodies.append( $row );
-			} else if ( !$row ||
+			} else if (
+				!$row ||
 				// row is a jQuery object?
-				!( $row instanceof jQuery ) ||
+				!( $row instanceof $ ) ||
 				// row contained in the table?
-				( $.fn.closest ? $row.closest( 'table' )[ 0 ] : $row.parents( 'table' )[ 0 ] ) !== c.table ) {
-				if ( c.debug ) {
+				( ts.getClosest( $row, 'table' )[ 0 ] !== c.table )
+			) {
+				if ( ts.debug(c, 'core') ) {
 					console.error( 'addRows method requires (1) a jQuery selector reference to rows that have already ' +
 						'been added to the table, or (2) row HTML string to be added to a table with only one tbody' );
 				}
@@ -11803,7 +11983,6 @@ function getClass(obj) {
 		appendCache : function( c, init ) {
 			var parsed, totalRows, $tbody, $curTbody, rowIndex, tbodyIndex, appendTime,
 				table = c.table,
-				wo = c.widgetOptions,
 				$tbodies = c.$tbodies,
 				rows = [],
 				cache = c.cache;
@@ -11813,7 +11992,7 @@ function getClass(obj) {
 				return c.appender ? c.appender( table, rows ) :
 					table.isUpdating ? c.$table.triggerHandler( 'updateComplete', table ) : ''; // Fixes #532
 			}
-			if ( c.debug ) {
+			if ( ts.debug(c, 'core') ) {
 				appendTime = new Date();
 			}
 			for ( tbodyIndex = 0; tbodyIndex < $tbodies.length; tbodyIndex++ ) {
@@ -11826,7 +12005,7 @@ function getClass(obj) {
 					for ( rowIndex = 0; rowIndex < totalRows; rowIndex++ ) {
 						rows[rows.length] = parsed[ rowIndex ][ c.columns ].$row;
 						// removeRows used by the pager plugin; don't render if using ajax - fixes #411
-						if ( !c.appender || ( c.pager && ( !c.pager.removeRows || !wo.pager_removeRows ) && !c.pager.ajax ) ) {
+						if ( !c.appender || ( c.pager && !c.pager.removeRows && !c.pager.ajax ) ) {
 							$curTbody.append( parsed[ rowIndex ][ c.columns ].$row );
 						}
 					}
@@ -11837,7 +12016,7 @@ function getClass(obj) {
 			if ( c.appender ) {
 				c.appender( table, rows );
 			}
-			if ( c.debug ) {
+			if ( ts.debug(c, 'core') ) {
 				console.log( 'Rebuilt table' + ts.benchmark( appendTime ) );
 			}
 			// apply table widgets; but not before ajax completes
@@ -11868,7 +12047,7 @@ function getClass(obj) {
 		initSort : function( c, cell, event ) {
 			if ( c.table.isUpdating ) {
 				// let any updates complete before initializing a sort
-				return setTimeout( function(){
+				return setTimeout( function() {
 					ts.initSort( c, cell, event );
 				}, 50 );
 			}
@@ -11877,15 +12056,15 @@ function getClass(obj) {
 				notMultiSort = !event[ c.sortMultiSortKey ],
 				table = c.table,
 				len = c.$headers.length,
-				// get current column index
-				col = parseInt( $( cell ).attr( 'data-column' ), 10 ),
+				th = ts.getClosest( $( cell ), 'th, td' ),
+				col = parseInt( th.attr( 'data-column' ), 10 ),
 				order = c.sortVars[ col ].order;
-
+			th = th[0];
 			// Only call sortStart if sorting is enabled
 			c.$table.triggerHandler( 'sortStart', table );
 			// get current column sort order
-			c.sortVars[ col ].count =
-				event[ c.sortResetKey ] ? 2 : ( c.sortVars[ col ].count + 1 ) % ( c.sortReset ? 3 : 2 );
+			tmp = ( c.sortVars[ col ].count + 1 ) % order.length;
+			c.sortVars[ col ].count = event[ c.sortResetKey ] ? 2 : tmp;
 			// reset all sorts on non-current column - issue #30
 			if ( c.sortRestart ) {
 				for ( headerIndx = 0; headerIndx < len; headerIndx++ ) {
@@ -11915,8 +12094,8 @@ function getClass(obj) {
 				if ( dir < 2 ) {
 					c.sortList[ c.sortList.length ] = [ col, dir ];
 					// add other columns if header spans across multiple
-					if ( cell.colSpan > 1 ) {
-						for ( indx = 1; indx < cell.colSpan; indx++ ) {
+					if ( th.colSpan > 1 ) {
+						for ( indx = 1; indx < th.colSpan; indx++ ) {
 							c.sortList[ c.sortList.length ] = [ col + indx, dir ];
 							// update count on columns in colSpan
 							c.sortVars[ col + indx ].count = $.inArray( dir, order );
@@ -11948,8 +12127,8 @@ function getClass(obj) {
 					if ( dir < 2 ) {
 						c.sortList[ c.sortList.length ] = [ col, dir ];
 						// add other columns if header spans across multiple
-						if ( cell.colSpan > 1 ) {
-							for ( indx = 1; indx < cell.colSpan; indx++ ) {
+						if ( th.colSpan > 1 ) {
+							for ( indx = 1; indx < th.colSpan; indx++ ) {
 								c.sortList[ c.sortList.length ] = [ col + indx, dir ];
 								// update count on columns in colSpan
 								c.sortVars[ col + indx ].count = $.inArray( dir, order );
@@ -11980,7 +12159,7 @@ function getClass(obj) {
 										dir = tmp === 0 ? 1 : 0;
 										break;
 									case 'n' :
-										dir = ( tmp + 1 ) % ( c.sortReset ? 3 : 2 );
+										dir = ( tmp + 1 ) % order.length;
 										break;
 									default:
 										dir = 0;
@@ -12007,8 +12186,9 @@ function getClass(obj) {
 
 		// sort multiple columns
 		multisort : function( c ) { /*jshint loopfunc:true */
-			var tbodyIndex, sortTime, colMax, rows,
+			var tbodyIndex, sortTime, colMax, rows, tmp,
 				table = c.table,
+				sorter = [],
 				dir = 0,
 				textSorter = c.textSorter || '',
 				sortList = c.sortList,
@@ -12018,7 +12198,17 @@ function getClass(obj) {
 				// empty table - fixes #206/#346
 				return;
 			}
-			if ( c.debug ) { sortTime = new Date(); }
+			if ( ts.debug(c, 'core') ) { sortTime = new Date(); }
+			// cache textSorter to optimize speed
+			if ( typeof textSorter === 'object' ) {
+				colMax = c.columns;
+				while ( colMax-- ) {
+					tmp = ts.getColumnData( table, textSorter, colMax );
+					if ( typeof tmp === 'function' ) {
+						sorter[ colMax ] = tmp;
+					}
+				}
+			}
 			for ( tbodyIndex = 0; tbodyIndex < len; tbodyIndex++ ) {
 				colMax = c.cache[ tbodyIndex ].colMax;
 				rows = c.cache[ tbodyIndex ].normalized;
@@ -12057,9 +12247,9 @@ function getClass(obj) {
 							if ( typeof textSorter === 'function' ) {
 								// custom OVERALL text sorter
 								sort = textSorter( x[ col ], y[ col ], dir, col, table );
-							} else if ( typeof textSorter === 'object' && textSorter.hasOwnProperty( col ) ) {
+							} else if ( typeof sorter[ col ] === 'function' ) {
 								// custom text sorter for a SPECIFIC COLUMN
-								sort = textSorter[ col ]( x[ col ], y[ col ], dir, col, table );
+								sort = sorter[ col ]( x[ col ], y[ col ], dir, col, table );
 							} else {
 								// fall back to natural sort
 								sort = ts[ 'sortNatural' + ( dir ? 'Asc' : 'Desc' ) ]( a[ col ], b[ col ], col, c );
@@ -12070,7 +12260,7 @@ function getClass(obj) {
 					return a[ c.columns ].order - b[ c.columns ].order;
 				});
 			}
-			if ( c.debug ) {
+			if ( ts.debug(c, 'core') ) {
 				console.log( 'Applying sort ' + sortList.toString() + ts.benchmark( sortTime ) );
 			}
 		},
@@ -12135,6 +12325,10 @@ function getClass(obj) {
 			ts.setHeadersCss( c );
 			ts.multisort( c );
 			ts.appendCache( c );
+			var indx;
+			for (indx = 0; indx < c.columns; indx++) {
+				c.sortVars[ indx ].count = -1;
+			}
 			if ( $.isFunction( callback ) ) {
 				callback( c.table );
 			}
@@ -12150,10 +12344,10 @@ function getClass(obj) {
 		},
 
 		// Natural sort - https://github.com/overset/javascript-natural-sort (date sorting removed)
-		// this function will only accept strings, or you'll see 'TypeError: undefined is not a function'
-		// I could add a = a.toString(); b = b.toString(); but it'll slow down the sort overall
 		sortNatural : function( a, b ) {
 			if ( a === b ) { return 0; }
+			a = a.toString();
+			b = b.toString();
 			var aNum, bNum, aFloat, bFloat, indx, max,
 				regex = ts.regex;
 			// first try and sort Hex codes
@@ -12277,14 +12471,17 @@ function getClass(obj) {
 		},
 
 		applyWidgetOptions : function( table ) {
-			var indx, widget,
+			var indx, widget, wo,
 				c = table.config,
 				len = c.widgets.length;
 			if ( len ) {
 				for ( indx = 0; indx < len; indx++ ) {
 					widget = ts.getWidgetById( c.widgets[ indx ] );
 					if ( widget && widget.options ) {
-						c.widgetOptions = $.extend( true, {}, widget.options, c.widgetOptions );
+						wo = $.extend( true, {}, widget.options );
+						c.widgetOptions = $.extend( true, wo, c.widgetOptions );
+						// add widgetOptions to defaults for option validator
+						$.extend( true, ts.defaults.widgetOptions, widget.options );
 					}
 				}
 			}
@@ -12316,6 +12513,7 @@ function getClass(obj) {
 			var applied, time, name,
 				c = table.config,
 				wo = c.widgetOptions,
+				debug = ts.debug(c, 'core'),
 				widget = ts.getWidgetById( id );
 			if ( widget ) {
 				name = widget.id;
@@ -12324,7 +12522,7 @@ function getClass(obj) {
 				if ( $.inArray( name, c.widgets ) < 0 ) {
 					c.widgets[ c.widgets.length ] = name;
 				}
-				if ( c.debug ) { time = new Date(); }
+				if ( debug ) { time = new Date(); }
 
 				if ( init || !( c.widgetInit[ name ] ) ) {
 					// set init flag first to prevent calling init more than once (e.g. pager)
@@ -12335,7 +12533,7 @@ function getClass(obj) {
 					}
 					if ( typeof widget.init === 'function' ) {
 						applied = true;
-						if ( c.debug ) {
+						if ( debug ) {
 							console[ console.group ? 'group' : 'log' ]( 'Initializing ' + name + ' widget' );
 						}
 						widget.init( table, widget, c, wo );
@@ -12343,12 +12541,12 @@ function getClass(obj) {
 				}
 				if ( !init && typeof widget.format === 'function' ) {
 					applied = true;
-					if ( c.debug ) {
+					if ( debug ) {
 						console[ console.group ? 'group' : 'log' ]( 'Updating ' + name + ' widget' );
 					}
 					widget.format( table, c, wo, false );
 				}
-				if ( c.debug ) {
+				if ( debug ) {
 					if ( applied ) {
 						console.log( 'Completed ' + ( init ? 'initializing ' : 'applying ' ) + name + ' widget' + ts.benchmark( time ) );
 						if ( console.groupEnd ) { console.groupEnd(); }
@@ -12361,12 +12559,13 @@ function getClass(obj) {
 			table = $( table )[ 0 ]; // in case this is called externally
 			var indx, len, names, widget, time,
 				c = table.config,
+				debug = ts.debug(c, 'core'),
 				widgets = [];
 			// prevent numerous consecutive widget applications
 			if ( init !== false && table.hasInitialized && ( table.isApplyingWidgets || table.isUpdating ) ) {
 				return;
 			}
-			if ( c.debug ) { time = new Date(); }
+			if ( debug ) { time = new Date(); }
 			ts.addWidgetFromClass( table );
 			// prevent "tablesorter-ready" from firing multiple times in a row
 			clearTimeout( c.timerReady );
@@ -12385,8 +12584,8 @@ function getClass(obj) {
 						// set priority to 10 if not defined
 						if ( !widget.priority ) { widget.priority = 10; }
 						widgets[ indx ] = widget;
-					} else if ( c.debug ) {
-						console.warn( '"' + names[ indx ] + '" widget code does not exist!' );
+					} else if ( debug ) {
+						console.warn( '"' + names[ indx ] + '" was enabled, but the widget code has not been loaded!' );
 					}
 				}
 				// sort widgets by priority
@@ -12395,7 +12594,7 @@ function getClass(obj) {
 				});
 				// add/update selected widgets
 				len = widgets.length;
-				if ( c.debug ) {
+				if ( debug ) {
 					console[ console.group ? 'group' : 'log' ]( 'Start ' + ( init ? 'initializing' : 'applying' ) + ' widgets' );
 				}
 				for ( indx = 0; indx < len; indx++ ) {
@@ -12404,23 +12603,23 @@ function getClass(obj) {
 						ts.applyWidgetId( table, widget.id, init );
 					}
 				}
-				if ( c.debug && console.groupEnd ) { console.groupEnd(); }
-				// callback executed on init only
-				if ( !init && typeof callback === 'function' ) {
-					callback( table );
-				}
+				if ( debug && console.groupEnd ) { console.groupEnd(); }
 			}
 			c.timerReady = setTimeout( function() {
 				table.isApplyingWidgets = false;
 				$.data( table, 'lastWidgetApplication', new Date() );
 				c.$table.triggerHandler( 'tablesorter-ready' );
+				// callback executed on init only
+				if ( !init && typeof callback === 'function' ) {
+					callback( table );
+				}
+				if ( debug ) {
+					widget = c.widgets.length;
+					console.log( 'Completed ' +
+						( init === true ? 'initializing ' : 'applying ' ) + widget +
+						' widget' + ( widget !== 1 ? 's' : '' ) + ts.benchmark( time ) );
+				}
 			}, 10 );
-			if ( c.debug ) {
-				widget = c.widgets.length;
-				console.log( 'Completed ' +
-					( init === true ? 'initializing ' : 'applying ' ) + widget +
-					' widget' + ( widget !== 1 ? 's' : '' ) + ts.benchmark( time ) );
-			}
 		},
 
 		removeWidget : function( table, name, refreshing ) {
@@ -12451,13 +12650,14 @@ function getClass(obj) {
 					c.widgets.splice( indx, 1 );
 				}
 				if ( widget && widget.remove ) {
-					if ( c.debug ) {
+					if ( ts.debug(c, 'core') ) {
 						console.log( ( refreshing ? 'Refreshing' : 'Removing' ) + ' "' + name[ index ] + '" widget' );
 					}
 					widget.remove( table, c, c.widgetOptions, refreshing );
 					c.widgetInit[ name[ index ] ] = false;
 				}
 			}
+			c.$table.triggerHandler( 'widgetRemoveEnd', table );
 		},
 
 		refreshWidgets : function( table, doAll, dontapply ) {
@@ -12498,11 +12698,17 @@ function getClass(obj) {
 		▀████▀   ██   ██ ██████ ██   ██   ██ ██████ █████▀
 		*/
 		benchmark : function( diff ) {
-			return ( ' ( ' + ( new Date().getTime() - diff.getTime() ) + 'ms )' );
+			return ( ' (' + ( new Date().getTime() - diff.getTime() ) + ' ms)' );
 		},
 		// deprecated ts.log
 		log : function() {
 			console.log( arguments );
+		},
+		debug : function(c, name) {
+			return c && (
+				c.debug === true ||
+				typeof c.debug === 'string' && c.debug.indexOf(name) > -1
+			);
 		},
 
 		// $.isEmptyObject from jQuery v1.4
@@ -12568,7 +12774,7 @@ function getClass(obj) {
 				cells = $rows[ i ].cells;
 				for ( j = 0; j < cells.length; j++ ) {
 					cell = cells[ j ];
-					rowIndex = cell.parentNode.rowIndex;
+					rowIndex = i;
 					rowSpan = cell.rowSpan || 1;
 					colSpan = cell.colSpan || 1;
 					if ( typeof matrix[ rowIndex ] === 'undefined' ) {
@@ -12603,7 +12809,40 @@ function getClass(obj) {
 					}
 				}
 			}
+			ts.checkColumnCount($rows, matrix, matrixrow.length);
 			return matrixrow.length;
+		},
+
+		checkColumnCount : function($rows, matrix, columns) {
+			// this DOES NOT report any tbody column issues, except for the math and
+			// and column selector widgets
+			var i, len,
+				valid = true,
+				cells = [];
+			for ( i = 0; i < matrix.length; i++ ) {
+				// some matrix entries are undefined when testing the footer because
+				// it is using the rowIndex property
+				if ( matrix[i] ) {
+					len = matrix[i].length;
+					if ( matrix[i].length !== columns ) {
+						valid = false;
+						break;
+					}
+				}
+			}
+			if ( !valid ) {
+				$rows.each( function( indx, el ) {
+					var cell = el.parentElement.nodeName;
+					if ( cells.indexOf( cell ) < 0 ) {
+						cells.push( cell );
+					}
+				});
+				console.error(
+					'Invalid or incorrect number of columns in the ' +
+					cells.join( ' or ' ) + '; expected ' + columns +
+					', but found ' + len + ' columns'
+				);
+			}
 		},
 
 		// automatically add a colgroup with col elements set to a percentage width
@@ -12657,15 +12896,17 @@ function getClass(obj) {
 		},
 
 		getColumnData : function( table, obj, indx, getCell, $headers ) {
-			if ( typeof obj === 'undefined' || obj === null ) { return; }
+			if ( typeof obj !== 'object' || obj === null ) {
+				return obj;
+			}
 			table = $( table )[ 0 ];
 			var $header, key,
 				c = table.config,
 				$cells = ( $headers || c.$headers ),
 				// c.$headerIndexed is not defined initially
 				$cell = c.$headerIndexed && c.$headerIndexed[ indx ] ||
-					$cells.filter( '[data-column="' + indx + '"]:last' );
-			if ( obj[ indx ] ) {
+					$cells.find( '[data-column="' + indx + '"]:last' );
+			if ( typeof obj[ indx ] !== 'undefined' ) {
 				return getCell ? obj[ indx ] : obj[ $cells.index( $cell ) ];
 			}
 			for ( key in obj ) {
@@ -12768,6 +13009,34 @@ function getClass(obj) {
 			return str;
 		},
 
+		validateOptions : function( c ) {
+			var setting, setting2, typ, timer,
+				// ignore options containing an array
+				ignore = 'headers sortForce sortList sortAppend widgets'.split( ' ' ),
+				orig = c.originalSettings;
+			if ( orig ) {
+				if ( ts.debug(c, 'core') ) {
+					timer = new Date();
+				}
+				for ( setting in orig ) {
+					typ = typeof ts.defaults[setting];
+					if ( typ === 'undefined' ) {
+						console.warn( 'Tablesorter Warning! "table.config.' + setting + '" option not recognized' );
+					} else if ( typ === 'object' ) {
+						for ( setting2 in orig[setting] ) {
+							typ = ts.defaults[setting] && typeof ts.defaults[setting][setting2];
+							if ( $.inArray( setting, ignore ) < 0 && typ === 'undefined' ) {
+								console.warn( 'Tablesorter Warning! "table.config.' + setting + '.' + setting2 + '" option not recognized' );
+							}
+						}
+					}
+				}
+				if ( ts.debug(c, 'core') ) {
+					console.log( 'validate options time:' + ts.benchmark( timer ) );
+				}
+			}
+		},
+
 		// restore headers
 		restoreHeaders : function( table ) {
 			var index, $cell,
@@ -12793,7 +13062,6 @@ function getClass(obj) {
 			var events,
 				$t = $( table ),
 				c = table.config,
-				debug = c.debug,
 				$h = $t.find( 'thead:first' ),
 				$r = $h.find( 'tr.' + ts.css.headerRow ).removeClass( ts.css.headerRow + ' ' + c.cssHeaderRow ),
 				$f = $t.find( 'tfoot:first > tr' ).children( 'th, td' );
@@ -12824,13 +13092,14 @@ function getClass(obj) {
 				.unbind( ( 'mousedown mouseup keypress '.split( ' ' ).join( c.namespace + ' ' ) ).replace( ts.regex.spaces, ' ' ) );
 			ts.restoreHeaders( table );
 			$t.toggleClass( ts.css.table + ' ' + c.tableClass + ' tablesorter-' + c.theme, removeClasses === false );
+			$t.removeClass(c.namespace.slice(1));
 			// clear flag in case the plugin is initialized again
 			table.hasInitialized = false;
 			delete table.config.cache;
 			if ( typeof callback === 'function' ) {
 				callback( table );
 			}
-			if ( debug ) {
+			if ( ts.debug(c, 'core') ) {
 				console.log( 'tablesorter has been removed' );
 			}
 		}
@@ -12927,8 +13196,8 @@ function getClass(obj) {
 
 	// too many protocols to add them all https://en.wikipedia.org/wiki/URI_scheme
 	// now, this regex can be updated before initialization
-	ts.regex.urlProtocolTest =   /^(https?|ftp|file):\/\//;
-	ts.regex.urlProtocolReplace = /(https?|ftp|file):\/\//;
+	ts.regex.urlProtocolTest = /^(https?|ftp|file):\/\//;
+	ts.regex.urlProtocolReplace = /(https?|ftp|file):\/\/(www\.)?/;
 	ts.addParser({
 		id : 'url',
 		is : function( str ) {
@@ -12937,7 +13206,6 @@ function getClass(obj) {
 		format : function( str ) {
 			return str ? $.trim( str.replace( ts.regex.urlProtocolReplace, '' ) ) : str;
 		},
-		parsed : true, // filter widget flag
 		type : 'text'
 	});
 
@@ -12948,7 +13216,7 @@ function getClass(obj) {
 		is : function( str ) {
 			return ts.regex.isoDate.test( str );
 		},
-		format : function( str, table ) {
+		format : function( str ) {
 			var date = str ? new Date( str.replace( ts.regex.dash, '/' ) ) : str;
 			return date instanceof Date && isFinite( date ) ? date.getTime() : str;
 		},
@@ -12991,7 +13259,7 @@ function getClass(obj) {
 			// Jan 01, 2013 12:34:56 PM or 01 Jan 2013
 			return ts.regex.usLongDateTest1.test( str ) || ts.regex.usLongDateTest2.test( str );
 		},
-		format : function( str, table ) {
+		format : function( str ) {
 			var date = str ? new Date( str.replace( ts.regex.dateReplace, '$1 $2' ) ) : str;
 			return date instanceof Date && isFinite( date ) ? date.getTime() : str;
 		},
@@ -13045,14 +13313,14 @@ function getClass(obj) {
 	});
 
 	// match 24 hour time & 12 hours time + am/pm - see http://regexr.com/3c3tk
-	ts.regex.timeTest = /^([1-9]|1[0-2]):([0-5]\d)(\s[AP]M)$|^((?:[01]\d|[2][0-4]):[0-5]\d)$/i;
-	ts.regex.timeMatch = /([1-9]|1[0-2]):([0-5]\d)(\s[AP]M)|((?:[01]\d|[2][0-4]):[0-5]\d)/i;
+	ts.regex.timeTest = /^(0?[1-9]|1[0-2]):([0-5]\d)(\s[AP]M)$|^((?:[01]\d|[2][0-4]):[0-5]\d)$/i;
+	ts.regex.timeMatch = /(0?[1-9]|1[0-2]):([0-5]\d)(\s[AP]M)|((?:[01]\d|[2][0-4]):[0-5]\d)/i;
 	ts.addParser({
 		id : 'time',
 		is : function( str ) {
 			return ts.regex.timeTest.test( str );
 		},
-		format : function( str, table ) {
+		format : function( str ) {
 			// isolate time... ignore month, day and year
 			var temp,
 				timePart = ( str || '' ).match( ts.regex.timeMatch ),
@@ -13119,7 +13387,7 @@ function getClass(obj) {
 			var tbodyIndex, $tbody,
 				$tbodies = c.$tbodies,
 				toRemove = ( wo.zebra || [ 'even', 'odd' ] ).join( ' ' );
-			for ( tbodyIndex = 0; tbodyIndex < $tbodies.length; tbodyIndex++ ){
+			for ( tbodyIndex = 0; tbodyIndex < $tbodies.length; tbodyIndex++ ) {
 				$tbody = ts.processTbody( table, $tbodies.eq( tbodyIndex ), true ); // remove tbody
 				$tbody.children().removeClass( toRemove );
 				ts.processTbody( table, $tbody, false ); // restore tbody
@@ -13129,12 +13397,26 @@ function getClass(obj) {
 
 })( jQuery );
 
-/*! Widget: storage - updated 3/1/2016 (v2.25.5) */
+/*! Widget: storage - updated 2018-03-18 (v2.30.0) */
 /*global JSON:false */
 ;(function ($, window, document) {
 	'use strict';
 
 	var ts = $.tablesorter || {};
+
+	// update defaults for validator; these values must be falsy!
+	$.extend(true, ts.defaults, {
+		fixedUrl: '',
+		widgetOptions: {
+			storage_fixedUrl: '',
+			storage_group: '',
+			storage_page: '',
+			storage_storageType: '',
+			storage_tableId: '',
+			storage_useSessionStorage: ''
+		}
+	});
+
 	// *** Store data in local storage, with a cookie fallback ***
 	/* IE7 needs JSON library for JSON.stringify - (http://caniuse.com/#search=json)
 	   if you need it, then include https://github.com/douglascrockford/JSON-js
@@ -13161,8 +13443,13 @@ function getClass(obj) {
 			values = {},
 			c = table.config,
 			wo = c && c.widgetOptions,
-			storageType = ( options && options.useSessionStorage ) || ( wo && wo.storage_useSessionStorage ) ?
-				'sessionStorage' : 'localStorage',
+			debug = ts.debug(c, 'storage'),
+			storageType = (
+				( options && options.storageType ) || ( wo && wo.storage_storageType )
+			).toString().charAt(0).toLowerCase(),
+			// deprecating "useSessionStorage"; any storageType setting overrides it
+			session = storageType ? '' :
+				( options && options.useSessionStorage ) || ( wo && wo.storage_useSessionStorage ),
 			$table = $(table),
 			// id from (1) options ID, (2) table 'data-table-group' attribute, (3) widgetOptions.storage_tableId,
 			// (4) table ID, then (5) table index
@@ -13174,17 +13461,23 @@ function getClass(obj) {
 			url = options && options.url ||
 				$table.attr(options && options.page || wo && wo.storage_page || 'data-table-page') ||
 				wo && wo.storage_fixedUrl || c && c.fixedUrl || window.location.pathname;
-		// https://gist.github.com/paulirish/5558557
-		if (storageType in window) {
-			try {
-				window[storageType].setItem('_tmptest', 'temp');
-				hasStorage = true;
-				window[storageType].removeItem('_tmptest');
-			} catch (error) {
-				if (c && c.debug) {
+
+		// skip if using cookies
+		if (storageType !== 'c') {
+			storageType = (storageType === 's' || session) ? 'sessionStorage' : 'localStorage';
+			// https://gist.github.com/paulirish/5558557
+			if (storageType in window) {
+				try {
+					window[storageType].setItem('_tmptest', 'temp');
+					hasStorage = true;
+					window[storageType].removeItem('_tmptest');
+				} catch (error) {
 					console.warn( storageType + ' is not supported in this browser' );
 				}
 			}
+		}
+		if (debug) {
+			console.log('Storage >> Using', hasStorage ? storageType : 'cookies');
 		}
 		// *** get value ***
 		if ($.parseJSON) {
@@ -13220,7 +13513,7 @@ function getClass(obj) {
 
 })(jQuery, window, document);
 
-/*! Widget: uitheme - updated 7/11/2016 (v2.26.6) */
+/*! Widget: uitheme - updated 2018-03-18 (v2.30.0) */
 ;(function ($) {
 	'use strict';
 	var ts = $.tablesorter || {};
@@ -13237,10 +13530,10 @@ function getClass(obj) {
 			active       : '', // applied when column is sorted
 			hover        : '', // custom css required - a defined bootstrap style may not override other classes
 			// icon class names
-			icons        : '', // add 'icon-white' to make them white; this icon class is added to the <i> in the header
+			icons        : '', // add 'bootstrap-icon-white' to make them white; this icon class is added to the <i> in the header
 			iconSortNone : 'bootstrap-icon-unsorted', // class name added to icon when column is not sorted
-			iconSortAsc  : 'icon-chevron-up glyphicon glyphicon-chevron-up', // class name added to icon when column has ascending sort
-			iconSortDesc : 'icon-chevron-down glyphicon glyphicon-chevron-down', // class name added to icon when column has descending sort
+			iconSortAsc  : 'glyphicon glyphicon-chevron-up', // class name added to icon when column has ascending sort
+			iconSortDesc : 'glyphicon glyphicon-chevron-down', // class name added to icon when column has descending sort
 			filterRow    : '', // filter row class
 			footerRow    : '',
 			footerCells  : '',
@@ -13259,9 +13552,9 @@ function getClass(obj) {
 			hover        : 'ui-state-hover',  // hover class
 			// icon class names
 			icons        : 'ui-icon', // icon class added to the <i> in the header
-			iconSortNone : 'ui-icon-carat-2-n-s', // class name added to icon when column is not sorted
-			iconSortAsc  : 'ui-icon-carat-1-n', // class name added to icon when column has ascending sort
-			iconSortDesc : 'ui-icon-carat-1-s', // class name added to icon when column has descending sort
+			iconSortNone : 'ui-icon-carat-2-n-s ui-icon-caret-2-n-s', // class name added to icon when column is not sorted
+			iconSortAsc  : 'ui-icon-carat-1-n ui-icon-caret-1-n', // class name added to icon when column has ascending sort
+			iconSortDesc : 'ui-icon-carat-1-s ui-icon-caret-1-s', // class name added to icon when column has descending sort
 			filterRow    : '',
 			footerRow    : '',
 			footerCells  : '',
@@ -13285,8 +13578,9 @@ function getClass(obj) {
 				theme = c.theme || 'jui',
 				themes = themesAll[theme] || {},
 				remove = $.trim( [ themes.sortNone, themes.sortDesc, themes.sortAsc, themes.active ].join( ' ' ) ),
-				iconRmv = $.trim( [ themes.iconSortNone, themes.iconSortDesc, themes.iconSortAsc ].join( ' ' ) );
-			if (c.debug) { time = new Date(); }
+				iconRmv = $.trim( [ themes.iconSortNone, themes.iconSortDesc, themes.iconSortAsc ].join( ' ' ) ),
+				debug = ts.debug(c, 'uitheme');
+			if (debug) { time = new Date(); }
 			// initialization code - run once
 			if (!$table.hasClass('tablesorter-' + theme) || c.theme !== c.appliedTheme || !wo.uitheme_applied) {
 				wo.uitheme_applied = true;
@@ -13331,7 +13625,7 @@ function getClass(obj) {
 						$(this)[ event.type === 'mouseenter' ? 'addClass' : 'removeClass' ](themes.hover || '');
 					});
 
-				$headers.each(function(){
+				$headers.each(function() {
 					var $this = $(this);
 					if (!$this.find('.' + ts.css.wrapper).length) {
 						// Firefox needs this inner div to position the icon & resizer correctly
@@ -13346,7 +13640,7 @@ function getClass(obj) {
 						.addClass(themes.icons || '');
 				}
 				// filter widget initializes after uitheme
-				if (c.widgets.indexOf('filter') > -1) {
+				if (ts.hasWidget( c.table, 'filter' )) {
 					tmp = function() {
 						$table.children('thead').children('.' + ts.css.filterRow)
 							.removeClass(hasOldTheme ? oldtheme.filterRow || '' : '')
@@ -13389,8 +13683,8 @@ function getClass(obj) {
 					}
 				}
 			}
-			if (c.debug) {
-				console.log('Applying ' + theme + ' theme' + ts.benchmark(time));
+			if (debug) {
+				console.log('uitheme >> Applied ' + theme + ' theme' + ts.benchmark(time));
 			}
 		},
 		remove: function(table, c, wo, refreshing) {
@@ -13416,14 +13710,14 @@ function getClass(obj) {
 
 })(jQuery);
 
-/*! Widget: columns */
+/*! Widget: columns - updated 5/24/2017 (v2.28.11) */
 ;(function ($) {
 	'use strict';
 	var ts = $.tablesorter || {};
 
 	ts.addWidget({
 		id: 'columns',
-		priority: 30,
+		priority: 65,
 		options : {
 			columns : [ 'primary', 'secondary', 'tertiary' ]
 		},
@@ -13495,7 +13789,7 @@ function getClass(obj) {
 
 })(jQuery);
 
-/*! Widget: filter - updated 7/11/2016 (v2.26.6) *//*
+/*! Widget: filter - updated 2018-03-18 (v2.30.0) *//*
  * Requires tablesorter v2.8+ and jQuery 1.7+
  * by Rob Garrison
  */
@@ -13537,6 +13831,7 @@ function getClass(obj) {
 			filter_excludeFilter : {},    // filters to exclude, per column
 			filter_external      : '',    // jQuery selector string ( or jQuery object ) of external filters
 			filter_filteredRow   : 'filtered', // class added to filtered rows; define in css with "display:none" to hide the filtered-out rows
+			filter_filterLabel   : 'Filter "{{label}}" column by...', // Aria-label added to filter input/select; see #1495
 			filter_formatter     : null,  // add custom filter elements to the filter row
 			filter_functions     : null,  // add custom filter functions using this option
 			filter_hideEmpty     : true,  // hide filter row when table is empty
@@ -13566,8 +13861,10 @@ function getClass(obj) {
 			var tbodyIndex, $tbody,
 				$table = c.$table,
 				$tbodies = c.$tbodies,
-				events = 'addRows updateCell update updateRows updateComplete appendCache filterReset filterEnd search '
-					.split( ' ' ).join( c.namespace + 'filter ' );
+				events = (
+					'addRows updateCell update updateRows updateComplete appendCache filterReset ' +
+					'filterAndSortReset filterFomatterUpdate filterEnd search stickyHeadersInit '
+				).split( ' ' ).join( c.namespace + 'filter ' );
 			$table
 				.removeClass( 'hasFilters' )
 				// add filter namespace to all BUT search
@@ -13591,7 +13888,7 @@ function getClass(obj) {
 
 		// regex used in filter 'check' functions - not for general use and not documented
 		regex: {
-			regex     : /^\/((?:\\\/|[^\/])+)\/([mig]{0,3})?$/, // regex to test for regex
+			regex     : /^\/((?:\\\/|[^\/])+)\/([migyu]{0,5})?$/, // regex to test for regex
 			child     : /tablesorter-childRow/, // child row class name; this gets updated in the script
 			filtered  : /filtered/, // filtered (hidden) row class name; updated in the script
 			type      : /undefined|number/, // check type
@@ -13774,6 +14071,7 @@ function getClass(obj) {
 				if ( tsfRegex.exact.test( data.iFilter ) ) {
 					var txt = data.iFilter.replace( tsfRegex.exact, '' ),
 						filter = tsf.parseFilter( c, txt, data ) || '';
+					// eslint-disable-next-line eqeqeq
 					return data.anyMatch ? $.inArray( filter, data.rowArray ) >= 0 : filter == data.iExact;
 				}
 				return null;
@@ -13861,7 +14159,12 @@ function getClass(obj) {
 
 			var options, string, txt, $header, column, val, fxn, noSelect,
 				c = table.config,
-				wo = c.widgetOptions;
+				wo = c.widgetOptions,
+				processStr = function(prefix, str, suffix) {
+					str = str.trim();
+					// don't include prefix/suffix if str is empty
+					return str === '' ? '' : (prefix || '') + str + (suffix || '');
+				};
 			c.$table.addClass( 'hasFilters' );
 			c.lastSearch = [];
 
@@ -13877,13 +14180,13 @@ function getClass(obj) {
 			$.extend( tsfRegex, {
 				child : new RegExp( c.cssChildRow ),
 				filtered : new RegExp( wo.filter_filteredRow ),
-				alreadyFiltered : new RegExp( '(\\s+(' + ts.language.or + '|-|' + ts.language.to + ')\\s+)', 'i' ),
-				toTest : new RegExp( '\\s+(-|' + ts.language.to + ')\\s+', 'i' ),
-				toSplit : new RegExp( '(?:\\s+(?:-|' + ts.language.to + ')\\s+)', 'gi' ),
-				andTest : new RegExp( '\\s+(' + ts.language.and + '|&&)\\s+', 'i' ),
-				andSplit : new RegExp( '(?:\\s+(?:' + ts.language.and + '|&&)\\s+)', 'gi' ),
-				orTest : new RegExp( '(\\||\\s+' + ts.language.or + '\\s+)', 'i' ),
-				orSplit : new RegExp( '(?:\\s+(?:' + ts.language.or + ')\\s+|\\|)', 'gi' ),
+				alreadyFiltered : new RegExp( '(\\s+(-' + processStr('|', ts.language.or) + processStr('|', ts.language.to) + ')\\s+)', 'i' ),
+				toTest : new RegExp( '\\s+(-' + processStr('|', ts.language.to) + ')\\s+', 'i' ),
+				toSplit : new RegExp( '(?:\\s+(?:-' + processStr('|', ts.language.to) + ')\\s+)', 'gi' ),
+				andTest : new RegExp( '\\s+(' + processStr('', ts.language.and, '|') + '&&)\\s+', 'i' ),
+				andSplit : new RegExp( '(?:\\s+(?:' + processStr('', ts.language.and, '|') + '&&)\\s+)', 'gi' ),
+				orTest : new RegExp( '(\\|' + processStr('|\\s+', ts.language.or, '\\s+') + ')', 'i' ),
+				orSplit : new RegExp( '(?:\\|' + processStr('|\\s+(?:', ts.language.or, ')\\s+') + ')', 'gi' ),
 				iQuery : new RegExp( val, 'i' ),
 				igQuery : new RegExp( val, 'ig' ),
 				operTest : /^[<>]=?/,
@@ -13907,7 +14210,7 @@ function getClass(obj) {
 			}
 
 			txt = 'addRows updateCell update updateRows updateComplete appendCache filterReset ' +
-				'filterResetSaved filterEnd search '.split( ' ' ).join( c.namespace + 'filter ' );
+				'filterAndSortReset filterResetSaved filterEnd search '.split( ' ' ).join( c.namespace + 'filter ' );
 			c.$table.bind( txt, function( event, filter ) {
 				val = wo.filter_hideEmpty &&
 					$.isEmptyObject( c.cache ) &&
@@ -13918,9 +14221,16 @@ function getClass(obj) {
 					event.stopPropagation();
 					tsf.buildDefault( table, true );
 				}
-				if ( event.type === 'filterReset' ) {
+				// Add filterAndSortReset - see #1361
+				if ( event.type === 'filterReset' || event.type === 'filterAndSortReset' ) {
 					c.$table.find( '.' + tscss.filter ).add( wo.filter_$externalFilters ).val( '' );
-					tsf.searching( table, [] );
+					if ( event.type === 'filterAndSortReset' ) {
+						ts.sortReset( this.config, function() {
+							tsf.searching( table, [] );
+						});
+					} else {
+						tsf.searching( table, [] );
+					}
 				} else if ( event.type === 'filterResetSaved' ) {
 					ts.storage( table, 'tablesorter-filters', '' );
 				} else if ( event.type === 'filterEnd' ) {
@@ -13934,6 +14244,10 @@ function getClass(obj) {
 						// force a new search since content has changed
 						c.lastCombinedFilter = null;
 						c.lastSearch = [];
+						// update filterFormatters after update (& small delay) - Fixes #1237
+						setTimeout(function() {
+							c.$table.triggerHandler( 'filterFomatterUpdate' );
+						}, 100);
 					}
 					// pass true ( skipFirst ) to prevent the tablesorter.setFilters function from skipping the first
 					// input ensures all inputs are updated when a search is triggered on the table
@@ -14025,7 +14339,7 @@ function getClass(obj) {
 
 			// show processing icon
 			if ( c.showProcessing ) {
-				txt = 'filterStart filterEnd '.split( ' ' ).join( c.namespace + 'filter ' );
+				txt = 'filterStart filterEnd '.split( ' ' ).join( c.namespace + 'filter-sp ' );
 				c.$table
 					.unbind( txt.replace( ts.regex.spaces, ' ' ) )
 					.bind( txt, function( event, columns ) {
@@ -14085,7 +14399,9 @@ function getClass(obj) {
 		// so we have to work with it instead
 		formatterUpdated: function( $cell, column ) {
 			// prevent error if $cell is undefined - see #1056
-			var wo = $cell && $cell.closest( 'table' )[0].config.widgetOptions;
+			var $table = $cell && $cell.closest( 'table' );
+			var config = $table.length && $table[0].config,
+				wo = config && config.widgetOptions;
 			if ( wo && !wo.filter_initialized ) {
 				// add updates by column since this function
 				// may be called numerous times before initialization
@@ -14098,8 +14414,13 @@ function getClass(obj) {
 				count = 0,
 				completed = function() {
 					wo.filter_initialized = true;
+					// update lastSearch - it gets cleared often
+					c.lastSearch = c.$table.data( 'lastSearch' );
 					c.$table.triggerHandler( 'filterInit', c );
-					tsf.findRows( c.table, c.$table.data( 'lastSearch' ) || [] );
+					tsf.findRows( c.table, c.lastSearch || [] );
+					if (ts.debug(c, 'filter')) {
+						console.log('Filter >> Widget initialized');
+					}
 				};
 			if ( $.isEmptyObject( wo.filter_formatter ) ) {
 				completed();
@@ -14176,7 +14497,7 @@ function getClass(obj) {
 				cellFilter = wo.filter_cellFilter,
 				columns = c.columns,
 				arry = $.isArray( cellFilter ),
-				buildFilter = '<tr role="row" class="' + tscss.filterRow + ' ' + c.cssIgnoreRow + '">';
+				buildFilter = '<tr role="search" class="' + tscss.filterRow + ' ' + c.cssIgnoreRow + '">';
 			for ( column = 0; column < columns; column++ ) {
 				if ( c.$headerIndexed[ column ].length ) {
 					// account for entire column set with colspan. See #1047
@@ -14245,7 +14566,22 @@ function getClass(obj) {
 							( typeof wo.filter_cssFilter[column] !== 'undefined' ? wo.filter_cssFilter[column] || '' : '' ) :
 							wo.filter_cssFilter ) || '';
 						// copy data-column from table cell (it will include colspan)
-						buildFilter.addClass( tscss.filter + ' ' + name ).attr( 'data-column', $filter.attr( 'data-column' ) );
+						buildFilter.addClass( tscss.filter + ' ' + name );
+						name = wo.filter_filterLabel;
+						tmp = name.match(/{{([^}]+?)}}/g);
+						if (!tmp) {
+							tmp = [ '{{label}}' ];
+						}
+						$.each(tmp, function(indx, attr) {
+							var regex = new RegExp(attr, 'g'),
+								data = $header.attr('data-' + attr.replace(/{{|}}/g, '')),
+								text = typeof data === 'undefined' ? $header.text() : data;
+							name = name.replace( regex, $.trim( text ) );
+						});
+						buildFilter.attr({
+							'data-column': $filter.attr( 'data-column' ),
+							'aria-label': name
+						});
 						if ( disabled ) {
 							buildFilter.attr( 'placeholder', '' ).addClass( tscss.filterDisabled )[0].disabled = true;
 						}
@@ -14289,63 +14625,108 @@ function getClass(obj) {
 			})
 			.bind( 'keyup' + namespace, function( event ) {
 				wo = table.config.widgetOptions; // make sure "wo" isn't cached
-				var column = parseInt( $( this ).attr( 'data-column' ), 10 );
+				var column = parseInt( $( this ).attr( 'data-column' ), 10 ),
+					liveSearch = typeof wo.filter_liveSearch === 'boolean' ? wo.filter_liveSearch :
+						ts.getColumnData( table, wo.filter_liveSearch, column );
+				if ( typeof liveSearch === 'undefined' ) {
+					liveSearch = wo.filter_liveSearch.fallback || false;
+				}
 				$( this ).attr( 'data-lastSearchTime', new Date().getTime() );
 				// emulate what webkit does.... escape clears the filter
 				if ( event.which === tskeyCodes.escape ) {
 					// make sure to restore the last value on escape
 					this.value = wo.filter_resetOnEsc ? '' : c.lastSearch[column];
-				// live search
-				} else if ( wo.filter_liveSearch === false ) {
-					return;
 					// don't return if the search value is empty ( all rows need to be revealed )
 				} else if ( this.value !== '' && (
 					// liveSearch can contain a min value length; ignore arrow and meta keys, but allow backspace
-					( typeof wo.filter_liveSearch === 'number' && this.value.length < wo.filter_liveSearch ) ||
+					( typeof liveSearch === 'number' && this.value.length < liveSearch ) ||
 					// let return & backspace continue on, but ignore arrows & non-valid characters
 					( event.which !== tskeyCodes.enter && event.which !== tskeyCodes.backSpace &&
 						( event.which < tskeyCodes.space || ( event.which >= tskeyCodes.left && event.which <= tskeyCodes.down ) ) ) ) ) {
 					return;
+					// live search
+				} else if ( liveSearch === false ) {
+					if ( this.value !== '' && event.which !== tskeyCodes.enter ) {
+						return;
+					}
 				}
 				// change event = no delay; last true flag tells getFilters to skip newest timed input
-				tsf.searching( table, true, true );
+				tsf.searching( table, true, true, column );
 			})
 			// include change for select - fixes #473
-			.bind( 'search change keypress input '.split( ' ' ).join( namespace + ' ' ), function( event ) {
+			.bind( 'search change keypress input blur '.split( ' ' ).join( namespace + ' ' ), function( event ) {
 				// don't get cached data, in case data-column changes dynamically
-				var column = parseInt( $( this ).attr( 'data-column' ), 10 );
-				// don't allow 'change' event to process if the input value is the same - fixes #685
+				var column = parseInt( $( this ).attr( 'data-column' ), 10 ),
+					eventType = event.type,
+					liveSearch = typeof wo.filter_liveSearch === 'boolean' ?
+						wo.filter_liveSearch :
+						ts.getColumnData( table, wo.filter_liveSearch, column );
 				if ( table.config.widgetOptions.filter_initialized &&
-					( event.which === tskeyCodes.enter || event.type === 'search' ||
-					( event.type === 'change' ) && this.value !== c.lastSearch[column] ) ||
-					// only "input" event fires in MS Edge when clicking the "x" to clear the search
-					( event.type === 'input' && this.value === '' ) ) {
+					// immediate search if user presses enter
+					( event.which === tskeyCodes.enter ||
+						// immediate search if a "search" or "blur" is triggered on the input
+						( eventType === 'search' || eventType === 'blur' ) ||
+						// change & input events must be ignored if liveSearch !== true
+						( eventType === 'change' || eventType === 'input' ) &&
+						// prevent search if liveSearch is a number
+						( liveSearch === true || liveSearch !== true && event.target.nodeName !== 'INPUT' ) &&
+						// don't allow 'change' or 'input' event to process if the input value
+						// is the same - fixes #685
+						this.value !== c.lastSearch[column]
+					)
+				) {
 					event.preventDefault();
 					// init search with no delay
 					$( this ).attr( 'data-lastSearchTime', new Date().getTime() );
-					tsf.searching( table, event.type !== 'keypress', true );
+					tsf.searching( table, eventType !== 'keypress', true, column );
 				}
 			});
 		},
-		searching: function( table, filter, skipFirst ) {
-			var wo = table.config.widgetOptions;
+		searching: function( table, filter, skipFirst, column ) {
+			var liveSearch,
+				wo = table.config.widgetOptions;
+			if (typeof column === 'undefined') {
+				// no delay
+				liveSearch = false;
+			} else {
+				liveSearch = typeof wo.filter_liveSearch === 'boolean' ?
+					wo.filter_liveSearch :
+					// get column setting, or set to fallback value, or default to false
+					ts.getColumnData( table, wo.filter_liveSearch, column );
+				if ( typeof liveSearch === 'undefined' ) {
+					liveSearch = wo.filter_liveSearch.fallback || false;
+				}
+			}
 			clearTimeout( wo.filter_searchTimer );
 			if ( typeof filter === 'undefined' || filter === true ) {
 				// delay filtering
 				wo.filter_searchTimer = setTimeout( function() {
 					tsf.checkFilters( table, filter, skipFirst );
-				}, wo.filter_liveSearch ? wo.filter_searchDelay : 10 );
+				}, liveSearch ? wo.filter_searchDelay : 10 );
 			} else {
 				// skip delay
 				tsf.checkFilters( table, filter, skipFirst );
 			}
+		},
+		equalFilters: function (c, filter1, filter2) {
+			var indx,
+				f1 = [],
+				f2 = [],
+				len = c.columns + 1; // add one to include anyMatch filter
+			filter1 = $.isArray(filter1) ? filter1 : [];
+			filter2 = $.isArray(filter2) ? filter2 : [];
+			for (indx = 0; indx < len; indx++) {
+				f1[indx] = filter1[indx] || '';
+				f2[indx] = filter2[indx] || '';
+			}
+			return f1.join(',') === f2.join(',');
 		},
 		checkFilters: function( table, filter, skipFirst ) {
 			var c = table.config,
 				wo = c.widgetOptions,
 				filterArray = $.isArray( filter ),
 				filters = ( filterArray ) ? filter : ts.getFilters( table, true ),
-				combinedFilters = ( filters || [] ).join( '' ); // combined filter values
+				currentFilters = filters || []; // current filter values
 			// prevent errors if delay init is set
 			if ( $.isEmptyObject( c.cache ) ) {
 				// update cache if delayInit set & pager has initialized ( after user initiates a search )
@@ -14359,7 +14740,10 @@ function getClass(obj) {
 			// add filter array back into inputs
 			if ( filterArray ) {
 				ts.setFilters( table, filters, false, skipFirst !== true );
-				if ( !wo.filter_initialized ) { c.lastCombinedFilter = ''; }
+				if ( !wo.filter_initialized ) {
+					c.lastSearch = [];
+					c.lastCombinedFilter = '';
+				}
 			}
 			if ( wo.filter_hideFilters ) {
 				// show/hide filter row as needed
@@ -14369,11 +14753,11 @@ function getClass(obj) {
 			}
 			// return if the last search is the same; but filter === false when updating the search
 			// see example-widget-filter.html filter toggle buttons
-			if ( c.lastCombinedFilter === combinedFilters && filter !== false ) {
+			if ( tsf.equalFilters(c, c.lastSearch, currentFilters) && filter !== false ) {
 				return;
 			} else if ( filter === false ) {
 				// force filter refresh
-				c.lastCombinedFilter = null;
+				c.lastCombinedFilter = '';
 				c.lastSearch = [];
 			}
 			// define filter inside it is false
@@ -14390,11 +14774,11 @@ function getClass(obj) {
 			if ( c.showProcessing ) {
 				// give it time for the processing icon to kick in
 				setTimeout( function() {
-					tsf.findRows( table, filters, combinedFilters );
+					tsf.findRows( table, filters, currentFilters );
 					return false;
 				}, 30 );
 			} else {
-				tsf.findRows( table, filters, combinedFilters );
+				tsf.findRows( table, filters, currentFilters );
 				return false;
 			}
 		},
@@ -14547,6 +14931,7 @@ function getClass(obj) {
 				if ( $.inArray( ffxn, vars.excludeMatch ) < 0 && matches === null ) {
 					matches = tsf.types[ffxn]( c, data, vars );
 					if ( matches !== null ) {
+						data.matchedOn = ffxn;
 						filterMatched = matches;
 					}
 				}
@@ -14584,6 +14969,7 @@ function getClass(obj) {
 				fxn, ffxn, txt,
 				wo = c.widgetOptions,
 				showRow = true,
+				hasAnyMatchInput = wo.filter_$anyMatch && wo.filter_$anyMatch.length,
 
 				// if wo.filter_$anyMatch data-column attribute is changed dynamically
 				// we don't want to do an "anyMatch" search on one column using data
@@ -14593,11 +14979,12 @@ function getClass(obj) {
 					tsf.multipleColumns( c, wo.filter_$anyMatch ) :
 					[];
 			data.$cells = data.$row.children();
-			if ( data.anyMatchFlag && columnIndex.length > 1 || data.anyMatchFilter ) {
+			data.matchedOn = null;
+			if ( data.anyMatchFlag && columnIndex.length > 1 || ( data.anyMatchFilter && !hasAnyMatchInput ) ) {
 				data.anyMatch = true;
 				data.isMatch = true;
 				data.rowArray = data.$cells.map( function( i ) {
-					if ( $.inArray( i, columnIndex ) > -1 || data.anyMatchFilter ) {
+					if ( $.inArray( i, columnIndex ) > -1 || ( data.anyMatchFilter && !hasAnyMatchInput ) ) {
 						if ( data.parsed[ i ] ) {
 							txt = data.cacheArray[ i ];
 						} else {
@@ -14679,13 +15066,7 @@ function getClass(obj) {
 					fxn = vars.functions[ columnIndex ];
 					filterMatched = null;
 					if ( fxn ) {
-						if ( fxn === true ) {
-							// default selector uses exact match unless 'filter-match' class is found
-							filterMatched = data.isMatch ?
-								// data.iExact may be a number
-								( '' + data.iExact ).search( data.iFilter ) >= 0 :
-								data.filter === data.exact;
-						} else if ( typeof fxn === 'function' ) {
+						if ( typeof fxn === 'function' ) {
 							// filter callback( exact cell content, parser normalized content,
 							// filter input value, column index, jQuery row object )
 							filterMatched = fxn( data.exact, data.cache, data.filter, columnIndex, data.$row, c, data );
@@ -14700,12 +15081,24 @@ function getClass(obj) {
 						// cycle through the different filters
 						// filters return a boolean or null if nothing matches
 						filterMatched = tsf.processTypes( c, data, vars );
-						if ( filterMatched !== null ) {
+						// select with exact match; ignore "and" or "or" within the text; fixes #1486
+						txt = fxn === true && (data.matchedOn === 'and' || data.matchedOn === 'or');
+						if ( filterMatched !== null && !txt) {
 							result = filterMatched;
 						// Look for match, and add child row data for matching
 						} else {
-							txt = ( data.iExact + data.childRowText ).indexOf( tsf.parseFilter( c, data.iFilter, data ) );
-							result = ( ( !wo.filter_startsWith && txt >= 0 ) || ( wo.filter_startsWith && txt === 0 ) );
+							// check fxn (filter-select in header) after filter types are checked
+							// without this, the filter + jQuery UI selectmenu demo was breaking
+							if ( fxn === true ) {
+								// default selector uses exact match unless 'filter-match' class is found
+								result = data.isMatch ?
+									// data.iExact may be a number
+									( '' + data.iExact ).search( data.iFilter ) >= 0 :
+									data.filter === data.exact;
+							} else {
+								txt = ( data.iExact + data.childRowText ).indexOf( tsf.parseFilter( c, data.iFilter, data ) );
+								result = ( ( !wo.filter_startsWith && txt >= 0 ) || ( wo.filter_startsWith && txt === 0 ) );
+							}
 						}
 					} else {
 						result = filterMatched;
@@ -14715,9 +15108,11 @@ function getClass(obj) {
 			}
 			return showRow;
 		},
-		findRows: function( table, filters, combinedFilters ) {
-			if ( table.config.lastCombinedFilter === combinedFilters ||
-				!table.config.widgetOptions.filter_initialized ) {
+		findRows: function( table, filters, currentFilters ) {
+			if (
+				tsf.equalFilters(table.config, table.config.lastSearch, currentFilters) ||
+				!table.config.widgetOptions.filter_initialized
+			) {
 				return;
 			}
 			var len, norm_rows, rowData, $rows, $row, rowIndex, tbodyIndex, $tbody, columnIndex,
@@ -14726,6 +15121,7 @@ function getClass(obj) {
 				storedFilters = $.extend( [], filters ),
 				c = table.config,
 				wo = c.widgetOptions,
+				debug = ts.debug(c, 'filter'),
 				// data object passed to filters; anyMatch is a flag for the filters
 				data = {
 					anyMatch: false,
@@ -14742,7 +15138,6 @@ function getClass(obj) {
 					defaultColFilter : [],
 					defaultAnyFilter : ts.getColumnData( table, wo.filter_defaultFilter, c.columns, true ) || ''
 				};
-
 			// parse columns after formatter, in case the class is added at that point
 			data.parsed = [];
 			for ( columnIndex = 0; columnIndex < c.columns; columnIndex++ ) {
@@ -14764,15 +15159,14 @@ function getClass(obj) {
 					( ts.getColumnData( table, wo.filter_excludeFilter, columnIndex, true ) || '' ).split( /\s+/ );
 			}
 
-			if ( c.debug ) {
-				console.log( 'Filter: Starting filter widget search', filters );
+			if ( debug ) {
+				console.log( 'Filter >> Starting filter widget search', filters );
 				time = new Date();
 			}
 			// filtered rows count
 			c.filteredRows = 0;
 			c.totalRows = 0;
-			// combindedFilters are undefined on init
-			combinedFilters = ( storedFilters || [] ).join( '' );
+			currentFilters = ( storedFilters || [] );
 
 			for ( tbodyIndex = 0; tbodyIndex < c.$tbodies.length; tbodyIndex++ ) {
 				$tbody = ts.processTbody( table, c.$tbodies.eq( tbodyIndex ), true );
@@ -14785,7 +15179,7 @@ function getClass(obj) {
 					return el[ columnIndex ].$row.get();
 				}) );
 
-				if ( combinedFilters === '' || wo.filter_serversideFiltering ) {
+				if ( currentFilters.join('') === '' || wo.filter_serversideFiltering ) {
 					$rows
 						.removeClass( wo.filter_filteredRow )
 						.not( '.' + c.cssChildRow )
@@ -14811,7 +15205,17 @@ function getClass(obj) {
 								res = query[ indx ].split( ':' );
 								if ( res.length > 1 ) {
 									// make the column a one-based index ( non-developers start counting from one :P )
-									id = parseInt( res[0], 10 ) - 1;
+									if ( isNaN( res[0] ) ) {
+										$.each( c.headerContent, function( i, txt ) {
+											// multiple matches are possible
+											if ( txt.toLowerCase().indexOf( res[0] ) > -1 ) {
+												id = i;
+												filters[ id ] = res[1];
+											}
+										});
+									} else {
+										id = parseInt( res[0], 10 ) - 1;
+									}
 									if ( id >= 0 && id < c.columns ) { // if id is an integer
 										filters[ id ] = res[1];
 										query.splice( indx, 1 );
@@ -14854,8 +15258,8 @@ function getClass(obj) {
 					notFiltered = $rows.not( '.' + wo.filter_filteredRow ).length;
 					// can't search when all rows are hidden - this happens when looking for exact matches
 					if ( searchFiltered && notFiltered === 0 ) { searchFiltered = false; }
-					if ( c.debug ) {
-						console.log( 'Filter: Searching through ' +
+					if ( debug ) {
+						console.log( 'Filter >> Searching through ' +
 							( searchFiltered && notFiltered < len ? notFiltered : 'all' ) + ' rows' );
 					}
 					if ( data.anyMatchFlag ) {
@@ -14887,6 +15291,7 @@ function getClass(obj) {
 						}
 
 						data.$row = $rows.eq( rowIndex );
+						data.rowIndex = rowIndex;
 						data.cacheArray = norm_rows[ rowIndex ];
 						rowData = data.cacheArray[ c.columns ];
 						data.rawArray = rowData.raw;
@@ -14949,15 +15354,16 @@ function getClass(obj) {
 				c.totalRows += $rows.length;
 				ts.processTbody( table, $tbody, false );
 			}
-			c.lastCombinedFilter = combinedFilters; // save last search
+			// lastCombinedFilter is no longer used internally
+			c.lastCombinedFilter = storedFilters.join(''); // save last search
 			// don't save 'filters' directly since it may have altered ( AnyMatch column searches )
 			c.lastSearch = storedFilters;
 			c.$table.data( 'lastSearch', storedFilters );
 			if ( wo.filter_saveFilters && ts.storage ) {
 				ts.storage( table, 'tablesorter-filters', tsf.processFilters( storedFilters, true ) );
 			}
-			if ( c.debug ) {
-				console.log( 'Completed filter widget search' + ts.benchmark(time) );
+			if ( debug ) {
+				console.log( 'Filter >> Completed search' + ts.benchmark(time) );
 			}
 			if ( wo.filter_initialized ) {
 				c.$table.triggerHandler( 'filterBeforeEnd', c );
@@ -14992,6 +15398,10 @@ function getClass(obj) {
 			} else if ( $.type( source ) === 'object' && fxn ) {
 				// custom select source function for a SPECIFIC COLUMN
 				arry = fxn( table, column, onlyAvail );
+				// abort - updating the selects from an external method
+				if (arry === null) {
+					return null;
+				}
 			}
 			if ( arry === false ) {
 				// fall back to original method
@@ -15009,6 +15419,7 @@ function getClass(obj) {
 			var cts, txt, indx, len, parsedTxt, str,
 				c = table.config,
 				validColumn = typeof column !== 'undefined' && column !== null && column >= 0 && column < c.columns,
+				direction = validColumn ? c.$headerIndexed[ column ].hasClass( 'filter-select-sort-desc' ) : false,
 				parsed = [];
 			// get unique elements and sort the list
 			// if $.tablesorter.sortText exists ( not in the original tablesorter ),
@@ -15049,8 +15460,8 @@ function getClass(obj) {
 				// sort parsed select options
 				cts = c.textSorter || '';
 				parsed.sort( function( a, b ) {
-					var x = a.parsed,
-						y = b.parsed;
+					var x = direction ? b.parsed : a.parsed,
+						y = direction ? a.parsed : b.parsed;
 					if ( validColumn && typeof cts === 'function' ) {
 						// custom OVERALL text sorter
 						return cts( x, y, true, column, table );
@@ -15148,6 +15559,10 @@ function getClass(obj) {
 			// filter_selectSource or column data
 			if ( typeof arry === 'undefined' || arry === '' ) {
 				arry = tsf.getOptionSource( table, column, onlyAvail );
+				// abort, selects are updated by an external method
+				if (arry === null) {
+					return;
+				}
 			}
 
 			if ( $.isArray( arry ) ) {
@@ -15163,13 +15578,13 @@ function getClass(obj) {
 						options += '<option';
 						for ( val in option ) {
 							if ( option.hasOwnProperty( val ) && val !== 'text' ) {
-								options += ' ' + val + '="' + option[ val ] + '"';
+								options += ' ' + val + '="' + option[ val ].replace( tsfRegex.quote, '&quot;' ) + '"';
 							}
 						}
 						if ( !option.value ) {
-							options += ' value="' + option.text + '"';
+							options += ' value="' + option.text.replace( tsfRegex.quote, '&quot;' ) + '"';
 						}
-						options += '>' + option.text + '</option>';
+						options += '>' + option.text.replace( tsfRegex.quote, '&quot;' ) + '</option>';
 						// above code is needed in jQuery < v1.8
 
 						// make sure we don't turn an object into a string (objects without a "text" property)
@@ -15242,14 +15657,15 @@ function getClass(obj) {
 
 	ts.getFilters = function( table, getRaw, setFilters, skipFirst ) {
 		var i, $filters, $column, cols,
-			filters = false,
+			filters = [],
 			c = table ? $( table )[0].config : '',
 			wo = c ? c.widgetOptions : '';
 		if ( ( getRaw !== true && wo && !wo.filter_columnFilters ) ||
 			// setFilters called, but last search is exactly the same as the current
 			// fixes issue #733 & #903 where calling update causes the input values to reset
-			( $.isArray(setFilters) && setFilters.join('') === c.lastCombinedFilter ) ) {
-			return $( table ).data( 'lastSearch' );
+			( $.isArray(setFilters) && tsf.equalFilters(c, setFilters, c.lastSearch) )
+		) {
+			return $( table ).data( 'lastSearch' ) || [];
 		}
 		if ( c ) {
 			if ( c.$filters ) {
@@ -15308,9 +15724,6 @@ function getClass(obj) {
 				}
 			}
 		}
-		if ( filters.length === 0 ) {
-			filters = false;
-		}
 		return filters;
 	};
 
@@ -15328,12 +15741,12 @@ function getClass(obj) {
 			tsf.searching( c.table, filter, skipFirst );
 			c.$table.triggerHandler( 'filterFomatterUpdate' );
 		}
-		return !!valid;
+		return valid.length !== 0;
 	};
 
 })( jQuery );
 
-/*! Widget: stickyHeaders - updated 5/1/2016 (v2.26.0) *//*
+/*! Widget: stickyHeaders - updated 9/27/2017 (v2.29.0) *//*
  * Requires tablesorter v2.8+ and jQuery 1.4.3+
  * by Rob Garrison
  */
@@ -15390,16 +15803,24 @@ function getClass(obj) {
 		}, options.timer);
 	};
 
+	function getStickyOffset(c, wo) {
+		var $el = isNaN(wo.stickyHeaders_offset) ? $(wo.stickyHeaders_offset) : [];
+		return $el.length ?
+			$el.height() || 0 :
+			parseInt(wo.stickyHeaders_offset, 10) || 0;
+	}
+
 	// Sticky headers based on this awesome article:
 	// http://css-tricks.com/13465-persistent-headers/
 	// and https://github.com/jmosbech/StickyTableHeaders by Jonas Mosbech
 	// **************************
 	ts.addWidget({
 		id: 'stickyHeaders',
-		priority: 60, // sticky widget must be initialized after the filter widget!
+		priority: 54, // sticky widget must be initialized after the filter & before pager widget!
 		options: {
 			stickyHeaders : '',       // extra class name added to the sticky header row
-			stickyHeaders_attachTo : null, // jQuery selector or object to attach sticky header to
+			stickyHeaders_appendTo : null, // jQuery selector or object to phycially attach the sticky headers
+			stickyHeaders_attachTo : null, // jQuery selector or object to attach scroll listener to (overridden by xScroll & yScroll settings)
 			stickyHeaders_xScroll : null, // jQuery selector or object to monitor horizontal scroll position (defaults: xScroll > attachTo > window)
 			stickyHeaders_yScroll : null, // jQuery selector or object to monitor vertical scroll position (defaults: yScroll > attachTo > window)
 			stickyHeaders_offset : 0, // number or jquery selector targeting the position:fixed element
@@ -15417,7 +15838,7 @@ function getClass(obj) {
 			var index, len, $t,
 				$table = c.$table,
 				// add position: relative to attach element, hopefully it won't cause trouble.
-				$attach = $(wo.stickyHeaders_attachTo),
+				$attach = $(wo.stickyHeaders_attachTo || wo.stickyHeaders_appendTo),
 				namespace = c.namespace + 'stickyheaders ',
 				// element to watch for the scroll event
 				$yScroll = $(wo.stickyHeaders_yScroll || wo.stickyHeaders_attachTo || window),
@@ -15425,8 +15846,7 @@ function getClass(obj) {
 				$thead = $table.children('thead:first'),
 				$header = $thead.children('tr').not('.sticky-false').children(),
 				$tfoot = $table.children('tfoot'),
-				$stickyOffset = isNaN(wo.stickyHeaders_offset) ? $(wo.stickyHeaders_offset) : '',
-				stickyOffset = $stickyOffset.length ? $stickyOffset.height() || 0 : parseInt(wo.stickyHeaders_offset, 10) || 0,
+				stickyOffset = getStickyOffset(c, wo),
 				// is this table nested? If so, find parent sticky header wrapper (div, not table)
 				$nestedSticky = $table.parent().closest('.' + ts.css.table).hasClass('hasStickyHeaders') ?
 					$table.parent().closest('table.tablesorter')[0].config.widgetOptions.$sticky.parent() : [],
@@ -15448,8 +15868,7 @@ function getClass(obj) {
 				$stickyThead = $stickyTable.children('thead:first'),
 				$stickyCells,
 				laststate = '',
-				spacing = 0,
-				setWidth = function($orig, $clone){
+				setWidth = function($orig, $clone) {
 					var index, width, border, $cell, $this,
 						$cells = $orig.filter(':visible'),
 						len = $cells.length;
@@ -15479,12 +15898,17 @@ function getClass(obj) {
 						});
 					}
 				},
+				getLeftPosition = function(yWindow) {
+					if (yWindow === false && $nestedSticky.length) {
+						return $table.position().left;
+					}
+					return $attach.length ?
+						parseInt($attach.css('padding-left'), 10) || 0 :
+						$table.offset().left - parseInt($table.css('margin-left'), 10) - $(window).scrollLeft();
+				},
 				resizeHeader = function() {
-					stickyOffset = $stickyOffset.length ? $stickyOffset.height() || 0 : parseInt(wo.stickyHeaders_offset, 10) || 0;
-					spacing = 0;
 					$stickyWrap.css({
-						left : $attach.length ? parseInt($attach.css('padding-left'), 10) || 0 :
-								$table.offset().left - parseInt($table.css('margin-left'), 10) - $xScroll.scrollLeft() - spacing,
+						left : getLeftPosition(),
 						width: $table.outerWidth()
 					});
 					setWidth( $table, $stickyTable );
@@ -15494,31 +15918,42 @@ function getClass(obj) {
 					if (!$table.is(':visible')) { return; } // fixes #278
 					// Detect nested tables - fixes #724
 					nestedStickyTop = $nestedSticky.length ? $nestedSticky.offset().top - $yScroll.scrollTop() + $nestedSticky.height() : 0;
-					var offset = $table.offset(),
+					var tmp,
+						offset = $table.offset(),
+						stickyOffset = getStickyOffset(c, wo),
 						yWindow = $.isWindow( $yScroll[0] ), // $.isWindow needs jQuery 1.4.3
-						xWindow = $.isWindow( $xScroll[0] ),
-						attachTop = $attach.length ?
-							( yWindow ? $yScroll.scrollTop() : $yScroll.offset().top ) :
-							$yScroll.scrollTop(),
+						yScroll = yWindow ?
+							$yScroll.scrollTop() :
+							// use parent sticky position if nested AND inside of a scrollable element - see #1512
+							$nestedSticky.length ? parseInt($nestedSticky[0].style.top, 10) : $yScroll.offset().top,
+						attachTop = $attach.length ? yScroll : $yScroll.scrollTop(),
 						captionHeight = wo.stickyHeaders_includeCaption ? 0 : $table.children( 'caption' ).height() || 0,
 						scrollTop = attachTop + stickyOffset + nestedStickyTop - captionHeight,
 						tableHeight = $table.height() - ($stickyWrap.height() + ($tfoot.height() || 0)) - captionHeight,
 						isVisible = ( scrollTop > offset.top ) && ( scrollTop < offset.top + tableHeight ) ? 'visible' : 'hidden',
+						state = isVisible === 'visible' ? ts.css.stickyVis : ts.css.stickyHide,
+						needsUpdating = !$stickyWrap.hasClass( state ),
 						cssSettings = { visibility : isVisible };
 					if ($attach.length) {
+						// attached sticky headers always need updating
+						needsUpdating = true;
 						cssSettings.top = yWindow ? scrollTop - $attach.offset().top : $attach.scrollTop();
 					}
-					if (xWindow) {
-						// adjust when scrolling horizontally - fixes issue #143
-						cssSettings.left = $table.offset().left - parseInt($table.css('margin-left'), 10) - $xScroll.scrollLeft() - spacing;
+					// adjust when scrolling horizontally - fixes issue #143
+					tmp = getLeftPosition(yWindow);
+					if (tmp !== parseInt($stickyWrap.css('left'), 10)) {
+						needsUpdating = true;
+						cssSettings.left = tmp;
 					}
-					if ($nestedSticky.length) {
-						cssSettings.top = ( cssSettings.top || 0 ) + stickyOffset + nestedStickyTop;
+					cssSettings.top = ( cssSettings.top || 0 ) +
+						// If nested AND inside of a scrollable element, only add parent sticky height
+						(!yWindow && $nestedSticky.length ? $nestedSticky.height() : stickyOffset + nestedStickyTop);
+					if (needsUpdating) {
+						$stickyWrap
+							.removeClass( ts.css.stickyVis + ' ' + ts.css.stickyHide )
+							.addClass( state )
+							.css(cssSettings);
 					}
-					$stickyWrap
-						.removeClass( ts.css.stickyVis + ' ' + ts.css.stickyHide )
-						.addClass( isVisible === 'visible' ? ts.css.stickyVis : ts.css.stickyHide )
-						.css(cssSettings);
 					if (isVisible !== laststate || resizing) {
 						// make sure the column widths match
 						resizeHeader();
@@ -15533,8 +15968,8 @@ function getClass(obj) {
 			if ($stickyTable.attr('id')) { $stickyTable[0].id += wo.stickyHeaders_cloneId; }
 			// clear out cloned table, except for sticky header
 			// include caption & filter row (fixes #126 & #249) - don't remove cells to get correct cell indexing
-			$stickyTable.find('thead:gt(0), tr.sticky-false').hide();
-			$stickyTable.find('tbody, tfoot').remove();
+			$stickyTable.find('> thead:gt(0), tr.sticky-false').hide();
+			$stickyTable.find('> tbody, > tfoot').remove();
 			$stickyTable.find('caption').toggle(wo.stickyHeaders_includeCaption);
 			// issue #172 - find td/th in sticky header
 			$stickyCells = $stickyThead.children().children();
@@ -15550,8 +15985,12 @@ function getClass(obj) {
 
 			ts.bindEvents(table, $stickyThead.children().children('.' + ts.css.header));
 
-			// add stickyheaders AFTER the table. If the table is selected by ID, the original one (first) will be returned.
-			$table.after( $stickyWrap );
+			if (wo.stickyHeaders_appendTo) {
+				$(wo.stickyHeaders_appendTo).append( $stickyWrap );
+			} else {
+				// add stickyheaders AFTER the table. If the table is selected by ID, the original one (first) will be returned.
+				$table.after( $stickyWrap );
+			}
 
 			// onRenderHeader is defined, we need to do something about it (fixes #641)
 			if (c.onRenderHeader) {
@@ -15562,7 +16001,6 @@ function getClass(obj) {
 					c.onRenderHeader.apply( $t.eq( index ), [ index, c, $stickyTable ] );
 				}
 			}
-
 			// make it sticky!
 			$xScroll.add($yScroll)
 				.unbind( ('scroll resize '.split(' ').join( namespace )).replace(/\s+/g, ' ') )
@@ -15571,7 +16009,7 @@ function getClass(obj) {
 				});
 			c.$table
 				.unbind('stickyHeadersUpdate' + namespace)
-				.bind('stickyHeadersUpdate' + namespace, function(){
+				.bind('stickyHeadersUpdate' + namespace, function() {
 					scrollSticky( true );
 				});
 
@@ -15610,6 +16048,8 @@ function getClass(obj) {
 				});
 			}
 
+			// make sure sticky is visible if page is partially scrolled
+			scrollSticky( true );
 			$table.triggerHandler('stickyHeadersInit');
 
 		},
@@ -15631,7 +16071,7 @@ function getClass(obj) {
 
 })(jQuery, window);
 
-/*! Widget: resizable - updated 6/28/2016 (v2.26.5) */
+/*! Widget: resizable - updated 2018-03-26 (v2.30.2) */
 /*jshint browser:true, jquery:true, unused:false */
 ;(function ($, window) {
 	'use strict';
@@ -15645,7 +16085,7 @@ function getClass(obj) {
 	});
 
 	// Add extra scroller css
-	$(function(){
+	$(function() {
 		var s = '<style>' +
 			'body.' + ts.css.resizableNoSelect + ' { -ms-user-select: none; -moz-user-select: -moz-none;' +
 				'-khtml-user-select: none; -webkit-user-select: none; user-select: none; }' +
@@ -15654,7 +16094,7 @@ function getClass(obj) {
 			'.' + ts.css.resizableHandle + ' { position: absolute; display: inline-block; width: 8px;' +
 				'top: 1px; cursor: ew-resize; z-index: 3; user-select: none; -moz-user-select: none; }' +
 			'</style>';
-		$(s).appendTo('body');
+		$('head').append(s);
 	});
 
 	ts.resizable = {
@@ -15790,21 +16230,29 @@ function getClass(obj) {
 
 			if ( ts.hasWidget( c.table, 'scroller' ) ) {
 				tableHeight = 0;
-				c.$table.closest( '.' + ts.css.scrollerWrap ).children().each(function(){
+				c.$table.closest( '.' + ts.css.scrollerWrap ).children().each(function() {
 					var $this = $(this);
 					// center table has a max-height set
 					tableHeight += $this.filter('[style*="height"]').length ? $this.height() : $this.children('table').height();
 				});
 			}
+
+			if ( !wo.resizable_includeFooter && c.$table.children('tfoot').length ) {
+				tableHeight -= c.$table.children('tfoot').height();
+			}
 			// subtract out table left position from resizable handles. Fixes #864
-			startPosition = c.$table.position().left;
+			// jQuery v3.3.0+ appears to include the start position with the $header.position().left; see #1544
+			startPosition = parseFloat($.fn.jquery) >= 3.3 ? 0 : c.$table.position().left;
 			$handles.each( function() {
 				var $this = $(this),
 					column = parseInt( $this.attr( 'data-column' ), 10 ),
 					columns = c.columns - 1,
 					$header = $this.data( 'header' );
 				if ( !$header ) { return; } // see #859
-				if ( !$header.is(':visible') ) {
+				if (
+					!$header.is(':visible') ||
+					( !wo.resizable_addLastColumn && ts.resizable.checkVisibleColumns(c, column) )
+				) {
 					$this.hide();
 				} else if ( column < columns || column === columns && wo.resizable_addLastColumn ) {
 					$this.css({
@@ -15814,6 +16262,16 @@ function getClass(obj) {
 					});
 				}
 			});
+		},
+
+		// Fixes #1485
+		checkVisibleColumns: function( c, column ) {
+			var i,
+				len = 0;
+			for ( i = column + 1; i < c.columns; i++ ) {
+				len += c.$headerIndexed[i].is( ':visible' ) ? 1 : 0;
+			}
+			return len === 0;
 		},
 
 		// prevent text selection while dragging resize bar
@@ -15887,8 +16345,11 @@ function getClass(obj) {
 
 			// right click to reset columns to default widths
 			c.$table
-				.bind( 'columnUpdate' + namespace + ' pagerComplete' + namespace, function() {
+				.bind( 'columnUpdate pagerComplete resizableUpdate '.split( ' ' ).join( namespace + ' ' ), function() {
 					ts.resizable.setHandlePosition( c, wo );
+				})
+				.bind( 'resizableReset' + namespace, function() {
+					ts.resizableReset( c.table );
 				})
 				.find( 'thead:first' )
 				.add( $( c.namespace + '_extra_table' ).find( 'thead:first' ) )
@@ -15951,6 +16412,7 @@ function getClass(obj) {
 			vars.$target = vars.$next = null;
 			// will update stickyHeaders, just in case, see #912
 			c.$table.triggerHandler('stickyHeadersUpdate');
+			c.$table.triggerHandler('resizableComplete');
 		}
 	};
 
@@ -15963,10 +16425,10 @@ function getClass(obj) {
 		options: {
 			resizable : true, // save column widths to storage
 			resizable_addLastColumn : false,
+			resizable_includeFooter: true,
 			resizable_widths : [],
 			resizable_throttle : false, // set to true (5ms) or any number 0-10 range
-			resizable_targetLast : false,
-			resizable_fullWidth : null
+			resizable_targetLast : false
 		},
 		init: function(table, thisWidget, c, wo) {
 			ts.resizable.init( c, wo );
@@ -15991,7 +16453,7 @@ function getClass(obj) {
 	});
 
 	ts.resizableReset = function( table, refreshing ) {
-		$( table ).each(function(){
+		$( table ).each(function() {
 			var index, $t,
 				c = this.config,
 				wo = c && c.widgetOptions,
@@ -16001,7 +16463,7 @@ function getClass(obj) {
 				if ( vars.overflow && vars.tableWidth ) {
 					ts.resizable.setWidth( c.$table, vars.tableWidth, true );
 					if ( vars.useStorage ) {
-						ts.storage( table, 'tablesorter-table-resized-width', 'auto' );
+						ts.storage( table, 'tablesorter-table-resized-width', vars.tableWidth );
 					}
 				}
 				for ( index = 0; index < c.columns; index++ ) {
@@ -16017,7 +16479,7 @@ function getClass(obj) {
 				// reset stickyHeader widths
 				c.$table.triggerHandler( 'stickyHeadersUpdate' );
 				if ( ts.storage && !refreshing ) {
-					ts.storage( this, ts.css.resizableStorage, {} );
+					ts.storage( this, ts.css.resizableStorage, [] );
 				}
 			}
 		});
@@ -16025,13 +16487,22 @@ function getClass(obj) {
 
 })( jQuery, window );
 
-/*! Widget: saveSort - updated 10/31/2015 (v2.24.0) *//*
+/*! Widget: saveSort - updated 2018-03-19 (v2.30.1) *//*
 * Requires tablesorter v2.16+
 * by Rob Garrison
 */
 ;(function ($) {
 	'use strict';
 	var ts = $.tablesorter || {};
+
+	function getStoredSortList(c) {
+		var stored = ts.storage( c.table, 'tablesorter-savesort' );
+		return (stored && stored.hasOwnProperty('sortList') && $.isArray(stored.sortList)) ? stored.sortList : [];
+	}
+
+	function sortListChanged(c, sortList) {
+		return (sortList || getStoredSortList(c)).join(',') !== c.sortList.join(',');
+	}
 
 	// this widget saves the last sort only if the
 	// saveSort widget option is true AND the
@@ -16048,18 +16519,19 @@ function getClass(obj) {
 			thisWidget.format(table, c, wo, true);
 		},
 		format: function(table, c, wo, init) {
-			var stored, time,
+			var time,
 				$table = c.$table,
 				saveSort = wo.saveSort !== false, // make saveSort active/inactive; default to true
-				sortList = { 'sortList' : c.sortList };
-			if (c.debug) {
+				sortList = { 'sortList' : c.sortList },
+				debug = ts.debug(c, 'saveSort');
+			if (debug) {
 				time = new Date();
 			}
 			if ($table.hasClass('hasSaveSort')) {
-				if (saveSort && table.hasInitialized && ts.storage) {
+				if (saveSort && table.hasInitialized && ts.storage && sortListChanged(c)) {
 					ts.storage( table, 'tablesorter-savesort', sortList );
-					if (c.debug) {
-						console.log('saveSort widget: Saving last sort: ' + c.sortList + ts.benchmark(time));
+					if (debug) {
+						console.log('saveSort >> Saving last sort: ' + c.sortList + ts.benchmark(time));
 					}
 				}
 			} else {
@@ -16068,10 +16540,9 @@ function getClass(obj) {
 				sortList = '';
 				// get data
 				if (ts.storage) {
-					stored = ts.storage( table, 'tablesorter-savesort' );
-					sortList = (stored && stored.hasOwnProperty('sortList') && $.isArray(stored.sortList)) ? stored.sortList : '';
-					if (c.debug) {
-						console.log('saveSort: Last sort loaded: "' + sortList + '"' + ts.benchmark(time));
+					sortList = getStoredSortList(c);
+					if (debug) {
+						console.log('saveSort >> Last sort loaded: "' + sortList + '"' + ts.benchmark(time));
 					}
 					$table.bind('saveSortReset', function(event) {
 						event.stopPropagation();
@@ -16084,7 +16555,9 @@ function getClass(obj) {
 					c.sortList = sortList;
 				} else if (table.hasInitialized && sortList && sortList.length > 0) {
 					// update sort change
-					ts.sortOn( c, sortList );
+					if (sortListChanged(c, sortList)) {
+						ts.sortOn(c, sortList);
+					}
 				}
 			}
 		},
@@ -16097,26 +16570,21 @@ function getClass(obj) {
 
 })(jQuery);
 
-return $.tablesorter;
+return jQuery.tablesorter;
 }));
 
 },{"jquery":1}],4:[function(require,module,exports){
 var Analyzer;
 
-module.exports = Analyzer = class Analyzer {
-  constructor() {}
+module.exports = Analyzer = (function() {
+  function Analyzer() {}
 
-  analyze(net) {
-    var aspect_ratios, d, dilation, dim_in, failed, feature_map, group, has_bias, i, infered_dim, isglobal, j, k, kernel, kernel_h, kernel_w, key, l, layertype, len, len1, len2, len3, mem, mode, module, n, n_elements, newshape, num_inputs, num_ops, num_priors, num_region_proposals, numout, op, ops, p, pad_h, pad_w, params, parent, parent2, permutation, pooltype, power, prod_in_dims, prod_out_dims, ref, ref1, ref10, ref11, ref12, ref13, ref14, ref15, ref16, ref17, ref18, ref19, ref2, ref20, ref21, ref22, ref23, ref24, ref25, ref26, ref27, ref28, ref29, ref3, ref30, ref31, ref32, ref33, ref34, ref35, ref36, ref37, ref38, ref39, ref4, ref40, ref41, ref42, ref43, ref44, ref45, ref46, ref47, ref48, ref49, ref5, ref50, ref51, ref52, ref53, ref54, ref55, ref56, ref6, ref7, ref8, ref9, roi_proposals, scale, settings, shape, shift, size, stride_h, stride_w, summary, trivial_layers, val;
+  Analyzer.prototype.analyze = function(net) {
+    var aspect_ratios, axis, d, dilation, dim_in, failed, feature_map, group, has_bias, i, infered_dim, isglobal, j, k, kernel, kernel_h, kernel_w, key, l, layertype, len, len1, len2, len3, mem, mode, module, n, n_elements, newshape, num_inputs, num_ops, num_priors, num_region_proposals, numout, op, ops, p, pad_h, pad_w, params, parent, parent2, permutation, pooltype, power, prod_in_dims, prod_out_dims, ref, ref1, ref10, ref11, ref12, ref13, ref14, ref15, ref16, ref17, ref18, ref19, ref2, ref20, ref21, ref22, ref23, ref24, ref25, ref26, ref27, ref28, ref29, ref3, ref30, ref31, ref32, ref33, ref34, ref35, ref36, ref37, ref38, ref39, ref4, ref40, ref41, ref42, ref43, ref44, ref45, ref46, ref47, ref48, ref49, ref5, ref50, ref51, ref52, ref53, ref54, ref55, ref56, ref57, ref6, ref7, ref8, ref9, roi_proposals, scale, settings, shape, shift, size, slich_ch, stride_h, stride_w, summary, trivial_layers, val;
     ref = net.sortTopologically();
-    //# Add Input/Output Dimensions + Channels to each Node / Layer
-    // shape.dim: (    N   x   K   x   W   x   H   )
-    //              batch   channel  width   height
-    //               chIn    chOut   wIn     wOut
     for (i = 0, len = ref.length; i < len; i++) {
       n = ref[i];
       layertype = n.type.toLowerCase();
-      // Setup Default Values for Analysis
       d = n.analysis;
       d.wIn = d.hIn = d.wOut = d.hOut = d.chIn = d.chOut = 0;
       d.comp = {
@@ -16132,7 +16600,6 @@ module.exports = Analyzer = class Analyzer {
       };
       d.variants = [];
       parent = (ref1 = n.parents[0]) != null ? ref1.analysis : void 0;
-      // Setup default channels + dimensions: inherited from parent
       d.batchOut = d.batchIn = parent != null ? parent.batchOut : void 0;
       d.wIn = parent != null ? parent.wOut : void 0;
       d.hIn = parent != null ? parent.hOut : void 0;
@@ -16140,7 +16607,6 @@ module.exports = Analyzer = class Analyzer {
       switch (layertype) {
         case "data":
         case "input":
-          //dimensions
           if (((ref2 = n.attribs.input_param) != null ? ref2.shape : void 0) != null) {
             shape = n.attribs.input_param.shape;
             d.batchIn = shape.dim[0];
@@ -16149,8 +16615,8 @@ module.exports = Analyzer = class Analyzer {
             d.wIn = shape.dim[3];
           } else if (((ref3 = n.attribs.transform_param) != null ? ref3.crop_size : void 0) != null) {
             d.wIn = d.hIn = n.attribs.transform_param.crop_size;
-            d.chIn = 3; // assume RGB
-            d.batchOut = 1;
+            d.chIn = 3;
+            d.batchIn = 1;
           } else {
             onerror('Unknown Input Dimensions');
             debugger;
@@ -16159,58 +16625,58 @@ module.exports = Analyzer = class Analyzer {
           d.hOut = d.hIn;
           d.chOut = d.chIn;
           d.batchOut = d.batchIn;
-          //computation
-          //-- none
-          //memory
-          //-- none
           d.mem.activation = d.wOut * d.hOut * d.chOut * d.batchOut;
           break;
+        case "slice":
+          params = n.attribs.slice_param;
+          slich_ch = params.slice_point;
+          axis = (ref4 = params.axis) != null ? ref4 : 1;
+          d.batchOut = axis === 0 ? slich_ch : d.batchIn;
+          d.chOut = axis === 1 ? slich_ch : d.chIn;
+          d.hOut = axis === 2 ? slich_ch : d.hIn;
+          d.wOut = axis === 3 ? slich_ch : d.wIn;
+          break;
         case "convolution":
-          //dimensions
           params = n.attribs.convolution_param;
-          kernel_w = (ref4 = params.kernel_w) != null ? ref4 : params.kernel_size;
-          kernel_h = (ref5 = params.kernel_h) != null ? ref5 : params.kernel_size;
-          stride_w = (ref6 = params.stride_w) != null ? ref6 : (ref7 = params.stride) != null ? ref7 : 1;
-          stride_h = (ref8 = params.stride_h) != null ? ref8 : (ref9 = params.stride) != null ? ref9 : 1;
-          pad_w = (ref10 = params.pad_w) != null ? ref10 : (ref11 = params.pad) != null ? ref11 : 0;
-          pad_h = (ref12 = params.pad_h) != null ? ref12 : (ref13 = params.pad) != null ? ref13 : 0;
+          kernel_w = (ref5 = params.kernel_w) != null ? ref5 : params.kernel_size;
+          kernel_h = (ref6 = params.kernel_h) != null ? ref6 : params.kernel_size;
+          stride_w = (ref7 = params.stride_w) != null ? ref7 : (ref8 = params.stride) != null ? ref8 : 1;
+          stride_h = (ref9 = params.stride_h) != null ? ref9 : (ref10 = params.stride) != null ? ref10 : 1;
+          pad_w = (ref11 = params.pad_w) != null ? ref11 : (ref12 = params.pad) != null ? ref12 : 0;
+          pad_h = (ref13 = params.pad_h) != null ? ref13 : (ref14 = params.pad) != null ? ref14 : 0;
           numout = params.num_output;
-          group = (ref14 = params.group) != null ? ref14 : 1;
-          dilation = (ref15 = params.dilation) != null ? ref15 : 1;
-          has_bias = ((ref16 = params.bias_term) != null ? ref16 : "true") === "false" ? 0 : 1;
-          // according to http://caffe.berkeleyvision.org/tutorial/layers.html and https://github.com/BVLC/caffe/issues/3656
+          group = (ref15 = params.group) != null ? ref15 : 1;
+          dilation = (ref16 = params.dilation) != null ? ref16 : 1;
+          has_bias = ((ref17 = params.bias_term) != null ? ref17 : "true") === "false" ? 0 : 1;
           kernel = dilation * (kernel_w - 1) + 1;
           d.wOut = Math.floor((d.wIn + 2 * pad_w - kernel) / stride_w) + 1;
           kernel = dilation * (kernel_h - 1) + 1;
           d.hOut = Math.floor((d.hIn + 2 * pad_h - kernel) / stride_h) + 1;
           d.chOut = numout;
-          //computation
-          d.comp.macc = (kernel_w * kernel_h) * (d.wOut * d.hOut) * d.chIn * d.chOut * d.batchOut / group;
-          //memory
-          d.mem.param = (kernel_w * kernel_h) * d.chIn * d.chOut / group + has_bias * d.chOut;
+          d.mem.param = (kernel_w * kernel_h * d.chIn / group + has_bias) * d.chOut;
           d.mem.activation = (d.wOut * d.hOut) * d.chOut * d.batchOut;
-          // CACHE AND BANDWIDTH for Implementation Variants
+          d.comp.macc = d.mem.param * d.wOut * d.hOut * d.batchOut;
           if (do_variants_analysis) {
             d.variants.push({
               name: "complete outputs, input cache",
-              cache: d.chIn * kernel_h * d.wIn + d.chIn * kernel_h * kernel_w, // line buffers // param cache
+              cache: d.chIn * kernel_h * d.wIn + d.chIn * kernel_h * kernel_w,
               readBW: d.chOut * d.chIn * (d.wIn * d.hIn),
-              writeBW: d.chOut * (d.wOut * d.hOut), // ideal
-              confBW: d.chOut * d.chIn * kernel_w * kernel_h // ideal
+              writeBW: d.chOut * (d.wOut * d.hOut),
+              confBW: d.chOut * d.chIn * kernel_w * kernel_h
             });
             d.variants.push({
               name: "complete inputs, input cache",
-              cache: kernel_h * d.wIn + d.chIn * kernel_h * kernel_w, // line buffers // param cache
+              cache: kernel_h * d.wIn + d.chIn * kernel_h * kernel_w,
               readBW: d.chIn * ((d.chOut + 1) * (d.wIn * d.hIn)),
               writeBW: d.chIn * (d.chOut * (d.wOut * d.hOut)),
-              confBW: d.chOut * d.chIn * kernel_w * kernel_h // ideal
+              confBW: d.chOut * d.chIn * kernel_w * kernel_h
             });
             d.variants.push({
               name: "complete inputs, input + output cache",
-              cache: kernel_h * d.wIn + d.chIn * kernel_h * kernel_w + d.wIn * d.hIn * d.chOut, // line buffers // param cache // output cache
-              readBW: d.chIn * (d.wIn * d.hIn), // ideal
-              writeBW: d.chOut * (d.wOut * d.hOut), // ideal
-              confBW: d.chOut * d.chIn * kernel_w * kernel_h // ideal
+              cache: kernel_h * d.wIn + d.chIn * kernel_h * kernel_w + d.wIn * d.hIn * d.chOut,
+              readBW: d.chIn * (d.wIn * d.hIn),
+              writeBW: d.chOut * (d.wOut * d.hOut),
+              confBW: d.chOut * d.chIn * kernel_w * kernel_h
             });
             d.variants.push({
               name: "streaming, input cache",
@@ -16224,7 +16690,7 @@ module.exports = Analyzer = class Analyzer {
               cache: d.chIn * kernel_h * d.wIn + d.chIn * d.chOut * (kernel_h * kernel_w),
               readBW: d.chIn * (d.wIn * d.hIn),
               writeBW: d.chOut * (d.wOut * d.hOut),
-              confBW: d.chOut * d.chIn * kernel_w * kernel_h // ideal
+              confBW: d.chOut * d.chIn * kernel_w * kernel_h
             });
             d.variants.push({
               name: "streaming, temp.",
@@ -16237,166 +16703,128 @@ module.exports = Analyzer = class Analyzer {
           break;
         case "innerproduct":
         case "inner_product":
-          //dimensions
           numout = n.attribs.inner_product_param.num_output;
-          has_bias = ((ref17 = n.attribs.inner_product_param.bias_term) != null ? ref17 : "true") === "false" ? 0 : 1;
+          has_bias = ((ref18 = n.attribs.inner_product_param.bias_term) != null ? ref18 : "true") === "false" ? 0 : 1;
           d.wOut = 1;
           d.hOut = 1;
           d.chOut = numout;
-          //computation
-          d.comp.macc = (d.wIn * d.hIn) * d.chIn * d.chOut * d.batchOut;
-          //memory
-          d.mem.param = d.wIn * d.hIn * d.chIn * d.chOut + has_bias * d.chOut;
+          d.mem.param = (d.wIn * d.hIn * d.chIn + has_bias) * d.chOut;
           d.mem.activation = d.wOut * d.hOut * d.chOut * d.batchOut;
+          d.comp.macc = d.mem.param * d.batchOut;
           break;
         case "pooling":
-          //dimensions
           params = n.attribs.pooling_param;
-          kernel_w = (ref18 = params.kernel_w) != null ? ref18 : params.kernel_size;
-          kernel_h = (ref19 = params.kernel_h) != null ? ref19 : params.kernel_size;
-          stride_w = (ref20 = params.stride_w) != null ? ref20 : (ref21 = params.stride) != null ? ref21 : 1;
-          stride_h = (ref22 = params.stride_h) != null ? ref22 : (ref23 = params.stride) != null ? ref23 : 1;
-          pad_w = (ref24 = params.pad_w) != null ? ref24 : (ref25 = params.pad) != null ? ref25 : 0;
-          pad_h = (ref26 = params.pad_h) != null ? ref26 : (ref27 = params.pad) != null ? ref27 : 0;
-          isglobal = (ref28 = params.global_pooling) != null ? ref28 : 0;
-          pooltype = ((ref29 = params.pool) != null ? ref29 : 'MAX').toUpperCase();
+          kernel_w = (ref19 = params.kernel_w) != null ? ref19 : params.kernel_size;
+          kernel_h = (ref20 = params.kernel_h) != null ? ref20 : params.kernel_size;
+          stride_w = (ref21 = params.stride_w) != null ? ref21 : (ref22 = params.stride) != null ? ref22 : 1;
+          stride_h = (ref23 = params.stride_h) != null ? ref23 : (ref24 = params.stride) != null ? ref24 : 1;
+          pad_w = (ref25 = params.pad_w) != null ? ref25 : (ref26 = params.pad) != null ? ref26 : 0;
+          pad_h = (ref27 = params.pad_h) != null ? ref27 : (ref28 = params.pad) != null ? ref28 : 0;
+          isglobal = (ref29 = params.global_pooling) != null ? ref29 : 0;
+          pooltype = ((ref30 = params.pool) != null ? ref30 : 'MAX').toUpperCase();
           d.chOut = d.chIn;
-          // according to http://caffe.berkeleyvision.org/tutorial/layers.html and https://github.com/BVLC/caffe/issues/3656
           d.wOut = Math.ceil((d.wIn + 2 * pad_w - kernel_w) / stride_w) + 1;
           d.hOut = Math.ceil((d.hIn + 2 * pad_h - kernel_h) / stride_h) + 1;
           if (isglobal) {
             d.wOut = d.hOut = 1;
           }
-          //computation
           num_ops = isglobal ? (d.wIn * d.hIn) * d.chIn * d.batchOut : (d.wOut * d.hOut) * kernel_h * kernel_w * d.chOut * d.batchOut;
           if (pooltype === 'MAX') {
             d.comp.comp = num_ops;
           } else if (pooltype === 'AVE') {
             d.comp.add = num_ops;
           } else {
-            //d.comp.div = (d.wOut*d.hOut*d.chOut) #divide by const.
-            onerror(`Unknown pooling type ${pooltype}`);
+            onerror("Unknown pooling type " + pooltype);
           }
-          //memory
           d.mem.activation = d.wOut * d.hOut * d.chOut * d.batchOut;
           break;
         case "batchnorm":
         case "bn":
-          //dimensions
           d.wOut = d.wIn;
           d.hOut = d.hIn;
           d.chOut = d.chIn;
-          //computation
-          // BN: subtract mean, divide by variance for each channel
-          // averages during training: over spatial dims + batch
           d.comp.add = d.wIn * d.hIn * d.chIn * d.batchOut;
           d.comp.div = d.wIn * d.hIn * d.chIn * d.batchOut;
-          //memory
           d.mem.param = d.chIn * 2;
           d.mem.activation = d.wOut * d.hOut * d.chOut * d.batchOut;
           break;
         case "lrn":
         case "normalize":
-          //dimensions
-          //default mode: ACROSS_CHANNELS
-          mode = (ref30 = (ref31 = n.attribs.lrn_param) != null ? ref31.norm_region : void 0) != null ? ref30 : 'ACROSS_CHANNELS';
-          size = (ref32 = (ref33 = n.attribs.lrn_param) != null ? ref33.local_size : void 0) != null ? ref32 : 1;
+          mode = (ref31 = (ref32 = n.attribs.lrn_param) != null ? ref32.norm_region : void 0) != null ? ref31 : 'ACROSS_CHANNELS';
+          size = (ref33 = (ref34 = n.attribs.lrn_param) != null ? ref34.local_size : void 0) != null ? ref33 : 1;
           d.wOut = d.wIn;
           d.hOut = d.hIn;
           d.chOut = d.chIn;
-          //computation
-          //  Each input value is divided by (1+(α/n)∑xi^2)^β
           num_inputs = d.wIn * d.hIn * d.chIn * d.batchOut;
-          d.comp.macc = num_inputs * size; // (∑xi^2)
-          d.comp.add = num_inputs; // (1+...)
-          d.comp.exp = num_inputs; // (...)^β
-          d.comp.div = num_inputs * 2; // (α/n)*... + divide by sum
-          //memory
-          d.mem.param = 2; // alpha, beta
+          d.comp.macc = num_inputs * size;
+          d.comp.add = num_inputs;
+          d.comp.exp = num_inputs;
+          d.comp.div = num_inputs * 2;
+          d.mem.param = 2;
           d.mem.activation = d.wOut * d.hOut * d.chOut * d.batchOut;
           break;
         case "concat":
-          //dimensions
           d.wOut = d.wIn;
           d.hOut = d.hIn;
-          // sum up channels from inputs
           d.chIn = 0;
-          ref34 = n.parents;
-          for (j = 0, len1 = ref34.length; j < len1; j++) {
-            p = ref34[j];
+          ref35 = n.parents;
+          for (j = 0, len1 = ref35.length; j < len1; j++) {
+            p = ref35[j];
             d.chIn += p.analysis.chOut;
           }
           d.chOut = d.chIn;
-          ref35 = n.parents;
-          for (k = 0, len2 = ref35.length; k < len2; k++) {
-            p = ref35[k];
-            // check input dimensions
+          ref36 = n.parents;
+          for (k = 0, len2 = ref36.length; k < len2; k++) {
+            p = ref36[k];
             failed = failed || (p.analysis.wOut !== d.wIn || p.analysis.hOut !== d.hIn);
           }
           if (failed) {
             window.onerror('CONCAT: input dimensions dont agree!');
           }
-          //computation
-          // --none
-          //memory
           d.mem.activation = d.wOut * d.hOut * d.chOut * d.batchOut;
           break;
-        //relu/dropout use some memory, do some comparisons
         case "relu":
         case "elu":
         case "prelu":
         case "dropout":
-          //dimensions
           d.wIn = parent.wOut;
           d.hIn = parent.hOut;
           d.wOut = d.wIn;
           d.hOut = d.hIn;
           d.chOut = d.chIn = parent.chOut;
-          //computation
           d.comp.comp = d.wIn * d.hIn * d.chIn * d.batchOut;
-          //memory
           d.mem.activation = d.wOut * d.hOut * d.chOut * d.batchOut;
           break;
         case "softmax":
         case "softmaxwithloss":
         case "softmax_loss":
-          //dimensions
           d.wOut = d.wIn;
           d.hOut = d.hIn;
           d.chOut = d.chIn;
-          //computation
           d.comp.exp = d.wIn * d.hIn * d.chIn * d.batchOut;
           d.comp.add = d.wIn * d.hIn * d.chIn * d.batchOut;
           d.comp.div = d.wIn * d.hIn * d.chIn * d.batchOut;
-          //memory
           d.mem.activation = d.wOut * d.hOut * d.chOut * d.batchOut;
           break;
         case "flatten":
-          //dimensions
           d.wOut = d.hOut = 1;
           d.chOut = d.chIn * d.wIn * d.hIn;
-          //computation
-          // --none
-          //memory
           d.mem.activation = d.wOut * d.hOut * d.chOut * d.batchOut;
           break;
         case "eltwise":
-          //dimensions
           d.wOut = d.wIn;
           d.hOut = d.hIn;
           d.chOut = d.chIn;
-          // check input dimensions
           failed = false;
-          ref36 = n.parents;
-          for (l = 0, len3 = ref36.length; l < len3; l++) {
-            p = ref36[l];
+          ref37 = n.parents;
+          for (l = 0, len3 = ref37.length; l < len3; l++) {
+            p = ref37[l];
             failed = failed || (d.wIn !== p.analysis.wOut) || (d.hIn !== p.analysis.hOut);
           }
           if (failed) {
             onerror('ELTWISE: input dimensions dont agree in ' + n.name);
           }
-          //computation
-          op = (ref37 = (ref38 = n.eltwise_param) != null ? (ref39 = ref38.operation) != null ? ref39.toUpperCase() : void 0 : void 0) != null ? ref37 : 'SUM';
+          op = (ref38 = (ref39 = n.eltwise_param) != null ? (ref40 = ref39.operation) != null ? ref40.toUpperCase() : void 0 : void 0) != null ? ref38 : 'SUM';
           if (op === 'SUM') {
             d.comp.add = d.wIn * d.hIn * d.chIn * d.batchOut;
           } else if (op === 'MAX') {
@@ -16406,108 +16834,73 @@ module.exports = Analyzer = class Analyzer {
           } else {
             onerror('ELTWISE: unknown operation ' + op);
           }
-          //memory
           d.mem.activation = d.wOut * d.hOut * d.chOut * d.batchOut;
           break;
         case "deconvolution":
-          //dimensions
           params = n.attribs.convolution_param;
-          kernel_w = (ref40 = params.kernel_w) != null ? ref40 : params.kernel_size;
-          kernel_h = (ref41 = params.kernel_h) != null ? ref41 : params.kernel_size;
-          stride_w = (ref42 = params.stride_w) != null ? ref42 : (ref43 = params.stride) != null ? ref43 : 1;
-          stride_h = (ref44 = params.stride_h) != null ? ref44 : (ref45 = params.stride) != null ? ref45 : 1;
-          pad_w = (ref46 = params.pad_w) != null ? ref46 : (ref47 = params.pad) != null ? ref47 : 0;
-          pad_h = (ref48 = params.pad_h) != null ? ref48 : (ref49 = params.pad) != null ? ref49 : 0;
+          kernel_w = (ref41 = params.kernel_w) != null ? ref41 : params.kernel_size;
+          kernel_h = (ref42 = params.kernel_h) != null ? ref42 : params.kernel_size;
+          stride_w = (ref43 = params.stride_w) != null ? ref43 : (ref44 = params.stride) != null ? ref44 : 1;
+          stride_h = (ref45 = params.stride_h) != null ? ref45 : (ref46 = params.stride) != null ? ref46 : 1;
+          pad_w = (ref47 = params.pad_w) != null ? ref47 : (ref48 = params.pad) != null ? ref48 : 0;
+          pad_h = (ref49 = params.pad_h) != null ? ref49 : (ref50 = params.pad) != null ? ref50 : 0;
           numout = params.num_output;
           d.wOut = stride_w * (d.wIn - 1) + kernel_w - 2 * pad_w;
           d.hOut = stride_h * (d.hIn - 1) + kernel_h - 2 * pad_h;
           d.chOut = numout;
-          //computation
           d.comp.macc = d.chIn * d.chOut * d.wOut * d.hOut * (kernel_w / stride_w) * (kernel_h / stride_h) * d.batchOut;
-          //memory
           d.mem.param = kernel_w * kernel_h * d.chIn * d.chOut;
           d.mem.activation = d.wOut * d.hOut * d.chOut * d.batchOut;
           break;
         case "crop":
-          //dimensions
-          //# crop to dims of 2nd parent
           parent2 = n.parents[1].analysis;
           d.wOut = parent2.wOut;
           d.hOut = parent2.hOut;
           d.chOut = d.chIn;
-          //computation
-          // --none
-          //memory
           d.mem.activation = d.wOut * d.hOut * d.chOut * d.batchOut;
           break;
-        //scale layer use activation memory and does multiplies
         case "scale":
-          //dimensions
-          //# assume pass-through
           d.wOut = d.wIn;
           d.hOut = d.hIn;
           d.chOut = d.chIn;
-          //computation: scale = multiplication
           d.comp.macc = d.wOut * d.hOut * d.chOut * d.batchOut;
-          //memory
           d.mem.activation = d.wOut * d.hOut * d.chOut * d.batchOut;
           break;
-        //implicit layers use activation memory, but no computation
         case "implicit":
-          //dimensions
-          //fix potentially undefined inputs
-          d.wIn = (ref50 = d.wIn) != null ? ref50 : "?";
-          d.hIn = (ref51 = d.hIn) != null ? ref51 : "?";
-          d.chIn = (ref52 = d.chIn) != null ? ref52 : "?";
-          d.batchIn = (ref53 = d.batchIn) != null ? ref53 : "?";
-          //# assume pass-through
+          d.wIn = (ref51 = d.wIn) != null ? ref51 : "?";
+          d.hIn = (ref52 = d.hIn) != null ? ref52 : "?";
+          d.chIn = (ref53 = d.chIn) != null ? ref53 : "?";
+          d.batchIn = (ref54 = d.batchIn) != null ? ref54 : "?";
           d.wOut = d.wIn;
           d.hOut = d.hIn;
           d.chOut = d.chIn;
           d.batchOut = d.batchIn;
-          //computation
-          // --none
-          //memory
           d.mem.activation = d.wOut * d.hOut * d.chOut * d.batchOut;
           if (isNaN(d.mem.activation)) {
             d.mem.activation = 0;
           }
           break;
-        // accuracy layers just pass through
         case "accuracy":
-          //dimensions
-          //# assume pass-through
           d.wOut = d.wIn;
           d.hOut = d.hIn;
           d.chOut = d.chIn;
           break;
-        //computation
-        // --none
-        //memory
-        // --none
-
-        // power layers: computes outputs y = (shift + scale * x) ^ power
         case "power":
           params = n.attribs.power_param;
-          power = (ref54 = params.power) != null ? ref54 : 1;
-          scale = (ref55 = params.scale) != null ? ref55 : 1;
-          shift = (ref56 = params.shift) != null ? ref56 : 0;
-          //dimensions: pass-through
+          power = (ref55 = params.power) != null ? ref55 : 1;
+          scale = (ref56 = params.scale) != null ? ref56 : 1;
+          shift = (ref57 = params.shift) != null ? ref57 : 0;
           d.wOut = d.wIn;
           d.hOut = d.hIn;
           d.chOut = d.chIn;
-          //computation
           n_elements = d.wOut * d.hOut * d.chOut;
           d.comp.macc = scale !== 1 ? n_elements : 0;
           d.comp.add = shift !== 0 ? n_elements : 0;
           d.comp.exp = power !== 1 ? n_elements : 0;
-          //memory
           d.mem.activation = n_elements;
           break;
-        // permute layers reorder the channels / dimensions
         case "permute":
-          permutation = n.attribs.permute_param.order.slice(0); //copy array
-          //dimension order: [batch, channels, height, width] according to http://caffe.berkeleyvision.org/tutorial/layers.html
+          permutation = n.attribs.permute_param.order.slice(0);
           dim_in = [d.batchIn, d.chIn, d.hIn, d.wIn];
           d.batchOut = dim_in[permutation[0]];
           d.chOut = dim_in[permutation[1]];
@@ -16526,16 +16919,8 @@ module.exports = Analyzer = class Analyzer {
           d.hOut = 4;
           d.wOut = num_priors;
           break;
-        //computation
-        // -- neglectable
-        //memory
-        // --neglectable
-
-        // reshape layers just permute dimensions, assume on-the-fly operation
         case "reshape":
-          //get reshape parameters
-          newshape = n.attribs.reshape_param.shape.dim.slice(0); // copy array
-          //debugger
+          newshape = n.attribs.reshape_param.shape.dim.slice(0);
           console.log(newshape);
           if ((!newshape[0]) || (newshape[0] === 0)) {
             newshape[0] = d.batchIn;
@@ -16549,9 +16934,8 @@ module.exports = Analyzer = class Analyzer {
           if ((!newshape[3]) || (newshape[3] === 0)) {
             newshape[3] = d.wIn;
           }
-          // -1 as dimension = infer from other dimensions, allowed for at most 1 dimension
           prod_in_dims = d.batchIn * d.wIn * d.hIn * d.chIn;
-          prod_out_dims = newshape[0] * newshape[1] * newshape[2] * newshape[3] * (-1); // -1 compensates "-1" in newshape
+          prod_out_dims = newshape[0] * newshape[1] * newshape[2] * newshape[3] * (-1);
           infered_dim = prod_in_dims / prod_out_dims;
           if (newshape[0] === -1) {
             newshape[0] = infered_dim;
@@ -16565,32 +16949,23 @@ module.exports = Analyzer = class Analyzer {
           if (newshape[3] === -1) {
             newshape[3] = infered_dim;
           }
-          // assign output dimensions
           d.batchOut = newshape[0];
           d.chOut = newshape[1];
           d.hOut = newshape[2];
           d.wOut = newshape[3];
           break;
-        //computation
-        // --none (some shifting-around only)
-        //memory
         case "python":
           module = n.attribs.python_param.module;
           if (module === "rpn.proposal_layer") {
-            // ASSUME TEST.RPN_POST_NMS_TOP_N = 300
-            num_region_proposals = 300; // see RPN_POST_NMS_TOP_N in lib/fast_rcnn/config.py
-            
-            //output dimensions:
+            num_region_proposals = 300;
             d.wOut = d.hOut = 1;
-            d.chOut = 5; // rectangle (x1, y1, x2, y2) (and image batch index n)
+            d.chOut = 5;
             d.batchOut = num_region_proposals;
-            //computation
             d.comp.div = (num_region_proposals * (num_region_proposals - 1)) / 2;
             d.comp.macc = d.batchIn * (4 + 4) * 9 * (d.wIn * d.hIn) + 2 * d.comp.div;
             d.comp.add = d.batchIn * (8 + 2) * 9 * (d.wIn * d.hIn) + 6 * d.comp.div;
             d.comp.comp = d.batchIn * (4 + 2) * 9 * (d.wIn * d.hIn) + Math.pow(9 * (d.wIn * d.hIn), 2) + 7 * d.comp.div;
             d.comp.exp = d.batchIn * 2 * 9 * (d.wIn * d.hIn);
-            //memory
             d.mem.activation = d.wOut * d.hOut * d.chOut * d.batchOut;
           } else {
             onerror('Unknown Python Layer: ' + module);
@@ -16599,24 +16974,19 @@ module.exports = Analyzer = class Analyzer {
           }
           break;
         case "roipooling":
-          // 2 parent layers: region proposals, feature vectors
-          roi_proposals = (n.parents[0].analysis.batchOut > 1) ? n.parents[0].analysis : n.parents[1].analysis; // parent with batchOut > 1 = region proposals
-          feature_map = (n.parents[0].analysis.batchOut > 1) ? n.parents[1].analysis : n.parents[0].analysis; // features = the other one
-          // Input / Output dimensions
+          roi_proposals = (n.parents[0].analysis.batchOut > 1) ? n.parents[0].analysis : n.parents[1].analysis;
+          feature_map = (n.parents[0].analysis.batchOut > 1) ? n.parents[1].analysis : n.parents[0].analysis;
           d.chIn = d.chOut = feature_map.chIn;
           d.hIn = feature_map.hIn;
           d.wIn = feature_map.wIn;
           d.hOut = n.attribs.roi_pooling_param.pooled_h;
           d.wOut = n.attribs.roi_pooling_param.pooled_w;
           d.batchIn = d.batchOut = roi_proposals.batchOut;
-          //spatial_scale = n.attribs.roi_pooling_param.spatial_scale
-          //computation
           d.comp.add = d.batchOut;
           d.comp.div = d.batchOut;
           d.comp.macc = d.batchOut;
           d.comp.comp = d.batchOut * d.chIn * d.wIn * d.hIn;
-          //memory
-          d.mem.activation = d.wOut * d.hOut * d.chOut * d.batchOut; // unknown layer;  print error message;
+          d.mem.activation = d.wOut * d.hOut * d.chOut * d.batchOut;
           break;
         default:
           onerror('Unknown Layer: ' + layertype);
@@ -16626,16 +16996,15 @@ module.exports = Analyzer = class Analyzer {
       trivial_layers = ["softmax", "softmaxwithloss", "softmax_loss", "dropout", "concat", "accuracy"];
       if (!($.inArray(layertype, trivial_layers) >= 0)) {
         summary = {
-          in: `${d.chIn}ch ⋅ ${d.wIn}×${d.hIn} (×${d.batchIn})`,
-          out: `${d.chOut}ch ⋅ ${d.wOut}×${d.hOut} (×${d.batchOut})`
+          "in": d.chIn + "ch ⋅ " + d.wIn + "×" + d.hIn + " (×" + d.batchIn + ")",
+          out: d.chOut + "ch ⋅ " + d.wOut + "×" + d.hOut + " (×" + d.batchOut + ")"
         };
-        // concat number of required operations into string
         ops = ((function() {
-          var ref57, results;
-          ref57 = d.comp;
+          var ref58, results;
+          ref58 = d.comp;
           results = [];
-          for (key in ref57) {
-            val = ref57[key];
+          for (key in ref58) {
+            val = ref58[key];
             if (val !== 0) {
               results.push(val + '⋅' + key);
             }
@@ -16643,16 +17012,14 @@ module.exports = Analyzer = class Analyzer {
           return results;
         })()).join(', ');
         if (ops !== "") {
-          //debugger
           summary.ops = ops;
         }
-        // concat memory requirements into string
         mem = ((function() {
-          var ref57, results;
-          ref57 = d.mem;
+          var ref58, results;
+          ref58 = d.mem;
           results = [];
-          for (key in ref57) {
-            val = ref57[key];
+          for (key in ref58) {
+            val = ref58[key];
             if (val !== 0) {
               results.push(val + '⋅' + key);
             }
@@ -16662,27 +17029,29 @@ module.exports = Analyzer = class Analyzer {
         if (mem !== "") {
           summary.mem = mem;
         }
-        // attach
         _.extend(n.attribs, {
           analysis: summary
         });
       }
     }
     return net;
-  }
+  };
 
-};
+  return Analyzer;
+
+})();
 
 
 },{}],5:[function(require,module,exports){
-var AppController, Editor, Renderer;
+var AppController, Editor, Renderer,
+  slice = [].slice;
 
 Renderer = require('./renderer.coffee');
 
 Editor = require('./editor.coffee');
 
-module.exports = AppController = class AppController {
-  constructor() {
+module.exports = AppController = (function() {
+  function AppController() {
     this.inProgress = false;
     this.$spinner = $('#net-spinner');
     this.$netBox = $('#net-container');
@@ -16693,7 +17062,9 @@ module.exports = AppController = class AppController {
     this.setupErrorHandler();
   }
 
-  startLoading(loaderFunc, loader, ...args) {
+  AppController.prototype.startLoading = function() {
+    var args, loader, loaderFunc;
+    loaderFunc = arguments[0], loader = arguments[1], args = 3 <= arguments.length ? slice.call(arguments, 2) : [];
     if (this.inProgress) {
       return;
     }
@@ -16701,21 +17072,25 @@ module.exports = AppController = class AppController {
     this.$netBox.hide();
     this.$tableBox.hide();
     this.$spinner.show();
-    return loaderFunc(...args, (net) => {
-      return this.completeLoading(net, loader);
-    });
-  }
+    return loaderFunc.apply(null, slice.call(args).concat([(function(_this) {
+      return function(net) {
+        return _this.completeLoading(net, loader);
+      };
+    })(this)]));
+  };
 
-  completeLoading(net, loader) {
+  AppController.prototype.completeLoading = function(net, loader) {
     var editlink, extendlink;
     this.$spinner.hide();
     $('#net-title').html(net.name.replace(/_/g, ' '));
     $('title').text(net.name.replace(/_/g, ' ') + ' — Netscope CNN Analyzer');
     editlink = $("<a>(edit)</a>").addClass("editlink");
     editlink.appendTo($('#net-title'));
-    editlink.click(() => {
-      return this.showEditor(loader);
-    });
+    editlink.click((function(_this) {
+      return function() {
+        return _this.showEditor(loader);
+      };
+    })(this));
     this.$netBox.show();
     this.$tableBox.show();
     $(this.svg).empty();
@@ -16724,48 +17099,58 @@ module.exports = AppController = class AppController {
     if (!window.do_variants_analysis) {
       $("<br>").appendTo(this.table);
       extendlink = $('<a>Excel-compatible Analysis Results (experimental)</a>');
-      extendlink.click(() => {
-        window.do_variants_analysis = true;
-        return this.renderer.renderTable();
-      });
+      extendlink.click((function(_this) {
+        return function() {
+          window.do_variants_analysis = true;
+          return _this.renderer.renderTable();
+        };
+      })(this));
       extendlink.appendTo(this.table);
     }
     return this.inProgress = false;
-  }
+  };
 
-  makeLoader(loaderFunc, loader) {
-    return (...args) => {
-      return this.startLoading(loaderFunc, loader, ...args);
-    };
-  }
+  AppController.prototype.makeLoader = function(loaderFunc, loader) {
+    return (function(_this) {
+      return function() {
+        var args;
+        args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+        return _this.startLoading.apply(_this, [loaderFunc, loader].concat(slice.call(args)));
+      };
+    })(this);
+  };
 
-  showEditor(loader) {
-    // Display the editor by lazily loading CodeMirror.
-    // loader is an instance of a Loader.
+  AppController.prototype.showEditor = function(loader) {
     if (_.isUndefined(window.CodeMirror)) {
-      return $.getScript('assets/js/lib/codemirror.min.js', () => {
-        return this.netEditor = new Editor(this.makeLoader(loader.load, loader), loader);
-      });
+      return $.getScript('assets/js/lib/codemirror.min.js', (function(_this) {
+        return function() {
+          return _this.netEditor = new Editor(_this.makeLoader(loader.load, loader), loader);
+        };
+      })(this));
     } else {
       return this.netEditor.reload(loader.load, loader);
     }
-  }
+  };
 
-  setupErrorHandler() {
-    return window.onerror = (message, filename, lineno, colno, e) => {
-      var msg;
-      msg = message;
-      if (!(_.isUndefined(e) || _.isUndefined(e.line) || _.isUndefined(e.column))) {
-        msg = _.template('Line ${line}, Column ${column}: ${message}')(e);
-      }
-      this.$spinner.hide();
-      $('.msg', this.$netError).html(msg);
-      this.$netError.show();
-      return this.inProgress = false;
-    };
-  }
+  AppController.prototype.setupErrorHandler = function() {
+    return window.onerror = (function(_this) {
+      return function(message, filename, lineno, colno, e) {
+        var msg;
+        msg = message;
+        if (!(_.isUndefined(e) || _.isUndefined(e.line) || _.isUndefined(e.column))) {
+          msg = _.template('Line ${line}, Column ${column}: ${message}')(e);
+        }
+        _this.$spinner.hide();
+        $('.msg', _this.$netError).html(msg);
+        _this.$netError.show();
+        return _this.inProgress = false;
+      };
+    })(this);
+  };
 
-};
+  return AppController;
+
+})();
 
 
 },{"./editor.coffee":8,"./renderer.coffee":12}],6:[function(require,module,exports){
@@ -16786,7 +17171,6 @@ generateLayers = function(descriptors, phase) {
   layers = [];
   for (j = 0, len = descriptors.length; j < len; j++) {
     entry = descriptors[j];
-    // Support the deprecated Caffe 'layers' key as well.
     layerDesc = entry.layer || entry.layers;
     if (layerDesc != null) {
       layer = {};
@@ -16811,40 +17195,37 @@ generateNetwork = function(layers, header) {
   nodeTable = {};
   implicitLayers = [];
   net = new Network(header.name);
-  getSingleNode = (name) => {
-    var node;
-    node = nodeTable[name];
-    // Caffe allows top to be a layer which isn't explicitly
-    // defined. Create an implicit layer if this is detected.
-    if (node == null) {
-      debugger;
-      node = net.createNode(name, 'implicit');
-      nodeTable[name] = node;
-    }
-    return node;
-  };
-  getNodes = (names, exclude) => {
-    names = [].concat(names);
-    if (exclude != null) {
-      _.pullAll(names, exclude);
-    }
-    return _.map(names, getSingleNode);
-  };
-  // Build the node LUT.
+  getSingleNode = (function(_this) {
+    return function(name) {
+      var node;
+      node = nodeTable[name];
+      if (node == null) {
+        debugger;
+        node = net.createNode(name, 'implicit');
+        nodeTable[name] = node;
+      }
+      return node;
+    };
+  })(this);
+  getNodes = (function(_this) {
+    return function(names, exclude) {
+      names = [].concat(names);
+      if (exclude != null) {
+        _.pullAll(names, exclude);
+      }
+      return _.map(names, getSingleNode);
+    };
+  })(this);
   for (j = 0, len = layers.length; j < len; j++) {
     layer = layers[j];
     nodeTable[layer.name] = net.createNode(layer.name, layer.type, layer.attribs, {});
   }
-  // Connect layers.
   inplaceTable = {};
   for (l = 0, len1 = layers.length; l < len1; l++) {
     layer = layers[l];
     node = nodeTable[layer.name];
     if (layer.top != null) {
       if (layer.top === layer.bottom) {
-        // This is an inplace node. We will treat this specially.
-        // Note that this would have otherwise introduced a cycle,
-        // violating the requirements of a DAG.
         if (inplaceTable[layer.top] == null) {
           inplaceTable[layer.top] = [];
         }
@@ -16872,7 +17253,6 @@ generateNetwork = function(layers, header) {
     }
     curNode.addChildren(children);
   }
-  // Patch in data layer parameters.
   if (((header != null ? header.input : void 0) != null) && (((header != null ? header.input_dim : void 0) != null) || ((header != null ? (ref = header.input_shape) != null ? ref.dim : void 0 : void 0) != null))) {
     inputs = [].concat(header.input);
     dims = header.input_dim || header.input_shape.dim;
@@ -16894,18 +17274,18 @@ generateNetwork = function(layers, header) {
   return net;
 };
 
-module.exports = CaffeParser = class CaffeParser {
-  static parse(txt, phase) {
-    var NetworkAnalyzer, header, layerDesc, layers, network;
-    [header, layerDesc] = Parser.parse(txt);
-    // if header is already a layer instead of a 'global header' with network name etc...:
+module.exports = CaffeParser = (function() {
+  function CaffeParser() {}
+
+  CaffeParser.parse = function(txt, phase) {
+    var NetworkAnalyzer, header, layerDesc, layers, network, ref;
+    ref = Parser.parse(txt), header = ref[0], layerDesc = ref[1];
     if (header.layer) {
       layerDesc.unshift(header);
       header = {
         name: 'Unnamed Network'
       };
     }
-    // extract input_shape field from layerDesc to header
     if ((layerDesc[0].input_dim != null) || (layerDesc[0].input_shape != null)) {
       _.extend(header, layerDesc[0]);
     }
@@ -16914,9 +17294,11 @@ module.exports = CaffeParser = class CaffeParser {
     NetworkAnalyzer = new Analyzer();
     network = NetworkAnalyzer.analyze(network);
     return network;
-  }
+  };
 
-};
+  return CaffeParser;
+
+})();
 
 
 },{"../analyzer.coffee":4,"../network.coffee":11,"./parser":7}],7:[function(require,module,exports){
@@ -18595,8 +18977,8 @@ module.exports = (function() {
 },{}],8:[function(require,module,exports){
 var Editor;
 
-module.exports = Editor = class Editor {
-  constructor(loaderFunc, loader) {
+module.exports = Editor = (function() {
+  function Editor(loaderFunc, loader) {
     var $editorBox, editorWidthPercentage, preset, ref;
     this.loaderFunc = loaderFunc;
     editorWidthPercentage = 30;
@@ -18610,88 +18992,89 @@ module.exports = Editor = class Editor {
       lineNumbers: true,
       lineWrapping: true
     });
-    this.editor.on('keydown', (cm, e) => {
-      return this.onKeyDown(e);
-    });
+    this.editor.on('keydown', (function(_this) {
+      return function(cm, e) {
+        return _this.onKeyDown(e);
+      };
+    })(this));
   }
 
-  reload(loaderFunc, loader) {
+  Editor.prototype.reload = function(loaderFunc, loader) {
     var preset, ref;
     this.loaderFunc = loaderFunc;
     preset = (ref = loader.dataLoaded) != null ? ref : '# Enter your network definition here.\n# Use Shift+Enter to update the visualization.';
     return this.editor.setValue(preset);
-  }
+  };
 
-  //alert(preset)
-  onKeyDown(e) {
+  Editor.prototype.onKeyDown = function(e) {
     if (e.shiftKey && e.keyCode === 13) {
-      // Using onKeyDown lets us prevent the default action,
-      // even if an error is encountered (say, due to parsing).
-      // This would not be possible with keymaps.
       e.preventDefault();
       return this.loaderFunc(this.editor.getValue());
     }
-  }
+  };
 
-};
+  return Editor;
+
+})();
 
 
 },{}],9:[function(require,module,exports){
-var Loader;
+var Loader,
+  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
-module.exports = Loader = class Loader {
-  constructor(parser) {
-    this.fromGist = this.fromGist.bind(this);
-    this.fromURL = this.fromURL.bind(this);
-    this.fromPreset = this.fromPreset.bind(this);
-    this.load = this.load.bind(this);
+module.exports = Loader = (function() {
+  function Loader(parser) {
     this.parser = parser;
-    // The parser is a unary function that accepts the network source
-    // and outputs a Network instance.
+    this.load = bind(this.load, this);
+    this.fromPreset = bind(this.fromPreset, this);
+    this.fromURL = bind(this.fromURL, this);
+    this.fromGist = bind(this.fromGist, this);
     this.dataLoaded = null;
   }
 
-  fromGist(gistID, callback) {
+  Loader.prototype.fromGist = function(gistID, callback) {
     var url;
-    // Load the model with the given Gist ID.
     url = 'https://api.github.com/gists/' + gistID;
-    return $.getJSON(url, (data) => {
-      var fileInfo, fileKey, fileSet, filename, isProto, isSolitaryFile, isSolver;
-      fileSet = data['files'];
-      isSolitaryFile = Object.keys(fileSet).length === 1;
-      for (fileKey in fileSet) {
-        fileInfo = fileSet[fileKey];
-        filename = fileInfo['filename'].toLowerCase();
-        isProto = _.endsWith(filename, '.prototxt');
-        isSolver = _.startsWith(filename, 'solver');
-        if ((isProto && !isSolver) || isSolitaryFile) {
-          this.load(fileInfo['content'], callback);
-          return;
+    return $.getJSON(url, (function(_this) {
+      return function(data) {
+        var fileInfo, fileKey, fileSet, filename, isProto, isSolitaryFile, isSolver;
+        fileSet = data['files'];
+        isSolitaryFile = Object.keys(fileSet).length === 1;
+        for (fileKey in fileSet) {
+          fileInfo = fileSet[fileKey];
+          filename = fileInfo['filename'].toLowerCase();
+          isProto = _.endsWith(filename, '.prototxt');
+          isSolver = _.startsWith(filename, 'solver');
+          if ((isProto && !isSolver) || isSolitaryFile) {
+            _this.load(fileInfo['content'], callback);
+            return;
+          }
         }
-      }
-      return console.log('No prototxt found in the given GIST.');
-    });
-  }
+        return console.log('No prototxt found in the given GIST.');
+      };
+    })(this));
+  };
 
-  fromURL(url, callback) {
-    // Load the model from the given URL.
-    // This may fail due to same-origin policy.
+  Loader.prototype.fromURL = function(url, callback) {
     return $.ajax({
       url: url,
-      success: () => {
-        return this.load(data, callback);
-      }
+      success: (function(_this) {
+        return function() {
+          return _this.load(data, callback);
+        };
+      })(this)
     });
-  }
+  };
 
-  fromPreset(name, callback) {
-    // Load a preset model. Caffe Only.
-    return $.get('./presets/' + name + '.prototxt', (data) => {
-      return this.load(data, callback);
-    });
-  }
+  Loader.prototype.fromPreset = function(name, callback) {
+    return $.get('./presets/' + name + '.prototxt', (function(_this) {
+      return function(data) {
+        return _this.load(data, callback);
+      };
+    })(this));
+  };
 
-  load(data, callback) {
+  Loader.prototype.load = function(data, callback) {
     var net;
     this.dataLoaded = data;
     net = this.parser.parse(data);
@@ -18699,13 +19082,16 @@ module.exports = Loader = class Loader {
       callback(net);
     }
     return net;
-  }
+  };
 
-};
+  return Loader;
+
+})();
 
 
 },{}],10:[function(require,module,exports){
-var AppController, CaffeNetwork, Loader, showDocumentation;
+var AppController, CaffeNetwork, Loader, showDocumentation,
+  slice = [].slice;
 
 AppController = require('./app.coffee');
 
@@ -18722,27 +19108,28 @@ showDocumentation = function() {
 $(document).ready(function() {
   var app, loader, makeLoader, router, routes;
   app = new AppController();
-  // Setup Caffe model loader.
-  // This can be replaced with any arbitrary parser to support
-  // formats other than Caffe.
   loader = new Loader(CaffeNetwork);
-  // Helper function for wrapping the load calls.
   makeLoader = function(loadingFunc, loader) {
-    return function(...args) {
-      return app.startLoading(loadingFunc, loader, ...args);
+    return function() {
+      var args;
+      args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+      return app.startLoading.apply(app, [loadingFunc, loader].concat(slice.call(args)));
     };
   };
-  // Register routes
   routes = {
     '/gist/:gistID': makeLoader(loader.fromGist, loader),
     '/url/(.+)': makeLoader(loader.fromURL, loader),
     '/preset/:name': makeLoader(loader.fromPreset, loader),
-    '/editor(/?)': () => {
-      return app.showEditor(loader);
-    },
-    '/doc': () => {
-      return showDocumentation();
-    }
+    '/editor(/?)': (function(_this) {
+      return function() {
+        return app.showEditor(loader);
+      };
+    })(this),
+    '/doc': (function(_this) {
+      return function() {
+        return showDocumentation();
+      };
+    })(this)
   };
   router = Router(routes);
   return router.init('/doc');
@@ -18751,85 +19138,90 @@ $(document).ready(function() {
 
 },{"./app.coffee":5,"./caffe/caffe.coffee":6,"./loader.coffee":9}],11:[function(require,module,exports){
 var Network, Node,
-  indexOf = [].indexOf;
+  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-Node = class Node {
-  constructor(name, type1, attribs1 = {}, analysis1 = {}) {
-    this.addChild = this.addChild.bind(this);
-    this.addChildren = this.addChildren.bind(this);
-    this.addParent = this.addParent.bind(this);
-    this.addParents = this.addParents.bind(this);
-    this.detachChild = this.detachChild.bind(this);
-    this.detachChildren = this.detachChildren.bind(this);
+Node = (function() {
+  function Node(name, type1, attribs1, analysis1) {
     this.name = name;
     this.type = type1;
-    this.attribs = attribs1;
-    this.analysis = analysis1;
+    this.attribs = attribs1 != null ? attribs1 : {};
+    this.analysis = analysis1 != null ? analysis1 : {};
+    this.detachChildren = bind(this.detachChildren, this);
+    this.detachChild = bind(this.detachChild, this);
+    this.addParents = bind(this.addParents, this);
+    this.addParent = bind(this.addParent, this);
+    this.addChildren = bind(this.addChildren, this);
+    this.addChild = bind(this.addChild, this);
     this.parents = [];
     this.children = [];
-    // Nodes to be coalesced (by the renderer) with the current one.
-    // For instance, this can be used for grouping in-place operations.
-    // Note that this assumes the nodes to be coalesced and the current
-    // node form a simple chain structure.
     this.coalesce = [];
   }
 
-  addChild(child) {
+  Node.prototype.addChild = function(child) {
     if (indexOf.call(this.children, child) < 0) {
       this.children.push(child);
       if (indexOf.call(child.parents, this) < 0) {
         return child.parents.push(this);
       }
     }
-  }
+  };
 
-  addChildren(children) {
-    return _.forEach(children, (c) => {
-      return this.addChild(c);
-    });
-  }
+  Node.prototype.addChildren = function(children) {
+    return _.forEach(children, (function(_this) {
+      return function(c) {
+        return _this.addChild(c);
+      };
+    })(this));
+  };
 
-  addParent(parent) {
+  Node.prototype.addParent = function(parent) {
     return parent.addChild(this);
-  }
+  };
 
-  addParents(parents) {
-    return _.forEach(parents, (p) => {
-      return this.addParent(p);
-    });
-  }
+  Node.prototype.addParents = function(parents) {
+    return _.forEach(parents, (function(_this) {
+      return function(p) {
+        return _this.addParent(p);
+      };
+    })(this));
+  };
 
-  detachChild(child) {
+  Node.prototype.detachChild = function(child) {
     _.pull(this.children, child);
     return _.pull(child.parents, this);
-  }
+  };
 
-  detachChildren() {
+  Node.prototype.detachChildren = function() {
     var children;
     children = _.clone(this.children);
-    _.forEach(children, (c) => {
-      return this.detachChild(c);
-    });
+    _.forEach(children, (function(_this) {
+      return function(c) {
+        return _this.detachChild(c);
+      };
+    })(this));
     return children;
-  }
+  };
 
-};
+  return Node;
 
-module.exports = Network = class Network {
-  constructor(name = 'Untitled Network') {
-    this.sortTopologically = this.sortTopologically.bind(this);
-    this.name = name;
+})();
+
+module.exports = Network = (function() {
+  function Network(name) {
+    this.name = name != null ? name : 'Untitled Network';
+    this.sortTopologically = bind(this.sortTopologically, this);
     this.nodes = [];
   }
 
-  createNode(label, type, attribs, analysis) {
+  Network.prototype.createNode = function(label, type, attribs, analysis) {
     var node;
     node = new Node(label, type, attribs, analysis);
     this.nodes.push(node);
     return node;
-  }
+  };
 
-  sortTopologically() {
+  Network.prototype.sortTopologically = function() {
     var i, j, len, len1, node, sortedNodes, unsortedNodes, visit;
     sortedNodes = [];
     unsortedNodes = _.clone(this.nodes);
@@ -18866,9 +19258,11 @@ module.exports = Network = class Network {
       delete node.sort_;
     }
     return sortedNodes;
-  }
+  };
 
-};
+  return Network;
+
+})();
 
 
 },{}],12:[function(require,module,exports){
@@ -18879,8 +19273,8 @@ Tableify = require('tableify');
 
 require('tablesorter');
 
-module.exports = Renderer = class Renderer {
-  constructor(net, parent1, table) {
+module.exports = Renderer = (function() {
+  function Renderer(net, parent1, table) {
     this.net = net;
     this.parent = parent1;
     this.table = table;
@@ -18890,22 +19284,22 @@ module.exports = Renderer = class Renderer {
     this.renderTable();
   }
 
-  setupGraph() {
+  Renderer.prototype.setupGraph = function() {
     this.graph = new dagreD3.graphlib.Graph();
     this.graph.setDefaultEdgeLabel((function() {
       return {};
     }));
     return this.graph.setGraph({
       rankdir: this.layoutDirection,
-      ranksep: 10, // Vertical node separation
-      nodesep: 5, // Horizontal node separation
-      edgesep: 10, // Horizontal edge separation
-      marginx: 0, // Horizontal graph margin
-      marginy: 0 // Vertical graph margin
+      ranksep: 10,
+      nodesep: 5,
+      edgesep: 10,
+      marginx: 0,
+      marginy: 0
     });
-  }
+  };
 
-  generateGraph() {
+  Renderer.prototype.generateGraph = function() {
     var child, j, k, l, lastCoalesed, layers, len, len1, len2, len3, len4, m, node, nodes, o, parent, ref, ref1, ref2, ref3, sink, source, uberParents;
     this.setupGraph();
     nodes = this.net.sortTopologically();
@@ -18916,7 +19310,6 @@ module.exports = Renderer = class Renderer {
       }
       layers = [node].concat(node.coalesce);
       if (layers.length > 1) {
-        // Rewire the node following the last coalesced node to this one
         lastCoalesed = layers[layers.length - 1];
         ref = lastCoalesed.children;
         for (k = 0, len1 = ref.length; k < len1; k++) {
@@ -18936,17 +19329,17 @@ module.exports = Renderer = class Renderer {
     ref2 = this.graph.sources();
     for (m = 0, len3 = ref2.length; m < len3; m++) {
       source = ref2[m];
-      (this.graph.node(source)).class = 'node-type-source';
+      (this.graph.node(source))["class"] = 'node-type-source';
     }
     ref3 = this.graph.sinks();
     for (o = 0, len4 = ref3.length; o < len4; o++) {
       sink = ref3[o];
-      (this.graph.node(sink)).class = 'node-type-sink';
+      (this.graph.node(sink))["class"] = 'node-type-sink';
     }
     return this.render();
-  }
+  };
 
-  generateTable() {
+  Renderer.prototype.generateTable = function() {
     var entry, id, idx, j, k, key, l, len, len1, len2, n, ref, tbl, val, variant, variantcopy, worstcasepervariant;
     entry = {
       name: 'start'
@@ -18955,13 +19348,11 @@ module.exports = Renderer = class Renderer {
     id = 0;
     worstcasepervariant = null;
     ref = this.net.sortTopologically();
-    // Build up Layer Table
     for (j = 0, len = ref.length; j < len; j++) {
       n = ref[j];
-      // summarize Values in Variant Implementations
       if (do_variants_analysis) {
         if (n.analysis.variants.length > 0) {
-          if (!worstcasepervariant) { // initial copy
+          if (!worstcasepervariant) {
             worstcasepervariant = _.cloneDeep(n.analysis.variants);
           }
           variantcopy = _.extend([], n.analysis.variants);
@@ -19001,7 +19392,6 @@ module.exports = Renderer = class Renderer {
       tbl.push(entry);
     }
     if (do_variants_analysis && worstcasepervariant) {
-      // worst case variant summary
       for (l = 0, len2 = worstcasepervariant.length; l < len2; l++) {
         variant = worstcasepervariant[l];
         for (key in variant) {
@@ -19019,14 +19409,16 @@ module.exports = Renderer = class Renderer {
       tbl.push(entry);
     }
     return tbl;
-  }
+  };
 
-  toSuffixForm(num, decimals = 2) {
+  Renderer.prototype.toSuffixForm = function(num, decimals) {
     var exponent, exponents, factor, i, j, len, suffices, suffix;
+    if (decimals == null) {
+      decimals = 2;
+    }
     exponents = [12, 9, 6, 3];
     suffices = ["T", "G", "M", "k"];
     decimals = Math.pow(10, decimals);
-    //debugger
     for (i = j = 0, len = exponents.length; j < len; i = ++j) {
       exponent = exponents[i];
       suffix = suffices[i];
@@ -19035,11 +19427,10 @@ module.exports = Renderer = class Renderer {
         return Math.round(num / factor * decimals) / decimals + suffix;
       }
     }
-    // too small, no suffix
     return num;
-  }
+  };
 
-  summarizeTable(tbl) {
+  Renderer.prototype.summarizeTable = function(tbl) {
     var entry, j, k, key, len, len1, n, num_subs, ref, ref1, ref2, ref3, ref4, ref5, slashindex, summary, summary_without_raw, total, val;
     entry = {
       name: 'start'
@@ -19049,7 +19440,7 @@ module.exports = Renderer = class Renderer {
     for (j = 0, len = tbl.length; j < len; j++) {
       n = tbl[j];
       slashindex = n.name.indexOf('/');
-      if (slashindex > 0 && entry.name.substring(0, slashindex) === n.name.substring(0, slashindex)) { // layer has same prefix as current summary item
+      if (slashindex > 0 && entry.name.substring(0, slashindex) === n.name.substring(0, slashindex)) {
         num_subs++;
         entry.name = n.name.substring(0, slashindex);
         entry.type = 'submodule(' + num_subs + ')';
@@ -19075,7 +19466,6 @@ module.exports = Renderer = class Renderer {
             entry.mem[key] = this.toSuffixForm(val);
           }
         }
-        //debugger
         summary.pop();
         summary.push(entry);
       } else {
@@ -19111,7 +19501,6 @@ module.exports = Renderer = class Renderer {
         summary.push(entry);
       }
     }
-    // initialize TOTAL row
     total = {
       name: 'TOTAL',
       ops_raw: {},
@@ -19119,13 +19508,12 @@ module.exports = Renderer = class Renderer {
       ops: {},
       mem: {}
     };
-    _.extend(total.ops_raw, summary[0].ops_raw); // copy zeros from data layer
-    _.extend(total.mem_raw, summary[0].mem_raw); // idem
-    total.mem_raw.activation = 0; // data layer already uses activation --> set to zero
+    _.extend(total.ops_raw, summary[0].ops_raw);
+    _.extend(total.mem_raw, summary[0].mem_raw);
+    total.mem_raw.activation = 0;
     for (k = 0, len1 = summary.length; k < len1; k++) {
       entry = summary[k];
       for (key in entry.ops_raw) {
-        //debugger
         total.ops_raw[key] += entry.ops_raw[key];
       }
       for (key in entry.mem_raw) {
@@ -19153,17 +19541,14 @@ module.exports = Renderer = class Renderer {
       return results;
     })();
     return summary_without_raw;
-  }
+  };
 
-  renderTable() {
+  Renderer.prototype.renderTable = function() {
     var $node_elem, $table_elem, areatbl, detail, dim_in, entry, j, k, len, len1, line, ref, ref1, ref2, ref3, ref4, row, row_array, scroll_to, suffix, summary, summary_body, summary_table;
-    // Generate Detail Table and Summary
     detail = this.generateTable();
     summary = this.summarizeTable(detail);
     $(this.table).html('<h3>Summary:</h3><a id="summary"></a>' + Tableify(summary) + '<h3>Details:</h3><a id="details"></a>' + Tableify(detail));
     $(this.table + ' table').tablesorter();
-    // Add Click-to-Scroll Handlers
-    // Closure Function that executes scroll:
     scroll_to = function(el) {
       return function() {
         var removeHighlight, top_coord;
@@ -19180,30 +19565,25 @@ module.exports = Renderer = class Renderer {
         return window.setTimeout(removeHighlight(el), 4000);
       };
     };
-    // Add Click-to-Scroll to all summary rows, except last
     summary_table = $(this.table + ' table')[0];
     summary_body = summary_table.children[1];
     row_array = Array.prototype.slice.call(summary_body.children);
     ref = row_array.slice(0, -1);
     for (j = 0, len = ref.length; j < len; j++) {
       row = ref[j];
-      // Add Link between Node and Table Element -> both directions work
       $table_elem = $(row.children[1]);
       $node_elem = $('div[id^="node-' + $table_elem.text() + '"]');
       $table_elem.click(scroll_to($node_elem));
       $node_elem.click(scroll_to($table_elem));
     }
     if (do_variants_analysis) {
-      // Calculate Per-Layer Statistics
       areatbl = [];
       for (k = 0, len1 = detail.length; k < len1; k++) {
         entry = detail[k];
         if (!(entry.type === "Convolution" || entry.type === "Concat" || entry.type === "SoftmaxWithLoss" || entry.type === "innerproduct")) {
           continue;
         }
-        // extract input dimension:
         dim_in = (ref1 = entry.dim_in) != null ? ref1.split("x").pop() : void 0;
-        // add entry
         suffix = " " + this.net.name;
         line = {};
         line["layer"] = entry.name;
@@ -19217,9 +19597,9 @@ module.exports = Renderer = class Renderer {
       $(Tableify(areatbl)).appendTo(this.table);
     }
     return null;
-  }
+  };
 
-  insertNode(layers) {
+  Renderer.prototype.insertNode = function(layers) {
     var baseNode, j, layer, len, nodeClass, nodeDesc, nodeLabel;
     baseNode = layers[0];
     nodeClass = 'node-type-' + baseNode.type.replace(/_/g, '-').toLowerCase();
@@ -19231,7 +19611,7 @@ module.exports = Renderer = class Renderer {
       nodeDesc = {
         labelType: 'html',
         label: nodeLabel,
-        class: nodeClass,
+        "class": nodeClass,
         layers: layers,
         rx: 5,
         ry: 5
@@ -19243,17 +19623,17 @@ module.exports = Renderer = class Renderer {
       });
     }
     return this.graph.setNode(baseNode.name, nodeDesc);
-  }
+  };
 
-  generateLabel(layer) {
+  Renderer.prototype.generateLabel = function(layer) {
     if (!this.iconify) {
       return '<div class="node-label" id="node-' + layer.name + '">' + layer.name + '</div>';
     } else {
       return '';
     }
-  }
+  };
 
-  insertLink(src, dst) {
+  Renderer.prototype.insertLink = function(src, dst) {
     var b, ch, h, lbl, ref, ref1, ref2, ref3, w;
     if (!this.iconify) {
       ch = (ref = src.analysis.chOut) != null ? ref : "?";
@@ -19271,20 +19651,20 @@ module.exports = Renderer = class Renderer {
       arrowhead: 'vee',
       label: lbl
     });
-  }
+  };
 
-  renderKey(key) {
+  Renderer.prototype.renderKey = function(key) {
     return key.replace(/_/g, ' ');
-  }
+  };
 
-  renderValue(value) {
+  Renderer.prototype.renderValue = function(value) {
     if (Array.isArray(value)) {
       return value.join(', ');
     }
     return value;
-  }
+  };
 
-  renderSection(section) {
+  Renderer.prototype.renderSection = function(section) {
     var isSection, key, s, val;
     s = '';
     for (key in section) {
@@ -19303,9 +19683,9 @@ module.exports = Renderer = class Renderer {
       s += '</div>';
     }
     return s;
-  }
+  };
 
-  tipForNode(nodeKey) {
+  Renderer.prototype.tipForNode = function(nodeKey) {
     var j, layer, len, node, ref, s;
     node = this.graph.node(nodeKey);
     s = '';
@@ -19324,21 +19704,17 @@ module.exports = Renderer = class Renderer {
       s += this.renderSection(layer.attribs);
     }
     return s;
-  }
+  };
 
-  render() {
+  Renderer.prototype.render = function() {
     var bbox, graphRender, svg, svgGroup, that, tipPositions;
     svg = d3.select(this.parent);
     svgGroup = svg.append('g');
     graphRender = new dagreD3.render();
     graphRender(svgGroup, this.graph);
-    // Size to fit.
-    // getBBox appears to do the right thing on Chrome,
-    // but not on Firefox. getBoundingClientRect works on both.
     bbox = svgGroup.node().getBoundingClientRect();
     svg.attr('width', bbox.width);
     svg.attr('height', bbox.height);
-    // Configure Tooltips.
     tipPositions = {
       tb: {
         my: 'left center',
@@ -19368,9 +19744,11 @@ module.exports = Renderer = class Renderer {
         }
       });
     });
-  }
+  };
 
-};
+  return Renderer;
+
+})();
 
 
 },{"tableify":2,"tablesorter":3}]},{},[10]);
