@@ -84,11 +84,11 @@ module.exports =
                     d.hOut = Math.floor((d.hIn + 2*pad_h - kernel) / stride_h) + 1
 
                     d.chOut = numout
-                    #computation
-                    d.comp.macc = (kernel_w*kernel_h)*(d.wOut*d.hOut)*d.chIn*d.chOut*d.batchOut/group
                     #memory
-                    d.mem.param = (kernel_w*kernel_h)*d.chIn*d.chOut/group + has_bias*d.chOut
+                    d.mem.param = (kernel_w*kernel_h*d.chIn/group + has_bias)*d.chOut
                     d.mem.activation = (d.wOut*d.hOut)*d.chOut*d.batchOut
+                    #computation
+                    d.comp.macc = d.mem.param * d.wOut*d.hOut*d.batchOut
 
                     # CACHE AND BANDWIDTH for Implementation Variants
                     if (do_variants_analysis)
