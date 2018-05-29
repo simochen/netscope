@@ -289,6 +289,23 @@ module.exports =
                     #memory
                     d.mem.activation = d.wOut*d.hOut*d.chOut*d.batchOut
 
+                when "eltwiseaffine"
+                    #dimensions
+                    d.wOut = d.wIn
+                    d.hOut = d.hIn
+                    d.chOut = d.chIn
+                    # check input dimensions
+                    failed = false
+                    for p in n.parents
+                        failed = failed or (d.wIn != p.analysis.wOut) or (d.hIn != p.analysis.hOut)
+                    onerror 'ELTWISE_AFFINE: input dimensions dont agree in '+n.name if failed
+                    #memory
+                    d.mem.param = if n.attribs.eltwise_affine_param.channel_shared then 2 else 2 * d.chOut
+                    d.mem.activation = d.wOut*d.hOut*d.chOut*d.batchOut
+                    # computation
+                    d.comp.macc = d.wIn*d.hIn*d.chIn*d.batchOut
+                    d.comp.add = d.wIn*d.hIn*d.chIn*d.batchOut
+
                 when "deconvolution"
                     #dimensions
                     params   = n.attribs.convolution_param
