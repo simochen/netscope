@@ -2653,6 +2653,33 @@ layer {
   top: "res4"
 }
 layer {
+  name: "res6_branch1"
+  type: "Convolution"
+  bottom: "res4"
+  top: "res6_branch1"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 256
+    pad: 0
+    kernel_size: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
   name: "res4_bn"
   type: "BatchNorm"
   bottom: "res4"
@@ -2698,263 +2725,9 @@ layer {
   top: "res4_bn"
 }
 layer {
-  name: "res5_branch2a"
-  type: "Convolution"
-  bottom: "res4_bn"
-  top: "res5_branch2a"
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  convolution_param {
-    num_output: 64
-    bias_term: true
-    pad: 0
-    kernel_size: 1
-    stride: 1
-    weight_filler {
-      type: "gaussian"
-      std: 0.01
-    }
-    bias_filler {
-      type: "constant"
-      value: 0
-    }
-  }
-}
-layer {
-  name: "bn5_branch2a"
-  type: "BatchNorm"
-  bottom: "res5_branch2a"
-  top: "res5_branch2a"
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "scale5_branch2a"
-  type: "EltwiseAffine"
-  bottom: "res5_branch2a"
-  top: "res5_branch2a"
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  eltwise_affine_param {
-    channel_shared: false
-  }
-}
-layer {
-  name: "res5_branch2a_relu"
-  type: "ReLU"
-  bottom: "res5_branch2a"
-  top: "res5_branch2a"
-}
-layer {
-  name: "res5_branch2b"
-  type: "Convolution"
-  bottom: "res5_branch2a"
-  top: "res5_branch2b"
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  convolution_param {
-    num_output: 64
-    bias_term: true
-    pad: 1
-    kernel_size: 3
-    stride: 1
-    weight_filler {
-      type: "gaussian"
-      std: 0.01
-    }
-    bias_filler {
-      type: "constant"
-      value: 0
-    }
-  }
-}
-layer {
-  name: "bn5_branch2b"
-  type: "BatchNorm"
-  bottom: "res5_branch2b"
-  top: "res5_branch2b"
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "scale5_branch2b"
-  type: "EltwiseAffine"
-  bottom: "res5_branch2b"
-  top: "res5_branch2b"
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  eltwise_affine_param {
-    channel_shared: false
-  }
-}
-layer {
-  name: "res5_branch2b_relu"
-  type: "ReLU"
-  bottom: "res5_branch2b"
-  top: "res5_branch2b"
-}
-layer {
-  name: "res5_branch2c"
-  type: "Convolution"
-  bottom: "res5_branch2b"
-  top: "res5_branch2c"
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  convolution_param {
-    num_output: 128
-    pad: 0
-    kernel_size: 1
-    stride: 1
-    weight_filler {
-      type: "xavier"
-    }
-    bias_filler {
-      type: "constant"
-      value: 0
-    }
-  }
-}
-layer {
-  name: "res5"
-  type: "Eltwise"
-  bottom: "res4"
-  bottom: "res5_branch2c"
-  top: "res5"
-}
-layer {
-  name: "res6_branch1"
-  type: "Convolution"
-  bottom: "res5"
-  top: "res6_branch1"
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  convolution_param {
-    num_output: 256
-    pad: 0
-    kernel_size: 1
-    stride: 1
-    weight_filler {
-      type: "xavier"
-    }
-    bias_filler {
-      type: "constant"
-      value: 0
-    }
-  }
-}
-layer {
-  name: "res5_bn"
-  type: "BatchNorm"
-  bottom: "res5"
-  top: "res5_bn"
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "res5_bn_scale"
-  type: "EltwiseAffine"
-  bottom: "res5_bn"
-  top: "res5_bn"
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  eltwise_affine_param {
-    channel_shared: false
-  }
-}
-layer {
-  name: "res5_bn_scale_relu"
-  type: "ReLU"
-  bottom: "res5_bn"
-  top: "res5_bn"
-}
-layer {
   name: "res6_branch2a"
   type: "Convolution"
-  bottom: "res5_bn"
+  bottom: "res4_bn"
   top: "res6_branch2a"
   param {
     lr_mult: 0
@@ -3374,7 +3147,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -3594,7 +3367,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -4547,7 +4320,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -4767,7 +4540,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -5720,7 +5493,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -5940,7 +5713,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -6893,7 +6666,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -7113,7 +6886,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -7839,7 +7612,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -8059,7 +7832,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -8286,7 +8059,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -8316,11 +8089,11 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     bias_term: false
     pad: 0
     kernel_size: 2
-    group: 256
+    group: 512
     stride: 2
     weight_filler {
       type: "nearest"
@@ -8541,7 +8314,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -8571,11 +8344,11 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     bias_term: false
     pad: 0
     kernel_size: 2
-    group: 256
+    group: 512
     stride: 2
     weight_filler {
       type: "nearest"
@@ -8796,7 +8569,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -8826,11 +8599,11 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     bias_term: false
     pad: 0
     kernel_size: 2
-    group: 256
+    group: 512
     stride: 2
     weight_filler {
       type: "nearest"
@@ -9051,7 +8824,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -9081,11 +8854,11 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     bias_term: false
     pad: 0
     kernel_size: 2
-    group: 256
+    group: 512
     stride: 2
     weight_filler {
       type: "nearest"
@@ -9100,9 +8873,263 @@ layer {
   top: "hg1"
 }
 layer {
-  name: "linear1"
+  name: "hg1_res_branch1"
   type: "Convolution"
   bottom: "hg1"
+  top: "hg1_res_branch1"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 256
+    pad: 0
+    kernel_size: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
+  name: "hg1_bn"
+  type: "BatchNorm"
+  bottom: "hg1"
+  top: "hg1_bn"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  batch_norm_param {
+    use_global_stats: true
+    eps: 1e-05
+  }
+}
+layer {
+  name: "hg1_bn_scale"
+  type: "EltwiseAffine"
+  bottom: "hg1_bn"
+  top: "hg1_bn"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  eltwise_affine_param {
+    channel_shared: false
+  }
+}
+layer {
+  name: "hg1_bn_scale_relu"
+  type: "ReLU"
+  bottom: "hg1_bn"
+  top: "hg1_bn"
+}
+layer {
+  name: "hg1_res_branch2a"
+  type: "Convolution"
+  bottom: "hg1_bn"
+  top: "hg1_res_branch2a"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 128
+    bias_term: true
+    pad: 0
+    kernel_size: 1
+    stride: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
+  name: "hg1_bn_branch2a"
+  type: "BatchNorm"
+  bottom: "hg1_res_branch2a"
+  top: "hg1_res_branch2a"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  batch_norm_param {
+    use_global_stats: true
+    eps: 1e-05
+  }
+}
+layer {
+  name: "hg1_scale_branch2a"
+  type: "EltwiseAffine"
+  bottom: "hg1_res_branch2a"
+  top: "hg1_res_branch2a"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  eltwise_affine_param {
+    channel_shared: false
+  }
+}
+layer {
+  name: "hg1_res_branch2a_relu"
+  type: "ReLU"
+  bottom: "hg1_res_branch2a"
+  top: "hg1_res_branch2a"
+}
+layer {
+  name: "hg1_res_branch2b"
+  type: "Convolution"
+  bottom: "hg1_res_branch2a"
+  top: "hg1_res_branch2b"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 128
+    bias_term: true
+    pad: 1
+    kernel_size: 3
+    stride: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
+  name: "hg1_bn_branch2b"
+  type: "BatchNorm"
+  bottom: "hg1_res_branch2b"
+  top: "hg1_res_branch2b"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  batch_norm_param {
+    use_global_stats: true
+    eps: 1e-05
+  }
+}
+layer {
+  name: "hg1_scale_branch2b"
+  type: "EltwiseAffine"
+  bottom: "hg1_res_branch2b"
+  top: "hg1_res_branch2b"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  eltwise_affine_param {
+    channel_shared: false
+  }
+}
+layer {
+  name: "hg1_res_branch2b_relu"
+  type: "ReLU"
+  bottom: "hg1_res_branch2b"
+  top: "hg1_res_branch2b"
+}
+layer {
+  name: "hg1_res_branch2c"
+  type: "Convolution"
+  bottom: "hg1_res_branch2b"
+  top: "hg1_res_branch2c"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 256
+    pad: 0
+    kernel_size: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
+  name: "hg1_res"
+  type: "Eltwise"
+  bottom: "hg1_res_branch1"
+  bottom: "hg1_res_branch2c"
+  top: "hg1_res"
+}
+layer {
+  name: "linear1"
+  type: "Convolution"
+  bottom: "hg1_res"
   top: "linear1"
   param {
     lr_mult: 0
@@ -9174,83 +9201,9 @@ layer {
   top: "linear1"
 }
 layer {
-  name: "linear2"
-  type: "Convolution"
-  bottom: "linear1"
-  top: "linear2"
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  convolution_param {
-    num_output: 256
-    bias_term: true
-    pad: 0
-    kernel_size: 1
-    stride: 1
-    weight_filler {
-      type: "gaussian"
-      std: 0.01
-    }
-    bias_filler {
-      type: "constant"
-      value: 0
-    }
-  }
-}
-layer {
-  name: "bn_linear2"
-  type: "BatchNorm"
-  bottom: "linear2"
-  top: "linear2"
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "scale_linear2"
-  type: "EltwiseAffine"
-  bottom: "linear2"
-  top: "linear2"
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  eltwise_affine_param {
-    channel_shared: false
-  }
-}
-layer {
-  name: "linear2_relu"
-  type: "ReLU"
-  bottom: "linear2"
-  top: "linear2"
-}
-layer {
   name: "out1"
   type: "Convolution"
-  bottom: "linear2"
+  bottom: "linear1"
   top: "out1"
   param {
     lr_mult: 0
@@ -9288,44 +9241,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 384
-    pad: 0
-    kernel_size: 1
-    stride: 1
-    weight_filler {
-      type: "xavier"
-    }
-    bias_filler {
-      type: "constant"
-      value: 0
-    }
-  }
-}
-layer {
-  name: "concat1"
-  type: "Concat"
-  bottom: "linear2"
-  bottom: "pool1"
-  top: "concat1"
-  concat_param {
-    axis: 1
-  }
-}
-layer {
-  name: "concat1_CN"
-  type: "Convolution"
-  bottom: "concat1"
-  top: "concat1_CN"
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  convolution_param {
-    num_output: 384
+    num_output: 256
     pad: 0
     kernel_size: 1
     stride: 1
@@ -9341,7 +9257,8 @@ layer {
 layer {
   name: "int1"
   type: "Eltwise"
-  bottom: "concat1_CN"
+  bottom: "res6"
+  bottom: "linear1"
   bottom: "out1_"
   top: "int1"
 }
@@ -9613,7 +9530,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -9833,7 +9750,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -10813,7 +10730,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -11033,7 +10950,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -11986,7 +11903,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -12206,7 +12123,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -13159,7 +13076,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -13379,7 +13296,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -14105,7 +14022,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -14325,7 +14242,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -14552,7 +14469,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -14582,11 +14499,11 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     bias_term: false
     pad: 0
     kernel_size: 2
-    group: 256
+    group: 512
     stride: 2
     weight_filler {
       type: "nearest"
@@ -14807,7 +14724,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -14837,11 +14754,11 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     bias_term: false
     pad: 0
     kernel_size: 2
-    group: 256
+    group: 512
     stride: 2
     weight_filler {
       type: "nearest"
@@ -15062,7 +14979,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -15092,11 +15009,11 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     bias_term: false
     pad: 0
     kernel_size: 2
-    group: 256
+    group: 512
     stride: 2
     weight_filler {
       type: "nearest"
@@ -15317,7 +15234,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -15347,11 +15264,11 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     bias_term: false
     pad: 0
     kernel_size: 2
-    group: 256
+    group: 512
     stride: 2
     weight_filler {
       type: "nearest"
@@ -15366,10 +15283,10 @@ layer {
   top: "hg2"
 }
 layer {
-  name: "linear3"
+  name: "hg2_res_branch1"
   type: "Convolution"
   bottom: "hg2"
-  top: "linear3"
+  top: "hg2_res_branch1"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -15380,13 +15297,11 @@ layer {
   }
   convolution_param {
     num_output: 256
-    bias_term: true
     pad: 0
     kernel_size: 1
     stride: 1
     weight_filler {
-      type: "gaussian"
-      std: 0.01
+      type: "xavier"
     }
     bias_filler {
       type: "constant"
@@ -15395,10 +15310,10 @@ layer {
   }
 }
 layer {
-  name: "bn_linear3"
+  name: "hg2_bn"
   type: "BatchNorm"
-  bottom: "linear3"
-  top: "linear3"
+  bottom: "hg2"
+  top: "hg2_bn"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -15417,10 +15332,10 @@ layer {
   }
 }
 layer {
-  name: "scale_linear3"
+  name: "hg2_bn_scale"
   type: "EltwiseAffine"
-  bottom: "linear3"
-  top: "linear3"
+  bottom: "hg2_bn"
+  top: "hg2_bn"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -15434,16 +15349,198 @@ layer {
   }
 }
 layer {
-  name: "linear3_relu"
+  name: "hg2_bn_scale_relu"
   type: "ReLU"
-  bottom: "linear3"
-  top: "linear3"
+  bottom: "hg2_bn"
+  top: "hg2_bn"
 }
 layer {
-  name: "linear4"
+  name: "hg2_res_branch2a"
   type: "Convolution"
-  bottom: "linear3"
-  top: "linear4"
+  bottom: "hg2_bn"
+  top: "hg2_res_branch2a"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 128
+    bias_term: true
+    pad: 0
+    kernel_size: 1
+    stride: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
+  name: "hg2_bn_branch2a"
+  type: "BatchNorm"
+  bottom: "hg2_res_branch2a"
+  top: "hg2_res_branch2a"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  batch_norm_param {
+    use_global_stats: true
+    eps: 1e-05
+  }
+}
+layer {
+  name: "hg2_scale_branch2a"
+  type: "EltwiseAffine"
+  bottom: "hg2_res_branch2a"
+  top: "hg2_res_branch2a"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  eltwise_affine_param {
+    channel_shared: false
+  }
+}
+layer {
+  name: "hg2_res_branch2a_relu"
+  type: "ReLU"
+  bottom: "hg2_res_branch2a"
+  top: "hg2_res_branch2a"
+}
+layer {
+  name: "hg2_res_branch2b"
+  type: "Convolution"
+  bottom: "hg2_res_branch2a"
+  top: "hg2_res_branch2b"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 128
+    bias_term: true
+    pad: 1
+    kernel_size: 3
+    stride: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
+  name: "hg2_bn_branch2b"
+  type: "BatchNorm"
+  bottom: "hg2_res_branch2b"
+  top: "hg2_res_branch2b"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  batch_norm_param {
+    use_global_stats: true
+    eps: 1e-05
+  }
+}
+layer {
+  name: "hg2_scale_branch2b"
+  type: "EltwiseAffine"
+  bottom: "hg2_res_branch2b"
+  top: "hg2_res_branch2b"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  eltwise_affine_param {
+    channel_shared: false
+  }
+}
+layer {
+  name: "hg2_res_branch2b_relu"
+  type: "ReLU"
+  bottom: "hg2_res_branch2b"
+  top: "hg2_res_branch2b"
+}
+layer {
+  name: "hg2_res_branch2c"
+  type: "Convolution"
+  bottom: "hg2_res_branch2b"
+  top: "hg2_res_branch2c"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 256
+    pad: 0
+    kernel_size: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
+  name: "hg2_res"
+  type: "Eltwise"
+  bottom: "hg2_res_branch1"
+  bottom: "hg2_res_branch2c"
+  top: "hg2_res"
+}
+layer {
+  name: "linear2"
+  type: "Convolution"
+  bottom: "hg2_res"
+  top: "linear2"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -15469,10 +15566,10 @@ layer {
   }
 }
 layer {
-  name: "bn_linear4"
+  name: "bn_linear2"
   type: "BatchNorm"
-  bottom: "linear4"
-  top: "linear4"
+  bottom: "linear2"
+  top: "linear2"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -15491,10 +15588,10 @@ layer {
   }
 }
 layer {
-  name: "scale_linear4"
+  name: "scale_linear2"
   type: "EltwiseAffine"
-  bottom: "linear4"
-  top: "linear4"
+  bottom: "linear2"
+  top: "linear2"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -15508,15 +15605,15 @@ layer {
   }
 }
 layer {
-  name: "linear4_relu"
+  name: "linear2_relu"
   type: "ReLU"
-  bottom: "linear4"
-  top: "linear4"
+  bottom: "linear2"
+  top: "linear2"
 }
 layer {
   name: "out2"
   type: "Convolution"
-  bottom: "linear4"
+  bottom: "linear2"
   top: "out2"
   param {
     lr_mult: 0
@@ -15554,34 +15651,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 384
-    pad: 0
-    kernel_size: 1
-    stride: 1
-    weight_filler {
-      type: "xavier"
-    }
-    bias_filler {
-      type: "constant"
-      value: 0
-    }
-  }
-}
-layer {
-  name: "concat2_CN"
-  type: "Convolution"
-  bottom: "linear4"
-  top: "concat2_CN"
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  convolution_param {
-    num_output: 384
+    num_output: 256
     pad: 0
     kernel_size: 1
     stride: 1
@@ -15597,9 +15667,9 @@ layer {
 layer {
   name: "int2"
   type: "Eltwise"
-  bottom: "concat2_CN"
-  bottom: "out2_"
   bottom: "int1"
+  bottom: "linear2"
+  bottom: "out2_"
   top: "int2"
 }
 layer {
@@ -15870,7 +15940,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -16090,7 +16160,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -17070,7 +17140,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -17290,7 +17360,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -18243,7 +18313,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -18463,7 +18533,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -19416,7 +19486,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -19636,7 +19706,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -20362,7 +20432,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -20582,7 +20652,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -20809,7 +20879,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -20839,11 +20909,11 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     bias_term: false
     pad: 0
     kernel_size: 2
-    group: 256
+    group: 512
     stride: 2
     weight_filler {
       type: "nearest"
@@ -21064,7 +21134,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -21094,11 +21164,11 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     bias_term: false
     pad: 0
     kernel_size: 2
-    group: 256
+    group: 512
     stride: 2
     weight_filler {
       type: "nearest"
@@ -21319,7 +21389,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -21349,11 +21419,11 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     bias_term: false
     pad: 0
     kernel_size: 2
-    group: 256
+    group: 512
     stride: 2
     weight_filler {
       type: "nearest"
@@ -21574,7 +21644,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -21604,11 +21674,11 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     bias_term: false
     pad: 0
     kernel_size: 2
-    group: 256
+    group: 512
     stride: 2
     weight_filler {
       type: "nearest"
@@ -21623,10 +21693,10 @@ layer {
   top: "hg3"
 }
 layer {
-  name: "linear5"
+  name: "hg3_res_branch1"
   type: "Convolution"
   bottom: "hg3"
-  top: "linear5"
+  top: "hg3_res_branch1"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -21637,13 +21707,11 @@ layer {
   }
   convolution_param {
     num_output: 256
-    bias_term: true
     pad: 0
     kernel_size: 1
     stride: 1
     weight_filler {
-      type: "gaussian"
-      std: 0.01
+      type: "xavier"
     }
     bias_filler {
       type: "constant"
@@ -21652,10 +21720,10 @@ layer {
   }
 }
 layer {
-  name: "bn_linear5"
+  name: "hg3_bn"
   type: "BatchNorm"
-  bottom: "linear5"
-  top: "linear5"
+  bottom: "hg3"
+  top: "hg3_bn"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -21674,10 +21742,10 @@ layer {
   }
 }
 layer {
-  name: "scale_linear5"
+  name: "hg3_bn_scale"
   type: "EltwiseAffine"
-  bottom: "linear5"
-  top: "linear5"
+  bottom: "hg3_bn"
+  top: "hg3_bn"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -21691,16 +21759,198 @@ layer {
   }
 }
 layer {
-  name: "linear5_relu"
+  name: "hg3_bn_scale_relu"
   type: "ReLU"
-  bottom: "linear5"
-  top: "linear5"
+  bottom: "hg3_bn"
+  top: "hg3_bn"
 }
 layer {
-  name: "linear6"
+  name: "hg3_res_branch2a"
   type: "Convolution"
-  bottom: "linear5"
-  top: "linear6"
+  bottom: "hg3_bn"
+  top: "hg3_res_branch2a"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 128
+    bias_term: true
+    pad: 0
+    kernel_size: 1
+    stride: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
+  name: "hg3_bn_branch2a"
+  type: "BatchNorm"
+  bottom: "hg3_res_branch2a"
+  top: "hg3_res_branch2a"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  batch_norm_param {
+    use_global_stats: true
+    eps: 1e-05
+  }
+}
+layer {
+  name: "hg3_scale_branch2a"
+  type: "EltwiseAffine"
+  bottom: "hg3_res_branch2a"
+  top: "hg3_res_branch2a"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  eltwise_affine_param {
+    channel_shared: false
+  }
+}
+layer {
+  name: "hg3_res_branch2a_relu"
+  type: "ReLU"
+  bottom: "hg3_res_branch2a"
+  top: "hg3_res_branch2a"
+}
+layer {
+  name: "hg3_res_branch2b"
+  type: "Convolution"
+  bottom: "hg3_res_branch2a"
+  top: "hg3_res_branch2b"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 128
+    bias_term: true
+    pad: 1
+    kernel_size: 3
+    stride: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
+  name: "hg3_bn_branch2b"
+  type: "BatchNorm"
+  bottom: "hg3_res_branch2b"
+  top: "hg3_res_branch2b"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  batch_norm_param {
+    use_global_stats: true
+    eps: 1e-05
+  }
+}
+layer {
+  name: "hg3_scale_branch2b"
+  type: "EltwiseAffine"
+  bottom: "hg3_res_branch2b"
+  top: "hg3_res_branch2b"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  eltwise_affine_param {
+    channel_shared: false
+  }
+}
+layer {
+  name: "hg3_res_branch2b_relu"
+  type: "ReLU"
+  bottom: "hg3_res_branch2b"
+  top: "hg3_res_branch2b"
+}
+layer {
+  name: "hg3_res_branch2c"
+  type: "Convolution"
+  bottom: "hg3_res_branch2b"
+  top: "hg3_res_branch2c"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 256
+    pad: 0
+    kernel_size: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
+  name: "hg3_res"
+  type: "Eltwise"
+  bottom: "hg3_res_branch1"
+  bottom: "hg3_res_branch2c"
+  top: "hg3_res"
+}
+layer {
+  name: "linear3"
+  type: "Convolution"
+  bottom: "hg3_res"
+  top: "linear3"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -21726,10 +21976,10 @@ layer {
   }
 }
 layer {
-  name: "bn_linear6"
+  name: "bn_linear3"
   type: "BatchNorm"
-  bottom: "linear6"
-  top: "linear6"
+  bottom: "linear3"
+  top: "linear3"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -21748,10 +21998,10 @@ layer {
   }
 }
 layer {
-  name: "scale_linear6"
+  name: "scale_linear3"
   type: "EltwiseAffine"
-  bottom: "linear6"
-  top: "linear6"
+  bottom: "linear3"
+  top: "linear3"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -21765,15 +22015,15 @@ layer {
   }
 }
 layer {
-  name: "linear6_relu"
+  name: "linear3_relu"
   type: "ReLU"
-  bottom: "linear6"
-  top: "linear6"
+  bottom: "linear3"
+  top: "linear3"
 }
 layer {
   name: "out3"
   type: "Convolution"
-  bottom: "linear6"
+  bottom: "linear3"
   top: "out3"
   param {
     lr_mult: 0
@@ -21811,34 +22061,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 384
-    pad: 0
-    kernel_size: 1
-    stride: 1
-    weight_filler {
-      type: "xavier"
-    }
-    bias_filler {
-      type: "constant"
-      value: 0
-    }
-  }
-}
-layer {
-  name: "concat3_CN"
-  type: "Convolution"
-  bottom: "linear6"
-  top: "concat3_CN"
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  convolution_param {
-    num_output: 384
+    num_output: 256
     pad: 0
     kernel_size: 1
     stride: 1
@@ -21854,9 +22077,9 @@ layer {
 layer {
   name: "int3"
   type: "Eltwise"
-  bottom: "concat3_CN"
-  bottom: "out3_"
   bottom: "int2"
+  bottom: "linear3"
+  bottom: "out3_"
   top: "int3"
 }
 layer {
@@ -22127,7 +22350,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -22347,7 +22570,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -23327,7 +23550,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -23547,7 +23770,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -24500,7 +24723,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -24720,7 +24943,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -25673,7 +25896,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -25893,7 +26116,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -26619,7 +26842,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -26839,7 +27062,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -27066,7 +27289,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -27096,11 +27319,11 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     bias_term: false
     pad: 0
     kernel_size: 2
-    group: 256
+    group: 512
     stride: 2
     weight_filler {
       type: "nearest"
@@ -27321,7 +27544,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -27351,11 +27574,11 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     bias_term: false
     pad: 0
     kernel_size: 2
-    group: 256
+    group: 512
     stride: 2
     weight_filler {
       type: "nearest"
@@ -27576,7 +27799,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -27606,11 +27829,11 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     bias_term: false
     pad: 0
     kernel_size: 2
-    group: 256
+    group: 512
     stride: 2
     weight_filler {
       type: "nearest"
@@ -27831,7 +28054,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -27861,11 +28084,11 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     bias_term: false
     pad: 0
     kernel_size: 2
-    group: 256
+    group: 512
     stride: 2
     weight_filler {
       type: "nearest"
@@ -27880,10 +28103,10 @@ layer {
   top: "hg4"
 }
 layer {
-  name: "linear7"
+  name: "hg4_res_branch1"
   type: "Convolution"
   bottom: "hg4"
-  top: "linear7"
+  top: "hg4_res_branch1"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -27894,13 +28117,11 @@ layer {
   }
   convolution_param {
     num_output: 256
-    bias_term: true
     pad: 0
     kernel_size: 1
     stride: 1
     weight_filler {
-      type: "gaussian"
-      std: 0.01
+      type: "xavier"
     }
     bias_filler {
       type: "constant"
@@ -27909,10 +28130,10 @@ layer {
   }
 }
 layer {
-  name: "bn_linear7"
+  name: "hg4_bn"
   type: "BatchNorm"
-  bottom: "linear7"
-  top: "linear7"
+  bottom: "hg4"
+  top: "hg4_bn"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -27931,10 +28152,10 @@ layer {
   }
 }
 layer {
-  name: "scale_linear7"
+  name: "hg4_bn_scale"
   type: "EltwiseAffine"
-  bottom: "linear7"
-  top: "linear7"
+  bottom: "hg4_bn"
+  top: "hg4_bn"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -27948,16 +28169,198 @@ layer {
   }
 }
 layer {
-  name: "linear7_relu"
+  name: "hg4_bn_scale_relu"
   type: "ReLU"
-  bottom: "linear7"
-  top: "linear7"
+  bottom: "hg4_bn"
+  top: "hg4_bn"
 }
 layer {
-  name: "linear8"
+  name: "hg4_res_branch2a"
   type: "Convolution"
-  bottom: "linear7"
-  top: "linear8"
+  bottom: "hg4_bn"
+  top: "hg4_res_branch2a"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 128
+    bias_term: true
+    pad: 0
+    kernel_size: 1
+    stride: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
+  name: "hg4_bn_branch2a"
+  type: "BatchNorm"
+  bottom: "hg4_res_branch2a"
+  top: "hg4_res_branch2a"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  batch_norm_param {
+    use_global_stats: true
+    eps: 1e-05
+  }
+}
+layer {
+  name: "hg4_scale_branch2a"
+  type: "EltwiseAffine"
+  bottom: "hg4_res_branch2a"
+  top: "hg4_res_branch2a"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  eltwise_affine_param {
+    channel_shared: false
+  }
+}
+layer {
+  name: "hg4_res_branch2a_relu"
+  type: "ReLU"
+  bottom: "hg4_res_branch2a"
+  top: "hg4_res_branch2a"
+}
+layer {
+  name: "hg4_res_branch2b"
+  type: "Convolution"
+  bottom: "hg4_res_branch2a"
+  top: "hg4_res_branch2b"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 128
+    bias_term: true
+    pad: 1
+    kernel_size: 3
+    stride: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
+  name: "hg4_bn_branch2b"
+  type: "BatchNorm"
+  bottom: "hg4_res_branch2b"
+  top: "hg4_res_branch2b"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  batch_norm_param {
+    use_global_stats: true
+    eps: 1e-05
+  }
+}
+layer {
+  name: "hg4_scale_branch2b"
+  type: "EltwiseAffine"
+  bottom: "hg4_res_branch2b"
+  top: "hg4_res_branch2b"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  eltwise_affine_param {
+    channel_shared: false
+  }
+}
+layer {
+  name: "hg4_res_branch2b_relu"
+  type: "ReLU"
+  bottom: "hg4_res_branch2b"
+  top: "hg4_res_branch2b"
+}
+layer {
+  name: "hg4_res_branch2c"
+  type: "Convolution"
+  bottom: "hg4_res_branch2b"
+  top: "hg4_res_branch2c"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 256
+    pad: 0
+    kernel_size: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
+  name: "hg4_res"
+  type: "Eltwise"
+  bottom: "hg4_res_branch1"
+  bottom: "hg4_res_branch2c"
+  top: "hg4_res"
+}
+layer {
+  name: "linear4"
+  type: "Convolution"
+  bottom: "hg4_res"
+  top: "linear4"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -27983,10 +28386,10 @@ layer {
   }
 }
 layer {
-  name: "bn_linear8"
+  name: "bn_linear4"
   type: "BatchNorm"
-  bottom: "linear8"
-  top: "linear8"
+  bottom: "linear4"
+  top: "linear4"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -28005,10 +28408,10 @@ layer {
   }
 }
 layer {
-  name: "scale_linear8"
+  name: "scale_linear4"
   type: "EltwiseAffine"
-  bottom: "linear8"
-  top: "linear8"
+  bottom: "linear4"
+  top: "linear4"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -28022,15 +28425,15 @@ layer {
   }
 }
 layer {
-  name: "linear8_relu"
+  name: "linear4_relu"
   type: "ReLU"
-  bottom: "linear8"
-  top: "linear8"
+  bottom: "linear4"
+  top: "linear4"
 }
 layer {
   name: "output"
   type: "Convolution"
-  bottom: "linear8"
+  bottom: "linear4"
   top: "output"
   param {
     lr_mult: 0
