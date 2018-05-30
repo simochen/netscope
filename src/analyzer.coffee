@@ -299,12 +299,23 @@ module.exports =
                     for p in n.parents
                         failed = failed or (d.wIn != p.analysis.wOut) or (d.hIn != p.analysis.hOut)
                     onerror 'ELTWISE_AFFINE: input dimensions dont agree in '+n.name if failed
-                    #memory
+                    # memory
                     d.mem.param = if n.attribs.eltwise_affine_param.channel_shared then 2 else 2 * d.chOut
                     d.mem.activation = d.wOut*d.hOut*d.chOut*d.batchOut
                     # computation
                     d.comp.macc = d.wIn*d.hIn*d.chIn*d.batchOut
                     d.comp.add = d.wIn*d.hIn*d.chIn*d.batchOut
+
+                when "spatialtransformer"
+                    #parent2 = n.parents[1].analysis
+                    d.chOut = d.chIn
+                    d.hOut = n.attribs.st_param?.output_h ? d.hIn
+                    d.wOut = n.attribs.st_param?.output_w ? d.wIn
+                    # memory
+                    d.mem.param = d.batchIn * 6
+                    # computation
+                    d.comp.macc = d.wOut*d.hOut*d.chOut*d.batchOut*4 + 6*d.wOut*d.hOut*d.batchOut
+                    d.comp.add = d.wOut*d.hOut*d.chOut*d.batchOut*4
 
                 when "deconvolution"
                     #dimensions
