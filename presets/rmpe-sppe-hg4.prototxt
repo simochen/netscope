@@ -6765,7 +6765,7 @@ layer {
 layer {
   name: "reshg1_low4_low4_low4_low4_branch2a"
   type: "Convolution"
-  bottom: "reshg1_low4_low4_low4_low2_bn"
+  bottom: "reshg1_low4_low4_low4_low_bn"
   top: "reshg1_low4_low4_low4_low4_branch2a"
   param {
     lr_mult: 0
