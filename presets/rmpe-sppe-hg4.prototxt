@@ -3147,7 +3147,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -3367,7 +3367,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -4093,7 +4093,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -4313,7 +4313,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -5039,7 +5039,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -5259,7 +5259,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -5985,7 +5985,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -6205,7 +6205,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -6704,7 +6704,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -6924,7 +6924,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -7151,7 +7151,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -7181,11 +7181,11 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     bias_term: false
     pad: 0
     kernel_size: 2
-    group: 256
+    group: 512
     stride: 2
     weight_filler {
       type: "nearest"
@@ -7406,7 +7406,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -7436,11 +7436,11 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     bias_term: false
     pad: 0
     kernel_size: 2
-    group: 256
+    group: 512
     stride: 2
     weight_filler {
       type: "nearest"
@@ -7661,7 +7661,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -7691,11 +7691,11 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     bias_term: false
     pad: 0
     kernel_size: 2
-    group: 256
+    group: 512
     stride: 2
     weight_filler {
       type: "nearest"
@@ -7916,7 +7916,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -7946,11 +7946,11 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     bias_term: false
     pad: 0
     kernel_size: 2
-    group: 256
+    group: 512
     stride: 2
     weight_filler {
       type: "nearest"
@@ -8622,7 +8622,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -8842,7 +8842,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -9595,7 +9595,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -9815,7 +9815,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -10541,7 +10541,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -10761,7 +10761,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -11487,7 +11487,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -11707,7 +11707,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -12206,7 +12206,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -12426,7 +12426,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -12653,7 +12653,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -12683,11 +12683,11 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     bias_term: false
     pad: 0
     kernel_size: 2
-    group: 256
+    group: 512
     stride: 2
     weight_filler {
       type: "nearest"
@@ -12908,7 +12908,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -12938,11 +12938,11 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     bias_term: false
     pad: 0
     kernel_size: 2
-    group: 256
+    group: 512
     stride: 2
     weight_filler {
       type: "nearest"
@@ -13163,7 +13163,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -13193,11 +13193,11 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     bias_term: false
     pad: 0
     kernel_size: 2
-    group: 256
+    group: 512
     stride: 2
     weight_filler {
       type: "nearest"
@@ -13418,7 +13418,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -13448,11 +13448,11 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     bias_term: false
     pad: 0
     kernel_size: 2
-    group: 256
+    group: 512
     stride: 2
     weight_filler {
       type: "nearest"
@@ -14124,7 +14124,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -14344,7 +14344,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -15097,7 +15097,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -15317,7 +15317,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -16043,7 +16043,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -16263,7 +16263,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -16989,7 +16989,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -17209,7 +17209,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -17708,7 +17708,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -17928,7 +17928,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -18155,7 +18155,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -18185,11 +18185,11 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     bias_term: false
     pad: 0
     kernel_size: 2
-    group: 256
+    group: 512
     stride: 2
     weight_filler {
       type: "nearest"
@@ -18410,7 +18410,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -18440,11 +18440,11 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     bias_term: false
     pad: 0
     kernel_size: 2
-    group: 256
+    group: 512
     stride: 2
     weight_filler {
       type: "nearest"
@@ -18665,7 +18665,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -18695,11 +18695,11 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     bias_term: false
     pad: 0
     kernel_size: 2
-    group: 256
+    group: 512
     stride: 2
     weight_filler {
       type: "nearest"
@@ -18920,7 +18920,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -18950,11 +18950,11 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     bias_term: false
     pad: 0
     kernel_size: 2
-    group: 256
+    group: 512
     stride: 2
     weight_filler {
       type: "nearest"
@@ -19626,7 +19626,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -19846,7 +19846,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -20599,7 +20599,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -20819,7 +20819,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -21545,7 +21545,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -21765,7 +21765,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -22491,7 +22491,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -22711,7 +22711,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -23210,7 +23210,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -23430,7 +23430,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -23657,7 +23657,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -23687,11 +23687,11 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     bias_term: false
     pad: 0
     kernel_size: 2
-    group: 256
+    group: 512
     stride: 2
     weight_filler {
       type: "nearest"
@@ -23912,7 +23912,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -23942,11 +23942,11 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     bias_term: false
     pad: 0
     kernel_size: 2
-    group: 256
+    group: 512
     stride: 2
     weight_filler {
       type: "nearest"
@@ -24167,7 +24167,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -24197,11 +24197,11 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     bias_term: false
     pad: 0
     kernel_size: 2
-    group: 256
+    group: 512
     stride: 2
     weight_filler {
       type: "nearest"
@@ -24422,7 +24422,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -24452,11 +24452,11 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     bias_term: false
     pad: 0
     kernel_size: 2
-    group: 256
+    group: 512
     stride: 2
     weight_filler {
       type: "nearest"
