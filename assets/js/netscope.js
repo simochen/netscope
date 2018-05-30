@@ -16497,8 +16497,8 @@ module.exports = Analyzer = (function() {
           d.hOut = (ref42 = (ref43 = n.attribs.st_param) != null ? ref43.output_h : void 0) != null ? ref42 : d.hIn;
           d.wOut = (ref44 = (ref45 = n.attribs.st_param) != null ? ref45.output_w : void 0) != null ? ref44 : d.wIn;
           d.mem.param = d.batchIn * 6;
-          d.comp.macc = d.wOut * d.hOut * d.chOut * d.batchOut * 4 + 6 * d.wOut * d.hOut * d.batchOut;
-          d.comp.add = d.wOut * d.hOut * d.chOut * d.batchOut * 4;
+          d.comp.macc = d.wOut * d.hOut * d.chOut * d.batchOut * 8 + 6 * d.wOut * d.hOut * d.batchOut;
+          d.comp.add = d.wOut * d.hOut * d.chOut * d.batchOut * 8;
           break;
         case "deconvolution":
           params = n.attribs.convolution_param;

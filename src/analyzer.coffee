@@ -314,8 +314,8 @@ module.exports =
                     # memory
                     d.mem.param = d.batchIn * 6
                     # computation
-                    d.comp.macc = d.wOut*d.hOut*d.chOut*d.batchOut*4 + 6*d.wOut*d.hOut*d.batchOut
-                    d.comp.add = d.wOut*d.hOut*d.chOut*d.batchOut*4
+                    d.comp.macc = d.wOut*d.hOut*d.chOut*d.batchOut*8 + 6*d.wOut*d.hOut*d.batchOut
+                    d.comp.add = d.wOut*d.hOut*d.chOut*d.batchOut*8
 
                 when "deconvolution"
                     #dimensions
