@@ -17360,7 +17360,7 @@ layer {
   name: "out2_"
   type: "Convolution"
   bottom: "out2"
-  top: "out1_"
+  top: "out2_"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -24525,7 +24525,7 @@ layer {
   name: "out3_"
   type: "Convolution"
   bottom: "out3"
-  top: "out2_"
+  top: "out3_"
   param {
     lr_mult: 0
     decay_mult: 0
