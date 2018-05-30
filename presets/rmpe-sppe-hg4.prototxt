@@ -3361,6 +3361,33 @@ layer {
   top: "reshg1_up1"
 }
 layer {
+  name: "reshg1_up4_branch1"
+  type: "Convolution"
+  bottom: "reshg1_up1"
+  top: "reshg1_up4_branch1"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 512
+    pad: 0
+    kernel_size: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
   name: "reshg1_up1_bn"
   type: "BatchNorm"
   bottom: "reshg1_up1"
@@ -3406,10 +3433,10 @@ layer {
   top: "reshg1_up1_bn"
 }
 layer {
-  name: "reshg1_up2_branch2a"
+  name: "reshg1_up4_branch2a"
   type: "Convolution"
   bottom: "reshg1_up1_bn"
-  top: "reshg1_up2_branch2a"
+  top: "reshg1_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -3419,7 +3446,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 128
+    num_output: 256
     bias_term: true
     pad: 0
     kernel_size: 1
@@ -3435,10 +3462,10 @@ layer {
   }
 }
 layer {
-  name: "bnhg1_up2_branch2a"
+  name: "bnhg1_up4_branch2a"
   type: "BatchNorm"
-  bottom: "reshg1_up2_branch2a"
-  top: "reshg1_up2_branch2a"
+  bottom: "reshg1_up4_branch2a"
+  top: "reshg1_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -3457,10 +3484,10 @@ layer {
   }
 }
 layer {
-  name: "scalehg1_up2_branch2a"
+  name: "scalehg1_up4_branch2a"
   type: "EltwiseAffine"
-  bottom: "reshg1_up2_branch2a"
-  top: "reshg1_up2_branch2a"
+  bottom: "reshg1_up4_branch2a"
+  top: "reshg1_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -3474,16 +3501,16 @@ layer {
   }
 }
 layer {
-  name: "reshg1_up2_branch2a_relu"
+  name: "reshg1_up4_branch2a_relu"
   type: "ReLU"
-  bottom: "reshg1_up2_branch2a"
-  top: "reshg1_up2_branch2a"
+  bottom: "reshg1_up4_branch2a"
+  top: "reshg1_up4_branch2a"
 }
 layer {
-  name: "reshg1_up2_branch2b"
+  name: "reshg1_up4_branch2b"
   type: "Convolution"
-  bottom: "reshg1_up2_branch2a"
-  top: "reshg1_up2_branch2b"
+  bottom: "reshg1_up4_branch2a"
+  top: "reshg1_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -3493,7 +3520,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 128
+    num_output: 256
     bias_term: true
     pad: 1
     kernel_size: 3
@@ -3509,10 +3536,10 @@ layer {
   }
 }
 layer {
-  name: "bnhg1_up2_branch2b"
+  name: "bnhg1_up4_branch2b"
   type: "BatchNorm"
-  bottom: "reshg1_up2_branch2b"
-  top: "reshg1_up2_branch2b"
+  bottom: "reshg1_up4_branch2b"
+  top: "reshg1_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -3531,10 +3558,10 @@ layer {
   }
 }
 layer {
-  name: "scalehg1_up2_branch2b"
+  name: "scalehg1_up4_branch2b"
   type: "EltwiseAffine"
-  bottom: "reshg1_up2_branch2b"
-  top: "reshg1_up2_branch2b"
+  bottom: "reshg1_up4_branch2b"
+  top: "reshg1_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -3548,16 +3575,16 @@ layer {
   }
 }
 layer {
-  name: "reshg1_up2_branch2b_relu"
+  name: "reshg1_up4_branch2b_relu"
   type: "ReLU"
-  bottom: "reshg1_up2_branch2b"
-  top: "reshg1_up2_branch2b"
+  bottom: "reshg1_up4_branch2b"
+  top: "reshg1_up4_branch2b"
 }
 layer {
-  name: "reshg1_up2_branch2c"
+  name: "reshg1_up4_branch2c"
   type: "Convolution"
-  bottom: "reshg1_up2_branch2b"
-  top: "reshg1_up2_branch2c"
+  bottom: "reshg1_up4_branch2b"
+  top: "reshg1_up4_branch2c"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -3567,7 +3594,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -3581,11 +3608,11 @@ layer {
   }
 }
 layer {
-  name: "reshg1_up2"
+  name: "reshg1_up4"
   type: "Eltwise"
-  bottom: "reshg1_up1"
-  bottom: "reshg1_up2_branch2c"
-  top: "reshg1_up2"
+  bottom: "reshg1_up4_branch1"
+  bottom: "reshg1_up4_branch2c"
+  top: "reshg1_up4"
 }
 layer {
   name: "hg1_pool1"
@@ -4507,6 +4534,33 @@ layer {
   top: "reshg1_low6_up1"
 }
 layer {
+  name: "reshg1_low6_up4_branch1"
+  type: "Convolution"
+  bottom: "reshg1_low6_up1"
+  top: "reshg1_low6_up4_branch1"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 512
+    pad: 0
+    kernel_size: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
   name: "reshg1_low6_up1_bn"
   type: "BatchNorm"
   bottom: "reshg1_low6_up1"
@@ -4552,10 +4606,10 @@ layer {
   top: "reshg1_low6_up1_bn"
 }
 layer {
-  name: "reshg1_low6_up2_branch2a"
+  name: "reshg1_low6_up4_branch2a"
   type: "Convolution"
   bottom: "reshg1_low6_up1_bn"
-  top: "reshg1_low6_up2_branch2a"
+  top: "reshg1_low6_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -4565,7 +4619,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 128
+    num_output: 256
     bias_term: true
     pad: 0
     kernel_size: 1
@@ -4581,10 +4635,10 @@ layer {
   }
 }
 layer {
-  name: "bnhg1_low6_up2_branch2a"
+  name: "bnhg1_low6_up4_branch2a"
   type: "BatchNorm"
-  bottom: "reshg1_low6_up2_branch2a"
-  top: "reshg1_low6_up2_branch2a"
+  bottom: "reshg1_low6_up4_branch2a"
+  top: "reshg1_low6_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -4603,10 +4657,10 @@ layer {
   }
 }
 layer {
-  name: "scalehg1_low6_up2_branch2a"
+  name: "scalehg1_low6_up4_branch2a"
   type: "EltwiseAffine"
-  bottom: "reshg1_low6_up2_branch2a"
-  top: "reshg1_low6_up2_branch2a"
+  bottom: "reshg1_low6_up4_branch2a"
+  top: "reshg1_low6_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -4620,16 +4674,16 @@ layer {
   }
 }
 layer {
-  name: "reshg1_low6_up2_branch2a_relu"
+  name: "reshg1_low6_up4_branch2a_relu"
   type: "ReLU"
-  bottom: "reshg1_low6_up2_branch2a"
-  top: "reshg1_low6_up2_branch2a"
+  bottom: "reshg1_low6_up4_branch2a"
+  top: "reshg1_low6_up4_branch2a"
 }
 layer {
-  name: "reshg1_low6_up2_branch2b"
+  name: "reshg1_low6_up4_branch2b"
   type: "Convolution"
-  bottom: "reshg1_low6_up2_branch2a"
-  top: "reshg1_low6_up2_branch2b"
+  bottom: "reshg1_low6_up4_branch2a"
+  top: "reshg1_low6_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -4639,7 +4693,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 128
+    num_output: 256
     bias_term: true
     pad: 1
     kernel_size: 3
@@ -4655,10 +4709,10 @@ layer {
   }
 }
 layer {
-  name: "bnhg1_low6_up2_branch2b"
+  name: "bnhg1_low6_up4_branch2b"
   type: "BatchNorm"
-  bottom: "reshg1_low6_up2_branch2b"
-  top: "reshg1_low6_up2_branch2b"
+  bottom: "reshg1_low6_up4_branch2b"
+  top: "reshg1_low6_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -4677,10 +4731,10 @@ layer {
   }
 }
 layer {
-  name: "scalehg1_low6_up2_branch2b"
+  name: "scalehg1_low6_up4_branch2b"
   type: "EltwiseAffine"
-  bottom: "reshg1_low6_up2_branch2b"
-  top: "reshg1_low6_up2_branch2b"
+  bottom: "reshg1_low6_up4_branch2b"
+  top: "reshg1_low6_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -4694,16 +4748,16 @@ layer {
   }
 }
 layer {
-  name: "reshg1_low6_up2_branch2b_relu"
+  name: "reshg1_low6_up4_branch2b_relu"
   type: "ReLU"
-  bottom: "reshg1_low6_up2_branch2b"
-  top: "reshg1_low6_up2_branch2b"
+  bottom: "reshg1_low6_up4_branch2b"
+  top: "reshg1_low6_up4_branch2b"
 }
 layer {
-  name: "reshg1_low6_up2_branch2c"
+  name: "reshg1_low6_up4_branch2c"
   type: "Convolution"
-  bottom: "reshg1_low6_up2_branch2b"
-  top: "reshg1_low6_up2_branch2c"
+  bottom: "reshg1_low6_up4_branch2b"
+  top: "reshg1_low6_up4_branch2c"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -4713,7 +4767,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -4727,11 +4781,11 @@ layer {
   }
 }
 layer {
-  name: "reshg1_low6_up2"
+  name: "reshg1_low6_up4"
   type: "Eltwise"
-  bottom: "reshg1_low6_up1"
-  bottom: "reshg1_low6_up2_branch2c"
-  top: "reshg1_low6_up2"
+  bottom: "reshg1_low6_up4_branch1"
+  bottom: "reshg1_low6_up4_branch2c"
+  top: "reshg1_low6_up4"
 }
 layer {
   name: "hg1_low6_pool1"
@@ -5653,6 +5707,33 @@ layer {
   top: "reshg1_low6_low6_up1"
 }
 layer {
+  name: "reshg1_low6_low6_up4_branch1"
+  type: "Convolution"
+  bottom: "reshg1_low6_low6_up1"
+  top: "reshg1_low6_low6_up4_branch1"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 512
+    pad: 0
+    kernel_size: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
   name: "reshg1_low6_low6_up1_bn"
   type: "BatchNorm"
   bottom: "reshg1_low6_low6_up1"
@@ -5698,10 +5779,10 @@ layer {
   top: "reshg1_low6_low6_up1_bn"
 }
 layer {
-  name: "reshg1_low6_low6_up2_branch2a"
+  name: "reshg1_low6_low6_up4_branch2a"
   type: "Convolution"
   bottom: "reshg1_low6_low6_up1_bn"
-  top: "reshg1_low6_low6_up2_branch2a"
+  top: "reshg1_low6_low6_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -5711,7 +5792,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 128
+    num_output: 256
     bias_term: true
     pad: 0
     kernel_size: 1
@@ -5727,10 +5808,10 @@ layer {
   }
 }
 layer {
-  name: "bnhg1_low6_low6_up2_branch2a"
+  name: "bnhg1_low6_low6_up4_branch2a"
   type: "BatchNorm"
-  bottom: "reshg1_low6_low6_up2_branch2a"
-  top: "reshg1_low6_low6_up2_branch2a"
+  bottom: "reshg1_low6_low6_up4_branch2a"
+  top: "reshg1_low6_low6_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -5749,10 +5830,10 @@ layer {
   }
 }
 layer {
-  name: "scalehg1_low6_low6_up2_branch2a"
+  name: "scalehg1_low6_low6_up4_branch2a"
   type: "EltwiseAffine"
-  bottom: "reshg1_low6_low6_up2_branch2a"
-  top: "reshg1_low6_low6_up2_branch2a"
+  bottom: "reshg1_low6_low6_up4_branch2a"
+  top: "reshg1_low6_low6_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -5766,16 +5847,16 @@ layer {
   }
 }
 layer {
-  name: "reshg1_low6_low6_up2_branch2a_relu"
+  name: "reshg1_low6_low6_up4_branch2a_relu"
   type: "ReLU"
-  bottom: "reshg1_low6_low6_up2_branch2a"
-  top: "reshg1_low6_low6_up2_branch2a"
+  bottom: "reshg1_low6_low6_up4_branch2a"
+  top: "reshg1_low6_low6_up4_branch2a"
 }
 layer {
-  name: "reshg1_low6_low6_up2_branch2b"
+  name: "reshg1_low6_low6_up4_branch2b"
   type: "Convolution"
-  bottom: "reshg1_low6_low6_up2_branch2a"
-  top: "reshg1_low6_low6_up2_branch2b"
+  bottom: "reshg1_low6_low6_up4_branch2a"
+  top: "reshg1_low6_low6_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -5785,7 +5866,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 128
+    num_output: 256
     bias_term: true
     pad: 1
     kernel_size: 3
@@ -5801,10 +5882,10 @@ layer {
   }
 }
 layer {
-  name: "bnhg1_low6_low6_up2_branch2b"
+  name: "bnhg1_low6_low6_up4_branch2b"
   type: "BatchNorm"
-  bottom: "reshg1_low6_low6_up2_branch2b"
-  top: "reshg1_low6_low6_up2_branch2b"
+  bottom: "reshg1_low6_low6_up4_branch2b"
+  top: "reshg1_low6_low6_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -5823,10 +5904,10 @@ layer {
   }
 }
 layer {
-  name: "scalehg1_low6_low6_up2_branch2b"
+  name: "scalehg1_low6_low6_up4_branch2b"
   type: "EltwiseAffine"
-  bottom: "reshg1_low6_low6_up2_branch2b"
-  top: "reshg1_low6_low6_up2_branch2b"
+  bottom: "reshg1_low6_low6_up4_branch2b"
+  top: "reshg1_low6_low6_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -5840,16 +5921,16 @@ layer {
   }
 }
 layer {
-  name: "reshg1_low6_low6_up2_branch2b_relu"
+  name: "reshg1_low6_low6_up4_branch2b_relu"
   type: "ReLU"
-  bottom: "reshg1_low6_low6_up2_branch2b"
-  top: "reshg1_low6_low6_up2_branch2b"
+  bottom: "reshg1_low6_low6_up4_branch2b"
+  top: "reshg1_low6_low6_up4_branch2b"
 }
 layer {
-  name: "reshg1_low6_low6_up2_branch2c"
+  name: "reshg1_low6_low6_up4_branch2c"
   type: "Convolution"
-  bottom: "reshg1_low6_low6_up2_branch2b"
-  top: "reshg1_low6_low6_up2_branch2c"
+  bottom: "reshg1_low6_low6_up4_branch2b"
+  top: "reshg1_low6_low6_up4_branch2c"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -5859,7 +5940,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -5873,11 +5954,11 @@ layer {
   }
 }
 layer {
-  name: "reshg1_low6_low6_up2"
+  name: "reshg1_low6_low6_up4"
   type: "Eltwise"
-  bottom: "reshg1_low6_low6_up1"
-  bottom: "reshg1_low6_low6_up2_branch2c"
-  top: "reshg1_low6_low6_up2"
+  bottom: "reshg1_low6_low6_up4_branch1"
+  bottom: "reshg1_low6_low6_up4_branch2c"
+  top: "reshg1_low6_low6_up4"
 }
 layer {
   name: "hg1_low6_low6_pool1"
@@ -6799,6 +6880,33 @@ layer {
   top: "reshg1_low6_low6_low6_up1"
 }
 layer {
+  name: "reshg1_low6_low6_low6_up4_branch1"
+  type: "Convolution"
+  bottom: "reshg1_low6_low6_low6_up1"
+  top: "reshg1_low6_low6_low6_up4_branch1"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 512
+    pad: 0
+    kernel_size: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
   name: "reshg1_low6_low6_low6_up1_bn"
   type: "BatchNorm"
   bottom: "reshg1_low6_low6_low6_up1"
@@ -6844,10 +6952,10 @@ layer {
   top: "reshg1_low6_low6_low6_up1_bn"
 }
 layer {
-  name: "reshg1_low6_low6_low6_up2_branch2a"
+  name: "reshg1_low6_low6_low6_up4_branch2a"
   type: "Convolution"
   bottom: "reshg1_low6_low6_low6_up1_bn"
-  top: "reshg1_low6_low6_low6_up2_branch2a"
+  top: "reshg1_low6_low6_low6_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -6857,7 +6965,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 128
+    num_output: 256
     bias_term: true
     pad: 0
     kernel_size: 1
@@ -6873,10 +6981,10 @@ layer {
   }
 }
 layer {
-  name: "bnhg1_low6_low6_low6_up2_branch2a"
+  name: "bnhg1_low6_low6_low6_up4_branch2a"
   type: "BatchNorm"
-  bottom: "reshg1_low6_low6_low6_up2_branch2a"
-  top: "reshg1_low6_low6_low6_up2_branch2a"
+  bottom: "reshg1_low6_low6_low6_up4_branch2a"
+  top: "reshg1_low6_low6_low6_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -6895,10 +7003,10 @@ layer {
   }
 }
 layer {
-  name: "scalehg1_low6_low6_low6_up2_branch2a"
+  name: "scalehg1_low6_low6_low6_up4_branch2a"
   type: "EltwiseAffine"
-  bottom: "reshg1_low6_low6_low6_up2_branch2a"
-  top: "reshg1_low6_low6_low6_up2_branch2a"
+  bottom: "reshg1_low6_low6_low6_up4_branch2a"
+  top: "reshg1_low6_low6_low6_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -6912,16 +7020,16 @@ layer {
   }
 }
 layer {
-  name: "reshg1_low6_low6_low6_up2_branch2a_relu"
+  name: "reshg1_low6_low6_low6_up4_branch2a_relu"
   type: "ReLU"
-  bottom: "reshg1_low6_low6_low6_up2_branch2a"
-  top: "reshg1_low6_low6_low6_up2_branch2a"
+  bottom: "reshg1_low6_low6_low6_up4_branch2a"
+  top: "reshg1_low6_low6_low6_up4_branch2a"
 }
 layer {
-  name: "reshg1_low6_low6_low6_up2_branch2b"
+  name: "reshg1_low6_low6_low6_up4_branch2b"
   type: "Convolution"
-  bottom: "reshg1_low6_low6_low6_up2_branch2a"
-  top: "reshg1_low6_low6_low6_up2_branch2b"
+  bottom: "reshg1_low6_low6_low6_up4_branch2a"
+  top: "reshg1_low6_low6_low6_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -6931,7 +7039,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 128
+    num_output: 256
     bias_term: true
     pad: 1
     kernel_size: 3
@@ -6947,10 +7055,10 @@ layer {
   }
 }
 layer {
-  name: "bnhg1_low6_low6_low6_up2_branch2b"
+  name: "bnhg1_low6_low6_low6_up4_branch2b"
   type: "BatchNorm"
-  bottom: "reshg1_low6_low6_low6_up2_branch2b"
-  top: "reshg1_low6_low6_low6_up2_branch2b"
+  bottom: "reshg1_low6_low6_low6_up4_branch2b"
+  top: "reshg1_low6_low6_low6_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -6969,10 +7077,10 @@ layer {
   }
 }
 layer {
-  name: "scalehg1_low6_low6_low6_up2_branch2b"
+  name: "scalehg1_low6_low6_low6_up4_branch2b"
   type: "EltwiseAffine"
-  bottom: "reshg1_low6_low6_low6_up2_branch2b"
-  top: "reshg1_low6_low6_low6_up2_branch2b"
+  bottom: "reshg1_low6_low6_low6_up4_branch2b"
+  top: "reshg1_low6_low6_low6_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -6986,16 +7094,16 @@ layer {
   }
 }
 layer {
-  name: "reshg1_low6_low6_low6_up2_branch2b_relu"
+  name: "reshg1_low6_low6_low6_up4_branch2b_relu"
   type: "ReLU"
-  bottom: "reshg1_low6_low6_low6_up2_branch2b"
-  top: "reshg1_low6_low6_low6_up2_branch2b"
+  bottom: "reshg1_low6_low6_low6_up4_branch2b"
+  top: "reshg1_low6_low6_low6_up4_branch2b"
 }
 layer {
-  name: "reshg1_low6_low6_low6_up2_branch2c"
+  name: "reshg1_low6_low6_low6_up4_branch2c"
   type: "Convolution"
-  bottom: "reshg1_low6_low6_low6_up2_branch2b"
-  top: "reshg1_low6_low6_low6_up2_branch2c"
+  bottom: "reshg1_low6_low6_low6_up4_branch2b"
+  top: "reshg1_low6_low6_low6_up4_branch2c"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -7005,7 +7113,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -7019,11 +7127,11 @@ layer {
   }
 }
 layer {
-  name: "reshg1_low6_low6_low6_up2"
+  name: "reshg1_low6_low6_low6_up4"
   type: "Eltwise"
-  bottom: "reshg1_low6_low6_low6_up1"
-  bottom: "reshg1_low6_low6_low6_up2_branch2c"
-  top: "reshg1_low6_low6_low6_up2"
+  bottom: "reshg1_low6_low6_low6_up4_branch1"
+  bottom: "reshg1_low6_low6_low6_up4_branch2c"
+  top: "reshg1_low6_low6_low6_up4"
 }
 layer {
   name: "hg1_low6_low6_low6_pool1"
@@ -8222,7 +8330,7 @@ layer {
 layer {
   name: "hg1_low6_low6_low6"
   type: "Eltwise"
-  bottom: "reshg1_low6_low6_low6_up2"
+  bottom: "reshg1_low6_low6_low6_up4"
   bottom: "hg1_low6_low6_low6_Up5"
   top: "hg1_low6_low6_low6"
 }
@@ -8477,7 +8585,7 @@ layer {
 layer {
   name: "hg1_low6_low6"
   type: "Eltwise"
-  bottom: "reshg1_low6_low6_up2"
+  bottom: "reshg1_low6_low6_up4"
   bottom: "hg1_low6_low6_Up5"
   top: "hg1_low6_low6"
 }
@@ -8732,7 +8840,7 @@ layer {
 layer {
   name: "hg1_low6"
   type: "Eltwise"
-  bottom: "reshg1_low6_up2"
+  bottom: "reshg1_low6_up4"
   bottom: "hg1_low6_Up5"
   top: "hg1_low6"
 }
@@ -8987,7 +9095,7 @@ layer {
 layer {
   name: "hg1"
   type: "Eltwise"
-  bottom: "reshg1_up2"
+  bottom: "reshg1_up4"
   bottom: "hg1_Up5"
   top: "hg1"
 }
@@ -9492,6 +9600,33 @@ layer {
   top: "reshg2_up1"
 }
 layer {
+  name: "reshg2_up4_branch1"
+  type: "Convolution"
+  bottom: "reshg2_up1"
+  top: "reshg2_up4_branch1"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 512
+    pad: 0
+    kernel_size: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
   name: "reshg2_up1_bn"
   type: "BatchNorm"
   bottom: "reshg2_up1"
@@ -9537,10 +9672,10 @@ layer {
   top: "reshg2_up1_bn"
 }
 layer {
-  name: "reshg2_up2_branch2a"
+  name: "reshg2_up4_branch2a"
   type: "Convolution"
   bottom: "reshg2_up1_bn"
-  top: "reshg2_up2_branch2a"
+  top: "reshg2_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -9550,7 +9685,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 128
+    num_output: 256
     bias_term: true
     pad: 0
     kernel_size: 1
@@ -9566,10 +9701,10 @@ layer {
   }
 }
 layer {
-  name: "bnhg2_up2_branch2a"
+  name: "bnhg2_up4_branch2a"
   type: "BatchNorm"
-  bottom: "reshg2_up2_branch2a"
-  top: "reshg2_up2_branch2a"
+  bottom: "reshg2_up4_branch2a"
+  top: "reshg2_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -9588,10 +9723,10 @@ layer {
   }
 }
 layer {
-  name: "scalehg2_up2_branch2a"
+  name: "scalehg2_up4_branch2a"
   type: "EltwiseAffine"
-  bottom: "reshg2_up2_branch2a"
-  top: "reshg2_up2_branch2a"
+  bottom: "reshg2_up4_branch2a"
+  top: "reshg2_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -9605,16 +9740,16 @@ layer {
   }
 }
 layer {
-  name: "reshg2_up2_branch2a_relu"
+  name: "reshg2_up4_branch2a_relu"
   type: "ReLU"
-  bottom: "reshg2_up2_branch2a"
-  top: "reshg2_up2_branch2a"
+  bottom: "reshg2_up4_branch2a"
+  top: "reshg2_up4_branch2a"
 }
 layer {
-  name: "reshg2_up2_branch2b"
+  name: "reshg2_up4_branch2b"
   type: "Convolution"
-  bottom: "reshg2_up2_branch2a"
-  top: "reshg2_up2_branch2b"
+  bottom: "reshg2_up4_branch2a"
+  top: "reshg2_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -9624,7 +9759,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 128
+    num_output: 256
     bias_term: true
     pad: 1
     kernel_size: 3
@@ -9640,10 +9775,10 @@ layer {
   }
 }
 layer {
-  name: "bnhg2_up2_branch2b"
+  name: "bnhg2_up4_branch2b"
   type: "BatchNorm"
-  bottom: "reshg2_up2_branch2b"
-  top: "reshg2_up2_branch2b"
+  bottom: "reshg2_up4_branch2b"
+  top: "reshg2_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -9662,10 +9797,10 @@ layer {
   }
 }
 layer {
-  name: "scalehg2_up2_branch2b"
+  name: "scalehg2_up4_branch2b"
   type: "EltwiseAffine"
-  bottom: "reshg2_up2_branch2b"
-  top: "reshg2_up2_branch2b"
+  bottom: "reshg2_up4_branch2b"
+  top: "reshg2_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -9679,16 +9814,16 @@ layer {
   }
 }
 layer {
-  name: "reshg2_up2_branch2b_relu"
+  name: "reshg2_up4_branch2b_relu"
   type: "ReLU"
-  bottom: "reshg2_up2_branch2b"
-  top: "reshg2_up2_branch2b"
+  bottom: "reshg2_up4_branch2b"
+  top: "reshg2_up4_branch2b"
 }
 layer {
-  name: "reshg2_up2_branch2c"
+  name: "reshg2_up4_branch2c"
   type: "Convolution"
-  bottom: "reshg2_up2_branch2b"
-  top: "reshg2_up2_branch2c"
+  bottom: "reshg2_up4_branch2b"
+  top: "reshg2_up4_branch2c"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -9698,7 +9833,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -9712,11 +9847,11 @@ layer {
   }
 }
 layer {
-  name: "reshg2_up2"
+  name: "reshg2_up4"
   type: "Eltwise"
-  bottom: "reshg2_up1"
-  bottom: "reshg2_up2_branch2c"
-  top: "reshg2_up2"
+  bottom: "reshg2_up4_branch1"
+  bottom: "reshg2_up4_branch2c"
+  top: "reshg2_up4"
 }
 layer {
   name: "hg2_pool1"
@@ -10665,6 +10800,33 @@ layer {
   top: "reshg2_low6_up1"
 }
 layer {
+  name: "reshg2_low6_up4_branch1"
+  type: "Convolution"
+  bottom: "reshg2_low6_up1"
+  top: "reshg2_low6_up4_branch1"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 512
+    pad: 0
+    kernel_size: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
   name: "reshg2_low6_up1_bn"
   type: "BatchNorm"
   bottom: "reshg2_low6_up1"
@@ -10710,10 +10872,10 @@ layer {
   top: "reshg2_low6_up1_bn"
 }
 layer {
-  name: "reshg2_low6_up2_branch2a"
+  name: "reshg2_low6_up4_branch2a"
   type: "Convolution"
   bottom: "reshg2_low6_up1_bn"
-  top: "reshg2_low6_up2_branch2a"
+  top: "reshg2_low6_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -10723,7 +10885,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 128
+    num_output: 256
     bias_term: true
     pad: 0
     kernel_size: 1
@@ -10739,10 +10901,10 @@ layer {
   }
 }
 layer {
-  name: "bnhg2_low6_up2_branch2a"
+  name: "bnhg2_low6_up4_branch2a"
   type: "BatchNorm"
-  bottom: "reshg2_low6_up2_branch2a"
-  top: "reshg2_low6_up2_branch2a"
+  bottom: "reshg2_low6_up4_branch2a"
+  top: "reshg2_low6_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -10761,10 +10923,10 @@ layer {
   }
 }
 layer {
-  name: "scalehg2_low6_up2_branch2a"
+  name: "scalehg2_low6_up4_branch2a"
   type: "EltwiseAffine"
-  bottom: "reshg2_low6_up2_branch2a"
-  top: "reshg2_low6_up2_branch2a"
+  bottom: "reshg2_low6_up4_branch2a"
+  top: "reshg2_low6_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -10778,16 +10940,16 @@ layer {
   }
 }
 layer {
-  name: "reshg2_low6_up2_branch2a_relu"
+  name: "reshg2_low6_up4_branch2a_relu"
   type: "ReLU"
-  bottom: "reshg2_low6_up2_branch2a"
-  top: "reshg2_low6_up2_branch2a"
+  bottom: "reshg2_low6_up4_branch2a"
+  top: "reshg2_low6_up4_branch2a"
 }
 layer {
-  name: "reshg2_low6_up2_branch2b"
+  name: "reshg2_low6_up4_branch2b"
   type: "Convolution"
-  bottom: "reshg2_low6_up2_branch2a"
-  top: "reshg2_low6_up2_branch2b"
+  bottom: "reshg2_low6_up4_branch2a"
+  top: "reshg2_low6_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -10797,7 +10959,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 128
+    num_output: 256
     bias_term: true
     pad: 1
     kernel_size: 3
@@ -10813,10 +10975,10 @@ layer {
   }
 }
 layer {
-  name: "bnhg2_low6_up2_branch2b"
+  name: "bnhg2_low6_up4_branch2b"
   type: "BatchNorm"
-  bottom: "reshg2_low6_up2_branch2b"
-  top: "reshg2_low6_up2_branch2b"
+  bottom: "reshg2_low6_up4_branch2b"
+  top: "reshg2_low6_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -10835,10 +10997,10 @@ layer {
   }
 }
 layer {
-  name: "scalehg2_low6_up2_branch2b"
+  name: "scalehg2_low6_up4_branch2b"
   type: "EltwiseAffine"
-  bottom: "reshg2_low6_up2_branch2b"
-  top: "reshg2_low6_up2_branch2b"
+  bottom: "reshg2_low6_up4_branch2b"
+  top: "reshg2_low6_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -10852,16 +11014,16 @@ layer {
   }
 }
 layer {
-  name: "reshg2_low6_up2_branch2b_relu"
+  name: "reshg2_low6_up4_branch2b_relu"
   type: "ReLU"
-  bottom: "reshg2_low6_up2_branch2b"
-  top: "reshg2_low6_up2_branch2b"
+  bottom: "reshg2_low6_up4_branch2b"
+  top: "reshg2_low6_up4_branch2b"
 }
 layer {
-  name: "reshg2_low6_up2_branch2c"
+  name: "reshg2_low6_up4_branch2c"
   type: "Convolution"
-  bottom: "reshg2_low6_up2_branch2b"
-  top: "reshg2_low6_up2_branch2c"
+  bottom: "reshg2_low6_up4_branch2b"
+  top: "reshg2_low6_up4_branch2c"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -10871,7 +11033,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -10885,11 +11047,11 @@ layer {
   }
 }
 layer {
-  name: "reshg2_low6_up2"
+  name: "reshg2_low6_up4"
   type: "Eltwise"
-  bottom: "reshg2_low6_up1"
-  bottom: "reshg2_low6_up2_branch2c"
-  top: "reshg2_low6_up2"
+  bottom: "reshg2_low6_up4_branch1"
+  bottom: "reshg2_low6_up4_branch2c"
+  top: "reshg2_low6_up4"
 }
 layer {
   name: "hg2_low6_pool1"
@@ -11811,6 +11973,33 @@ layer {
   top: "reshg2_low6_low6_up1"
 }
 layer {
+  name: "reshg2_low6_low6_up4_branch1"
+  type: "Convolution"
+  bottom: "reshg2_low6_low6_up1"
+  top: "reshg2_low6_low6_up4_branch1"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 512
+    pad: 0
+    kernel_size: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
   name: "reshg2_low6_low6_up1_bn"
   type: "BatchNorm"
   bottom: "reshg2_low6_low6_up1"
@@ -11856,10 +12045,10 @@ layer {
   top: "reshg2_low6_low6_up1_bn"
 }
 layer {
-  name: "reshg2_low6_low6_up2_branch2a"
+  name: "reshg2_low6_low6_up4_branch2a"
   type: "Convolution"
   bottom: "reshg2_low6_low6_up1_bn"
-  top: "reshg2_low6_low6_up2_branch2a"
+  top: "reshg2_low6_low6_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -11869,7 +12058,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 128
+    num_output: 256
     bias_term: true
     pad: 0
     kernel_size: 1
@@ -11885,10 +12074,10 @@ layer {
   }
 }
 layer {
-  name: "bnhg2_low6_low6_up2_branch2a"
+  name: "bnhg2_low6_low6_up4_branch2a"
   type: "BatchNorm"
-  bottom: "reshg2_low6_low6_up2_branch2a"
-  top: "reshg2_low6_low6_up2_branch2a"
+  bottom: "reshg2_low6_low6_up4_branch2a"
+  top: "reshg2_low6_low6_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -11907,10 +12096,10 @@ layer {
   }
 }
 layer {
-  name: "scalehg2_low6_low6_up2_branch2a"
+  name: "scalehg2_low6_low6_up4_branch2a"
   type: "EltwiseAffine"
-  bottom: "reshg2_low6_low6_up2_branch2a"
-  top: "reshg2_low6_low6_up2_branch2a"
+  bottom: "reshg2_low6_low6_up4_branch2a"
+  top: "reshg2_low6_low6_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -11924,16 +12113,16 @@ layer {
   }
 }
 layer {
-  name: "reshg2_low6_low6_up2_branch2a_relu"
+  name: "reshg2_low6_low6_up4_branch2a_relu"
   type: "ReLU"
-  bottom: "reshg2_low6_low6_up2_branch2a"
-  top: "reshg2_low6_low6_up2_branch2a"
+  bottom: "reshg2_low6_low6_up4_branch2a"
+  top: "reshg2_low6_low6_up4_branch2a"
 }
 layer {
-  name: "reshg2_low6_low6_up2_branch2b"
+  name: "reshg2_low6_low6_up4_branch2b"
   type: "Convolution"
-  bottom: "reshg2_low6_low6_up2_branch2a"
-  top: "reshg2_low6_low6_up2_branch2b"
+  bottom: "reshg2_low6_low6_up4_branch2a"
+  top: "reshg2_low6_low6_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -11943,7 +12132,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 128
+    num_output: 256
     bias_term: true
     pad: 1
     kernel_size: 3
@@ -11959,10 +12148,10 @@ layer {
   }
 }
 layer {
-  name: "bnhg2_low6_low6_up2_branch2b"
+  name: "bnhg2_low6_low6_up4_branch2b"
   type: "BatchNorm"
-  bottom: "reshg2_low6_low6_up2_branch2b"
-  top: "reshg2_low6_low6_up2_branch2b"
+  bottom: "reshg2_low6_low6_up4_branch2b"
+  top: "reshg2_low6_low6_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -11981,10 +12170,10 @@ layer {
   }
 }
 layer {
-  name: "scalehg2_low6_low6_up2_branch2b"
+  name: "scalehg2_low6_low6_up4_branch2b"
   type: "EltwiseAffine"
-  bottom: "reshg2_low6_low6_up2_branch2b"
-  top: "reshg2_low6_low6_up2_branch2b"
+  bottom: "reshg2_low6_low6_up4_branch2b"
+  top: "reshg2_low6_low6_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -11998,16 +12187,16 @@ layer {
   }
 }
 layer {
-  name: "reshg2_low6_low6_up2_branch2b_relu"
+  name: "reshg2_low6_low6_up4_branch2b_relu"
   type: "ReLU"
-  bottom: "reshg2_low6_low6_up2_branch2b"
-  top: "reshg2_low6_low6_up2_branch2b"
+  bottom: "reshg2_low6_low6_up4_branch2b"
+  top: "reshg2_low6_low6_up4_branch2b"
 }
 layer {
-  name: "reshg2_low6_low6_up2_branch2c"
+  name: "reshg2_low6_low6_up4_branch2c"
   type: "Convolution"
-  bottom: "reshg2_low6_low6_up2_branch2b"
-  top: "reshg2_low6_low6_up2_branch2c"
+  bottom: "reshg2_low6_low6_up4_branch2b"
+  top: "reshg2_low6_low6_up4_branch2c"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -12017,7 +12206,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -12031,11 +12220,11 @@ layer {
   }
 }
 layer {
-  name: "reshg2_low6_low6_up2"
+  name: "reshg2_low6_low6_up4"
   type: "Eltwise"
-  bottom: "reshg2_low6_low6_up1"
-  bottom: "reshg2_low6_low6_up2_branch2c"
-  top: "reshg2_low6_low6_up2"
+  bottom: "reshg2_low6_low6_up4_branch1"
+  bottom: "reshg2_low6_low6_up4_branch2c"
+  top: "reshg2_low6_low6_up4"
 }
 layer {
   name: "hg2_low6_low6_pool1"
@@ -12957,6 +13146,33 @@ layer {
   top: "reshg2_low6_low6_low6_up1"
 }
 layer {
+  name: "reshg2_low6_low6_low6_up4_branch1"
+  type: "Convolution"
+  bottom: "reshg2_low6_low6_low6_up1"
+  top: "reshg2_low6_low6_low6_up4_branch1"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 512
+    pad: 0
+    kernel_size: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
   name: "reshg2_low6_low6_low6_up1_bn"
   type: "BatchNorm"
   bottom: "reshg2_low6_low6_low6_up1"
@@ -13002,10 +13218,10 @@ layer {
   top: "reshg2_low6_low6_low6_up1_bn"
 }
 layer {
-  name: "reshg2_low6_low6_low6_up2_branch2a"
+  name: "reshg2_low6_low6_low6_up4_branch2a"
   type: "Convolution"
   bottom: "reshg2_low6_low6_low6_up1_bn"
-  top: "reshg2_low6_low6_low6_up2_branch2a"
+  top: "reshg2_low6_low6_low6_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -13015,7 +13231,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 128
+    num_output: 256
     bias_term: true
     pad: 0
     kernel_size: 1
@@ -13031,10 +13247,10 @@ layer {
   }
 }
 layer {
-  name: "bnhg2_low6_low6_low6_up2_branch2a"
+  name: "bnhg2_low6_low6_low6_up4_branch2a"
   type: "BatchNorm"
-  bottom: "reshg2_low6_low6_low6_up2_branch2a"
-  top: "reshg2_low6_low6_low6_up2_branch2a"
+  bottom: "reshg2_low6_low6_low6_up4_branch2a"
+  top: "reshg2_low6_low6_low6_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -13053,10 +13269,10 @@ layer {
   }
 }
 layer {
-  name: "scalehg2_low6_low6_low6_up2_branch2a"
+  name: "scalehg2_low6_low6_low6_up4_branch2a"
   type: "EltwiseAffine"
-  bottom: "reshg2_low6_low6_low6_up2_branch2a"
-  top: "reshg2_low6_low6_low6_up2_branch2a"
+  bottom: "reshg2_low6_low6_low6_up4_branch2a"
+  top: "reshg2_low6_low6_low6_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -13070,16 +13286,16 @@ layer {
   }
 }
 layer {
-  name: "reshg2_low6_low6_low6_up2_branch2a_relu"
+  name: "reshg2_low6_low6_low6_up4_branch2a_relu"
   type: "ReLU"
-  bottom: "reshg2_low6_low6_low6_up2_branch2a"
-  top: "reshg2_low6_low6_low6_up2_branch2a"
+  bottom: "reshg2_low6_low6_low6_up4_branch2a"
+  top: "reshg2_low6_low6_low6_up4_branch2a"
 }
 layer {
-  name: "reshg2_low6_low6_low6_up2_branch2b"
+  name: "reshg2_low6_low6_low6_up4_branch2b"
   type: "Convolution"
-  bottom: "reshg2_low6_low6_low6_up2_branch2a"
-  top: "reshg2_low6_low6_low6_up2_branch2b"
+  bottom: "reshg2_low6_low6_low6_up4_branch2a"
+  top: "reshg2_low6_low6_low6_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -13089,7 +13305,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 128
+    num_output: 256
     bias_term: true
     pad: 1
     kernel_size: 3
@@ -13105,10 +13321,10 @@ layer {
   }
 }
 layer {
-  name: "bnhg2_low6_low6_low6_up2_branch2b"
+  name: "bnhg2_low6_low6_low6_up4_branch2b"
   type: "BatchNorm"
-  bottom: "reshg2_low6_low6_low6_up2_branch2b"
-  top: "reshg2_low6_low6_low6_up2_branch2b"
+  bottom: "reshg2_low6_low6_low6_up4_branch2b"
+  top: "reshg2_low6_low6_low6_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -13127,10 +13343,10 @@ layer {
   }
 }
 layer {
-  name: "scalehg2_low6_low6_low6_up2_branch2b"
+  name: "scalehg2_low6_low6_low6_up4_branch2b"
   type: "EltwiseAffine"
-  bottom: "reshg2_low6_low6_low6_up2_branch2b"
-  top: "reshg2_low6_low6_low6_up2_branch2b"
+  bottom: "reshg2_low6_low6_low6_up4_branch2b"
+  top: "reshg2_low6_low6_low6_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -13144,16 +13360,16 @@ layer {
   }
 }
 layer {
-  name: "reshg2_low6_low6_low6_up2_branch2b_relu"
+  name: "reshg2_low6_low6_low6_up4_branch2b_relu"
   type: "ReLU"
-  bottom: "reshg2_low6_low6_low6_up2_branch2b"
-  top: "reshg2_low6_low6_low6_up2_branch2b"
+  bottom: "reshg2_low6_low6_low6_up4_branch2b"
+  top: "reshg2_low6_low6_low6_up4_branch2b"
 }
 layer {
-  name: "reshg2_low6_low6_low6_up2_branch2c"
+  name: "reshg2_low6_low6_low6_up4_branch2c"
   type: "Convolution"
-  bottom: "reshg2_low6_low6_low6_up2_branch2b"
-  top: "reshg2_low6_low6_low6_up2_branch2c"
+  bottom: "reshg2_low6_low6_low6_up4_branch2b"
+  top: "reshg2_low6_low6_low6_up4_branch2c"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -13163,7 +13379,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -13177,11 +13393,11 @@ layer {
   }
 }
 layer {
-  name: "reshg2_low6_low6_low6_up2"
+  name: "reshg2_low6_low6_low6_up4"
   type: "Eltwise"
-  bottom: "reshg2_low6_low6_low6_up1"
-  bottom: "reshg2_low6_low6_low6_up2_branch2c"
-  top: "reshg2_low6_low6_low6_up2"
+  bottom: "reshg2_low6_low6_low6_up4_branch1"
+  bottom: "reshg2_low6_low6_low6_up4_branch2c"
+  top: "reshg2_low6_low6_low6_up4"
 }
 layer {
   name: "hg2_low6_low6_low6_pool1"
@@ -14380,7 +14596,7 @@ layer {
 layer {
   name: "hg2_low6_low6_low6"
   type: "Eltwise"
-  bottom: "reshg2_low6_low6_low6_up2"
+  bottom: "reshg2_low6_low6_low6_up4"
   bottom: "hg2_low6_low6_low6_Up5"
   top: "hg2_low6_low6_low6"
 }
@@ -14635,7 +14851,7 @@ layer {
 layer {
   name: "hg2_low6_low6"
   type: "Eltwise"
-  bottom: "reshg2_low6_low6_up2"
+  bottom: "reshg2_low6_low6_up4"
   bottom: "hg2_low6_low6_Up5"
   top: "hg2_low6_low6"
 }
@@ -14890,7 +15106,7 @@ layer {
 layer {
   name: "hg2_low6"
   type: "Eltwise"
-  bottom: "reshg2_low6_up2"
+  bottom: "reshg2_low6_up4"
   bottom: "hg2_low6_Up5"
   top: "hg2_low6"
 }
@@ -15145,7 +15361,7 @@ layer {
 layer {
   name: "hg2"
   type: "Eltwise"
-  bottom: "reshg2_up2"
+  bottom: "reshg2_up4"
   bottom: "hg2_Up5"
   top: "hg2"
 }
@@ -15641,6 +15857,33 @@ layer {
   top: "reshg3_up1"
 }
 layer {
+  name: "reshg3_up4_branch1"
+  type: "Convolution"
+  bottom: "reshg3_up1"
+  top: "reshg3_up4_branch1"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 512
+    pad: 0
+    kernel_size: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
   name: "reshg3_up1_bn"
   type: "BatchNorm"
   bottom: "reshg3_up1"
@@ -15686,10 +15929,10 @@ layer {
   top: "reshg3_up1_bn"
 }
 layer {
-  name: "reshg3_up2_branch2a"
+  name: "reshg3_up4_branch2a"
   type: "Convolution"
   bottom: "reshg3_up1_bn"
-  top: "reshg3_up2_branch2a"
+  top: "reshg3_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -15699,7 +15942,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 128
+    num_output: 256
     bias_term: true
     pad: 0
     kernel_size: 1
@@ -15715,10 +15958,10 @@ layer {
   }
 }
 layer {
-  name: "bnhg3_up2_branch2a"
+  name: "bnhg3_up4_branch2a"
   type: "BatchNorm"
-  bottom: "reshg3_up2_branch2a"
-  top: "reshg3_up2_branch2a"
+  bottom: "reshg3_up4_branch2a"
+  top: "reshg3_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -15737,10 +15980,10 @@ layer {
   }
 }
 layer {
-  name: "scalehg3_up2_branch2a"
+  name: "scalehg3_up4_branch2a"
   type: "EltwiseAffine"
-  bottom: "reshg3_up2_branch2a"
-  top: "reshg3_up2_branch2a"
+  bottom: "reshg3_up4_branch2a"
+  top: "reshg3_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -15754,16 +15997,16 @@ layer {
   }
 }
 layer {
-  name: "reshg3_up2_branch2a_relu"
+  name: "reshg3_up4_branch2a_relu"
   type: "ReLU"
-  bottom: "reshg3_up2_branch2a"
-  top: "reshg3_up2_branch2a"
+  bottom: "reshg3_up4_branch2a"
+  top: "reshg3_up4_branch2a"
 }
 layer {
-  name: "reshg3_up2_branch2b"
+  name: "reshg3_up4_branch2b"
   type: "Convolution"
-  bottom: "reshg3_up2_branch2a"
-  top: "reshg3_up2_branch2b"
+  bottom: "reshg3_up4_branch2a"
+  top: "reshg3_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -15773,7 +16016,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 128
+    num_output: 256
     bias_term: true
     pad: 1
     kernel_size: 3
@@ -15789,10 +16032,10 @@ layer {
   }
 }
 layer {
-  name: "bnhg3_up2_branch2b"
+  name: "bnhg3_up4_branch2b"
   type: "BatchNorm"
-  bottom: "reshg3_up2_branch2b"
-  top: "reshg3_up2_branch2b"
+  bottom: "reshg3_up4_branch2b"
+  top: "reshg3_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -15811,10 +16054,10 @@ layer {
   }
 }
 layer {
-  name: "scalehg3_up2_branch2b"
+  name: "scalehg3_up4_branch2b"
   type: "EltwiseAffine"
-  bottom: "reshg3_up2_branch2b"
-  top: "reshg3_up2_branch2b"
+  bottom: "reshg3_up4_branch2b"
+  top: "reshg3_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -15828,16 +16071,16 @@ layer {
   }
 }
 layer {
-  name: "reshg3_up2_branch2b_relu"
+  name: "reshg3_up4_branch2b_relu"
   type: "ReLU"
-  bottom: "reshg3_up2_branch2b"
-  top: "reshg3_up2_branch2b"
+  bottom: "reshg3_up4_branch2b"
+  top: "reshg3_up4_branch2b"
 }
 layer {
-  name: "reshg3_up2_branch2c"
+  name: "reshg3_up4_branch2c"
   type: "Convolution"
-  bottom: "reshg3_up2_branch2b"
-  top: "reshg3_up2_branch2c"
+  bottom: "reshg3_up4_branch2b"
+  top: "reshg3_up4_branch2c"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -15847,7 +16090,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -15861,11 +16104,11 @@ layer {
   }
 }
 layer {
-  name: "reshg3_up2"
+  name: "reshg3_up4"
   type: "Eltwise"
-  bottom: "reshg3_up1"
-  bottom: "reshg3_up2_branch2c"
-  top: "reshg3_up2"
+  bottom: "reshg3_up4_branch1"
+  bottom: "reshg3_up4_branch2c"
+  top: "reshg3_up4"
 }
 layer {
   name: "hg3_pool1"
@@ -16814,6 +17057,33 @@ layer {
   top: "reshg3_low6_up1"
 }
 layer {
+  name: "reshg3_low6_up4_branch1"
+  type: "Convolution"
+  bottom: "reshg3_low6_up1"
+  top: "reshg3_low6_up4_branch1"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 512
+    pad: 0
+    kernel_size: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
   name: "reshg3_low6_up1_bn"
   type: "BatchNorm"
   bottom: "reshg3_low6_up1"
@@ -16859,10 +17129,10 @@ layer {
   top: "reshg3_low6_up1_bn"
 }
 layer {
-  name: "reshg3_low6_up2_branch2a"
+  name: "reshg3_low6_up4_branch2a"
   type: "Convolution"
   bottom: "reshg3_low6_up1_bn"
-  top: "reshg3_low6_up2_branch2a"
+  top: "reshg3_low6_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -16872,7 +17142,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 128
+    num_output: 256
     bias_term: true
     pad: 0
     kernel_size: 1
@@ -16888,10 +17158,10 @@ layer {
   }
 }
 layer {
-  name: "bnhg3_low6_up2_branch2a"
+  name: "bnhg3_low6_up4_branch2a"
   type: "BatchNorm"
-  bottom: "reshg3_low6_up2_branch2a"
-  top: "reshg3_low6_up2_branch2a"
+  bottom: "reshg3_low6_up4_branch2a"
+  top: "reshg3_low6_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -16910,10 +17180,10 @@ layer {
   }
 }
 layer {
-  name: "scalehg3_low6_up2_branch2a"
+  name: "scalehg3_low6_up4_branch2a"
   type: "EltwiseAffine"
-  bottom: "reshg3_low6_up2_branch2a"
-  top: "reshg3_low6_up2_branch2a"
+  bottom: "reshg3_low6_up4_branch2a"
+  top: "reshg3_low6_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -16927,16 +17197,16 @@ layer {
   }
 }
 layer {
-  name: "reshg3_low6_up2_branch2a_relu"
+  name: "reshg3_low6_up4_branch2a_relu"
   type: "ReLU"
-  bottom: "reshg3_low6_up2_branch2a"
-  top: "reshg3_low6_up2_branch2a"
+  bottom: "reshg3_low6_up4_branch2a"
+  top: "reshg3_low6_up4_branch2a"
 }
 layer {
-  name: "reshg3_low6_up2_branch2b"
+  name: "reshg3_low6_up4_branch2b"
   type: "Convolution"
-  bottom: "reshg3_low6_up2_branch2a"
-  top: "reshg3_low6_up2_branch2b"
+  bottom: "reshg3_low6_up4_branch2a"
+  top: "reshg3_low6_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -16946,7 +17216,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 128
+    num_output: 256
     bias_term: true
     pad: 1
     kernel_size: 3
@@ -16962,10 +17232,10 @@ layer {
   }
 }
 layer {
-  name: "bnhg3_low6_up2_branch2b"
+  name: "bnhg3_low6_up4_branch2b"
   type: "BatchNorm"
-  bottom: "reshg3_low6_up2_branch2b"
-  top: "reshg3_low6_up2_branch2b"
+  bottom: "reshg3_low6_up4_branch2b"
+  top: "reshg3_low6_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -16984,10 +17254,10 @@ layer {
   }
 }
 layer {
-  name: "scalehg3_low6_up2_branch2b"
+  name: "scalehg3_low6_up4_branch2b"
   type: "EltwiseAffine"
-  bottom: "reshg3_low6_up2_branch2b"
-  top: "reshg3_low6_up2_branch2b"
+  bottom: "reshg3_low6_up4_branch2b"
+  top: "reshg3_low6_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -17001,16 +17271,16 @@ layer {
   }
 }
 layer {
-  name: "reshg3_low6_up2_branch2b_relu"
+  name: "reshg3_low6_up4_branch2b_relu"
   type: "ReLU"
-  bottom: "reshg3_low6_up2_branch2b"
-  top: "reshg3_low6_up2_branch2b"
+  bottom: "reshg3_low6_up4_branch2b"
+  top: "reshg3_low6_up4_branch2b"
 }
 layer {
-  name: "reshg3_low6_up2_branch2c"
+  name: "reshg3_low6_up4_branch2c"
   type: "Convolution"
-  bottom: "reshg3_low6_up2_branch2b"
-  top: "reshg3_low6_up2_branch2c"
+  bottom: "reshg3_low6_up4_branch2b"
+  top: "reshg3_low6_up4_branch2c"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -17020,7 +17290,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -17034,11 +17304,11 @@ layer {
   }
 }
 layer {
-  name: "reshg3_low6_up2"
+  name: "reshg3_low6_up4"
   type: "Eltwise"
-  bottom: "reshg3_low6_up1"
-  bottom: "reshg3_low6_up2_branch2c"
-  top: "reshg3_low6_up2"
+  bottom: "reshg3_low6_up4_branch1"
+  bottom: "reshg3_low6_up4_branch2c"
+  top: "reshg3_low6_up4"
 }
 layer {
   name: "hg3_low6_pool1"
@@ -17960,6 +18230,33 @@ layer {
   top: "reshg3_low6_low6_up1"
 }
 layer {
+  name: "reshg3_low6_low6_up4_branch1"
+  type: "Convolution"
+  bottom: "reshg3_low6_low6_up1"
+  top: "reshg3_low6_low6_up4_branch1"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 512
+    pad: 0
+    kernel_size: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
   name: "reshg3_low6_low6_up1_bn"
   type: "BatchNorm"
   bottom: "reshg3_low6_low6_up1"
@@ -18005,10 +18302,10 @@ layer {
   top: "reshg3_low6_low6_up1_bn"
 }
 layer {
-  name: "reshg3_low6_low6_up2_branch2a"
+  name: "reshg3_low6_low6_up4_branch2a"
   type: "Convolution"
   bottom: "reshg3_low6_low6_up1_bn"
-  top: "reshg3_low6_low6_up2_branch2a"
+  top: "reshg3_low6_low6_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -18018,7 +18315,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 128
+    num_output: 256
     bias_term: true
     pad: 0
     kernel_size: 1
@@ -18034,10 +18331,10 @@ layer {
   }
 }
 layer {
-  name: "bnhg3_low6_low6_up2_branch2a"
+  name: "bnhg3_low6_low6_up4_branch2a"
   type: "BatchNorm"
-  bottom: "reshg3_low6_low6_up2_branch2a"
-  top: "reshg3_low6_low6_up2_branch2a"
+  bottom: "reshg3_low6_low6_up4_branch2a"
+  top: "reshg3_low6_low6_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -18056,10 +18353,10 @@ layer {
   }
 }
 layer {
-  name: "scalehg3_low6_low6_up2_branch2a"
+  name: "scalehg3_low6_low6_up4_branch2a"
   type: "EltwiseAffine"
-  bottom: "reshg3_low6_low6_up2_branch2a"
-  top: "reshg3_low6_low6_up2_branch2a"
+  bottom: "reshg3_low6_low6_up4_branch2a"
+  top: "reshg3_low6_low6_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -18073,16 +18370,16 @@ layer {
   }
 }
 layer {
-  name: "reshg3_low6_low6_up2_branch2a_relu"
+  name: "reshg3_low6_low6_up4_branch2a_relu"
   type: "ReLU"
-  bottom: "reshg3_low6_low6_up2_branch2a"
-  top: "reshg3_low6_low6_up2_branch2a"
+  bottom: "reshg3_low6_low6_up4_branch2a"
+  top: "reshg3_low6_low6_up4_branch2a"
 }
 layer {
-  name: "reshg3_low6_low6_up2_branch2b"
+  name: "reshg3_low6_low6_up4_branch2b"
   type: "Convolution"
-  bottom: "reshg3_low6_low6_up2_branch2a"
-  top: "reshg3_low6_low6_up2_branch2b"
+  bottom: "reshg3_low6_low6_up4_branch2a"
+  top: "reshg3_low6_low6_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -18092,7 +18389,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 128
+    num_output: 256
     bias_term: true
     pad: 1
     kernel_size: 3
@@ -18108,10 +18405,10 @@ layer {
   }
 }
 layer {
-  name: "bnhg3_low6_low6_up2_branch2b"
+  name: "bnhg3_low6_low6_up4_branch2b"
   type: "BatchNorm"
-  bottom: "reshg3_low6_low6_up2_branch2b"
-  top: "reshg3_low6_low6_up2_branch2b"
+  bottom: "reshg3_low6_low6_up4_branch2b"
+  top: "reshg3_low6_low6_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -18130,10 +18427,10 @@ layer {
   }
 }
 layer {
-  name: "scalehg3_low6_low6_up2_branch2b"
+  name: "scalehg3_low6_low6_up4_branch2b"
   type: "EltwiseAffine"
-  bottom: "reshg3_low6_low6_up2_branch2b"
-  top: "reshg3_low6_low6_up2_branch2b"
+  bottom: "reshg3_low6_low6_up4_branch2b"
+  top: "reshg3_low6_low6_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -18147,16 +18444,16 @@ layer {
   }
 }
 layer {
-  name: "reshg3_low6_low6_up2_branch2b_relu"
+  name: "reshg3_low6_low6_up4_branch2b_relu"
   type: "ReLU"
-  bottom: "reshg3_low6_low6_up2_branch2b"
-  top: "reshg3_low6_low6_up2_branch2b"
+  bottom: "reshg3_low6_low6_up4_branch2b"
+  top: "reshg3_low6_low6_up4_branch2b"
 }
 layer {
-  name: "reshg3_low6_low6_up2_branch2c"
+  name: "reshg3_low6_low6_up4_branch2c"
   type: "Convolution"
-  bottom: "reshg3_low6_low6_up2_branch2b"
-  top: "reshg3_low6_low6_up2_branch2c"
+  bottom: "reshg3_low6_low6_up4_branch2b"
+  top: "reshg3_low6_low6_up4_branch2c"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -18166,7 +18463,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -18180,11 +18477,11 @@ layer {
   }
 }
 layer {
-  name: "reshg3_low6_low6_up2"
+  name: "reshg3_low6_low6_up4"
   type: "Eltwise"
-  bottom: "reshg3_low6_low6_up1"
-  bottom: "reshg3_low6_low6_up2_branch2c"
-  top: "reshg3_low6_low6_up2"
+  bottom: "reshg3_low6_low6_up4_branch1"
+  bottom: "reshg3_low6_low6_up4_branch2c"
+  top: "reshg3_low6_low6_up4"
 }
 layer {
   name: "hg3_low6_low6_pool1"
@@ -19106,6 +19403,33 @@ layer {
   top: "reshg3_low6_low6_low6_up1"
 }
 layer {
+  name: "reshg3_low6_low6_low6_up4_branch1"
+  type: "Convolution"
+  bottom: "reshg3_low6_low6_low6_up1"
+  top: "reshg3_low6_low6_low6_up4_branch1"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 512
+    pad: 0
+    kernel_size: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
   name: "reshg3_low6_low6_low6_up1_bn"
   type: "BatchNorm"
   bottom: "reshg3_low6_low6_low6_up1"
@@ -19151,10 +19475,10 @@ layer {
   top: "reshg3_low6_low6_low6_up1_bn"
 }
 layer {
-  name: "reshg3_low6_low6_low6_up2_branch2a"
+  name: "reshg3_low6_low6_low6_up4_branch2a"
   type: "Convolution"
   bottom: "reshg3_low6_low6_low6_up1_bn"
-  top: "reshg3_low6_low6_low6_up2_branch2a"
+  top: "reshg3_low6_low6_low6_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -19164,7 +19488,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 128
+    num_output: 256
     bias_term: true
     pad: 0
     kernel_size: 1
@@ -19180,10 +19504,10 @@ layer {
   }
 }
 layer {
-  name: "bnhg3_low6_low6_low6_up2_branch2a"
+  name: "bnhg3_low6_low6_low6_up4_branch2a"
   type: "BatchNorm"
-  bottom: "reshg3_low6_low6_low6_up2_branch2a"
-  top: "reshg3_low6_low6_low6_up2_branch2a"
+  bottom: "reshg3_low6_low6_low6_up4_branch2a"
+  top: "reshg3_low6_low6_low6_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -19202,10 +19526,10 @@ layer {
   }
 }
 layer {
-  name: "scalehg3_low6_low6_low6_up2_branch2a"
+  name: "scalehg3_low6_low6_low6_up4_branch2a"
   type: "EltwiseAffine"
-  bottom: "reshg3_low6_low6_low6_up2_branch2a"
-  top: "reshg3_low6_low6_low6_up2_branch2a"
+  bottom: "reshg3_low6_low6_low6_up4_branch2a"
+  top: "reshg3_low6_low6_low6_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -19219,16 +19543,16 @@ layer {
   }
 }
 layer {
-  name: "reshg3_low6_low6_low6_up2_branch2a_relu"
+  name: "reshg3_low6_low6_low6_up4_branch2a_relu"
   type: "ReLU"
-  bottom: "reshg3_low6_low6_low6_up2_branch2a"
-  top: "reshg3_low6_low6_low6_up2_branch2a"
+  bottom: "reshg3_low6_low6_low6_up4_branch2a"
+  top: "reshg3_low6_low6_low6_up4_branch2a"
 }
 layer {
-  name: "reshg3_low6_low6_low6_up2_branch2b"
+  name: "reshg3_low6_low6_low6_up4_branch2b"
   type: "Convolution"
-  bottom: "reshg3_low6_low6_low6_up2_branch2a"
-  top: "reshg3_low6_low6_low6_up2_branch2b"
+  bottom: "reshg3_low6_low6_low6_up4_branch2a"
+  top: "reshg3_low6_low6_low6_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -19238,7 +19562,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 128
+    num_output: 256
     bias_term: true
     pad: 1
     kernel_size: 3
@@ -19254,10 +19578,10 @@ layer {
   }
 }
 layer {
-  name: "bnhg3_low6_low6_low6_up2_branch2b"
+  name: "bnhg3_low6_low6_low6_up4_branch2b"
   type: "BatchNorm"
-  bottom: "reshg3_low6_low6_low6_up2_branch2b"
-  top: "reshg3_low6_low6_low6_up2_branch2b"
+  bottom: "reshg3_low6_low6_low6_up4_branch2b"
+  top: "reshg3_low6_low6_low6_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -19276,10 +19600,10 @@ layer {
   }
 }
 layer {
-  name: "scalehg3_low6_low6_low6_up2_branch2b"
+  name: "scalehg3_low6_low6_low6_up4_branch2b"
   type: "EltwiseAffine"
-  bottom: "reshg3_low6_low6_low6_up2_branch2b"
-  top: "reshg3_low6_low6_low6_up2_branch2b"
+  bottom: "reshg3_low6_low6_low6_up4_branch2b"
+  top: "reshg3_low6_low6_low6_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -19293,16 +19617,16 @@ layer {
   }
 }
 layer {
-  name: "reshg3_low6_low6_low6_up2_branch2b_relu"
+  name: "reshg3_low6_low6_low6_up4_branch2b_relu"
   type: "ReLU"
-  bottom: "reshg3_low6_low6_low6_up2_branch2b"
-  top: "reshg3_low6_low6_low6_up2_branch2b"
+  bottom: "reshg3_low6_low6_low6_up4_branch2b"
+  top: "reshg3_low6_low6_low6_up4_branch2b"
 }
 layer {
-  name: "reshg3_low6_low6_low6_up2_branch2c"
+  name: "reshg3_low6_low6_low6_up4_branch2c"
   type: "Convolution"
-  bottom: "reshg3_low6_low6_low6_up2_branch2b"
-  top: "reshg3_low6_low6_low6_up2_branch2c"
+  bottom: "reshg3_low6_low6_low6_up4_branch2b"
+  top: "reshg3_low6_low6_low6_up4_branch2c"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -19312,7 +19636,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -19326,11 +19650,11 @@ layer {
   }
 }
 layer {
-  name: "reshg3_low6_low6_low6_up2"
+  name: "reshg3_low6_low6_low6_up4"
   type: "Eltwise"
-  bottom: "reshg3_low6_low6_low6_up1"
-  bottom: "reshg3_low6_low6_low6_up2_branch2c"
-  top: "reshg3_low6_low6_low6_up2"
+  bottom: "reshg3_low6_low6_low6_up4_branch1"
+  bottom: "reshg3_low6_low6_low6_up4_branch2c"
+  top: "reshg3_low6_low6_low6_up4"
 }
 layer {
   name: "hg3_low6_low6_low6_pool1"
@@ -20529,7 +20853,7 @@ layer {
 layer {
   name: "hg3_low6_low6_low6"
   type: "Eltwise"
-  bottom: "reshg3_low6_low6_low6_up2"
+  bottom: "reshg3_low6_low6_low6_up4"
   bottom: "hg3_low6_low6_low6_Up5"
   top: "hg3_low6_low6_low6"
 }
@@ -20784,7 +21108,7 @@ layer {
 layer {
   name: "hg3_low6_low6"
   type: "Eltwise"
-  bottom: "reshg3_low6_low6_up2"
+  bottom: "reshg3_low6_low6_up4"
   bottom: "hg3_low6_low6_Up5"
   top: "hg3_low6_low6"
 }
@@ -21039,7 +21363,7 @@ layer {
 layer {
   name: "hg3_low6"
   type: "Eltwise"
-  bottom: "reshg3_low6_up2"
+  bottom: "reshg3_low6_up4"
   bottom: "hg3_low6_Up5"
   top: "hg3_low6"
 }
@@ -21294,7 +21618,7 @@ layer {
 layer {
   name: "hg3"
   type: "Eltwise"
-  bottom: "reshg3_up2"
+  bottom: "reshg3_up4"
   bottom: "hg3_Up5"
   top: "hg3"
 }
@@ -21790,6 +22114,33 @@ layer {
   top: "reshg4_up1"
 }
 layer {
+  name: "reshg4_up4_branch1"
+  type: "Convolution"
+  bottom: "reshg4_up1"
+  top: "reshg4_up4_branch1"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 512
+    pad: 0
+    kernel_size: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
   name: "reshg4_up1_bn"
   type: "BatchNorm"
   bottom: "reshg4_up1"
@@ -21835,10 +22186,10 @@ layer {
   top: "reshg4_up1_bn"
 }
 layer {
-  name: "reshg4_up2_branch2a"
+  name: "reshg4_up4_branch2a"
   type: "Convolution"
   bottom: "reshg4_up1_bn"
-  top: "reshg4_up2_branch2a"
+  top: "reshg4_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -21848,7 +22199,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 128
+    num_output: 256
     bias_term: true
     pad: 0
     kernel_size: 1
@@ -21864,10 +22215,10 @@ layer {
   }
 }
 layer {
-  name: "bnhg4_up2_branch2a"
+  name: "bnhg4_up4_branch2a"
   type: "BatchNorm"
-  bottom: "reshg4_up2_branch2a"
-  top: "reshg4_up2_branch2a"
+  bottom: "reshg4_up4_branch2a"
+  top: "reshg4_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -21886,10 +22237,10 @@ layer {
   }
 }
 layer {
-  name: "scalehg4_up2_branch2a"
+  name: "scalehg4_up4_branch2a"
   type: "EltwiseAffine"
-  bottom: "reshg4_up2_branch2a"
-  top: "reshg4_up2_branch2a"
+  bottom: "reshg4_up4_branch2a"
+  top: "reshg4_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -21903,16 +22254,16 @@ layer {
   }
 }
 layer {
-  name: "reshg4_up2_branch2a_relu"
+  name: "reshg4_up4_branch2a_relu"
   type: "ReLU"
-  bottom: "reshg4_up2_branch2a"
-  top: "reshg4_up2_branch2a"
+  bottom: "reshg4_up4_branch2a"
+  top: "reshg4_up4_branch2a"
 }
 layer {
-  name: "reshg4_up2_branch2b"
+  name: "reshg4_up4_branch2b"
   type: "Convolution"
-  bottom: "reshg4_up2_branch2a"
-  top: "reshg4_up2_branch2b"
+  bottom: "reshg4_up4_branch2a"
+  top: "reshg4_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -21922,7 +22273,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 128
+    num_output: 256
     bias_term: true
     pad: 1
     kernel_size: 3
@@ -21938,10 +22289,10 @@ layer {
   }
 }
 layer {
-  name: "bnhg4_up2_branch2b"
+  name: "bnhg4_up4_branch2b"
   type: "BatchNorm"
-  bottom: "reshg4_up2_branch2b"
-  top: "reshg4_up2_branch2b"
+  bottom: "reshg4_up4_branch2b"
+  top: "reshg4_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -21960,10 +22311,10 @@ layer {
   }
 }
 layer {
-  name: "scalehg4_up2_branch2b"
+  name: "scalehg4_up4_branch2b"
   type: "EltwiseAffine"
-  bottom: "reshg4_up2_branch2b"
-  top: "reshg4_up2_branch2b"
+  bottom: "reshg4_up4_branch2b"
+  top: "reshg4_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -21977,16 +22328,16 @@ layer {
   }
 }
 layer {
-  name: "reshg4_up2_branch2b_relu"
+  name: "reshg4_up4_branch2b_relu"
   type: "ReLU"
-  bottom: "reshg4_up2_branch2b"
-  top: "reshg4_up2_branch2b"
+  bottom: "reshg4_up4_branch2b"
+  top: "reshg4_up4_branch2b"
 }
 layer {
-  name: "reshg4_up2_branch2c"
+  name: "reshg4_up4_branch2c"
   type: "Convolution"
-  bottom: "reshg4_up2_branch2b"
-  top: "reshg4_up2_branch2c"
+  bottom: "reshg4_up4_branch2b"
+  top: "reshg4_up4_branch2c"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -21996,7 +22347,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -22010,11 +22361,11 @@ layer {
   }
 }
 layer {
-  name: "reshg4_up2"
+  name: "reshg4_up4"
   type: "Eltwise"
-  bottom: "reshg4_up1"
-  bottom: "reshg4_up2_branch2c"
-  top: "reshg4_up2"
+  bottom: "reshg4_up4_branch1"
+  bottom: "reshg4_up4_branch2c"
+  top: "reshg4_up4"
 }
 layer {
   name: "hg4_pool1"
@@ -22963,6 +23314,33 @@ layer {
   top: "reshg4_low6_up1"
 }
 layer {
+  name: "reshg4_low6_up4_branch1"
+  type: "Convolution"
+  bottom: "reshg4_low6_up1"
+  top: "reshg4_low6_up4_branch1"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 512
+    pad: 0
+    kernel_size: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
   name: "reshg4_low6_up1_bn"
   type: "BatchNorm"
   bottom: "reshg4_low6_up1"
@@ -23008,10 +23386,10 @@ layer {
   top: "reshg4_low6_up1_bn"
 }
 layer {
-  name: "reshg4_low6_up2_branch2a"
+  name: "reshg4_low6_up4_branch2a"
   type: "Convolution"
   bottom: "reshg4_low6_up1_bn"
-  top: "reshg4_low6_up2_branch2a"
+  top: "reshg4_low6_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -23021,7 +23399,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 128
+    num_output: 256
     bias_term: true
     pad: 0
     kernel_size: 1
@@ -23037,10 +23415,10 @@ layer {
   }
 }
 layer {
-  name: "bnhg4_low6_up2_branch2a"
+  name: "bnhg4_low6_up4_branch2a"
   type: "BatchNorm"
-  bottom: "reshg4_low6_up2_branch2a"
-  top: "reshg4_low6_up2_branch2a"
+  bottom: "reshg4_low6_up4_branch2a"
+  top: "reshg4_low6_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -23059,10 +23437,10 @@ layer {
   }
 }
 layer {
-  name: "scalehg4_low6_up2_branch2a"
+  name: "scalehg4_low6_up4_branch2a"
   type: "EltwiseAffine"
-  bottom: "reshg4_low6_up2_branch2a"
-  top: "reshg4_low6_up2_branch2a"
+  bottom: "reshg4_low6_up4_branch2a"
+  top: "reshg4_low6_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -23076,16 +23454,16 @@ layer {
   }
 }
 layer {
-  name: "reshg4_low6_up2_branch2a_relu"
+  name: "reshg4_low6_up4_branch2a_relu"
   type: "ReLU"
-  bottom: "reshg4_low6_up2_branch2a"
-  top: "reshg4_low6_up2_branch2a"
+  bottom: "reshg4_low6_up4_branch2a"
+  top: "reshg4_low6_up4_branch2a"
 }
 layer {
-  name: "reshg4_low6_up2_branch2b"
+  name: "reshg4_low6_up4_branch2b"
   type: "Convolution"
-  bottom: "reshg4_low6_up2_branch2a"
-  top: "reshg4_low6_up2_branch2b"
+  bottom: "reshg4_low6_up4_branch2a"
+  top: "reshg4_low6_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -23095,7 +23473,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 128
+    num_output: 256
     bias_term: true
     pad: 1
     kernel_size: 3
@@ -23111,10 +23489,10 @@ layer {
   }
 }
 layer {
-  name: "bnhg4_low6_up2_branch2b"
+  name: "bnhg4_low6_up4_branch2b"
   type: "BatchNorm"
-  bottom: "reshg4_low6_up2_branch2b"
-  top: "reshg4_low6_up2_branch2b"
+  bottom: "reshg4_low6_up4_branch2b"
+  top: "reshg4_low6_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -23133,10 +23511,10 @@ layer {
   }
 }
 layer {
-  name: "scalehg4_low6_up2_branch2b"
+  name: "scalehg4_low6_up4_branch2b"
   type: "EltwiseAffine"
-  bottom: "reshg4_low6_up2_branch2b"
-  top: "reshg4_low6_up2_branch2b"
+  bottom: "reshg4_low6_up4_branch2b"
+  top: "reshg4_low6_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -23150,16 +23528,16 @@ layer {
   }
 }
 layer {
-  name: "reshg4_low6_up2_branch2b_relu"
+  name: "reshg4_low6_up4_branch2b_relu"
   type: "ReLU"
-  bottom: "reshg4_low6_up2_branch2b"
-  top: "reshg4_low6_up2_branch2b"
+  bottom: "reshg4_low6_up4_branch2b"
+  top: "reshg4_low6_up4_branch2b"
 }
 layer {
-  name: "reshg4_low6_up2_branch2c"
+  name: "reshg4_low6_up4_branch2c"
   type: "Convolution"
-  bottom: "reshg4_low6_up2_branch2b"
-  top: "reshg4_low6_up2_branch2c"
+  bottom: "reshg4_low6_up4_branch2b"
+  top: "reshg4_low6_up4_branch2c"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -23169,7 +23547,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -23183,11 +23561,11 @@ layer {
   }
 }
 layer {
-  name: "reshg4_low6_up2"
+  name: "reshg4_low6_up4"
   type: "Eltwise"
-  bottom: "reshg4_low6_up1"
-  bottom: "reshg4_low6_up2_branch2c"
-  top: "reshg4_low6_up2"
+  bottom: "reshg4_low6_up4_branch1"
+  bottom: "reshg4_low6_up4_branch2c"
+  top: "reshg4_low6_up4"
 }
 layer {
   name: "hg4_low6_pool1"
@@ -24109,6 +24487,33 @@ layer {
   top: "reshg4_low6_low6_up1"
 }
 layer {
+  name: "reshg4_low6_low6_up4_branch1"
+  type: "Convolution"
+  bottom: "reshg4_low6_low6_up1"
+  top: "reshg4_low6_low6_up4_branch1"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 512
+    pad: 0
+    kernel_size: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
   name: "reshg4_low6_low6_up1_bn"
   type: "BatchNorm"
   bottom: "reshg4_low6_low6_up1"
@@ -24154,10 +24559,10 @@ layer {
   top: "reshg4_low6_low6_up1_bn"
 }
 layer {
-  name: "reshg4_low6_low6_up2_branch2a"
+  name: "reshg4_low6_low6_up4_branch2a"
   type: "Convolution"
   bottom: "reshg4_low6_low6_up1_bn"
-  top: "reshg4_low6_low6_up2_branch2a"
+  top: "reshg4_low6_low6_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -24167,7 +24572,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 128
+    num_output: 256
     bias_term: true
     pad: 0
     kernel_size: 1
@@ -24183,10 +24588,10 @@ layer {
   }
 }
 layer {
-  name: "bnhg4_low6_low6_up2_branch2a"
+  name: "bnhg4_low6_low6_up4_branch2a"
   type: "BatchNorm"
-  bottom: "reshg4_low6_low6_up2_branch2a"
-  top: "reshg4_low6_low6_up2_branch2a"
+  bottom: "reshg4_low6_low6_up4_branch2a"
+  top: "reshg4_low6_low6_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -24205,10 +24610,10 @@ layer {
   }
 }
 layer {
-  name: "scalehg4_low6_low6_up2_branch2a"
+  name: "scalehg4_low6_low6_up4_branch2a"
   type: "EltwiseAffine"
-  bottom: "reshg4_low6_low6_up2_branch2a"
-  top: "reshg4_low6_low6_up2_branch2a"
+  bottom: "reshg4_low6_low6_up4_branch2a"
+  top: "reshg4_low6_low6_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -24222,16 +24627,16 @@ layer {
   }
 }
 layer {
-  name: "reshg4_low6_low6_up2_branch2a_relu"
+  name: "reshg4_low6_low6_up4_branch2a_relu"
   type: "ReLU"
-  bottom: "reshg4_low6_low6_up2_branch2a"
-  top: "reshg4_low6_low6_up2_branch2a"
+  bottom: "reshg4_low6_low6_up4_branch2a"
+  top: "reshg4_low6_low6_up4_branch2a"
 }
 layer {
-  name: "reshg4_low6_low6_up2_branch2b"
+  name: "reshg4_low6_low6_up4_branch2b"
   type: "Convolution"
-  bottom: "reshg4_low6_low6_up2_branch2a"
-  top: "reshg4_low6_low6_up2_branch2b"
+  bottom: "reshg4_low6_low6_up4_branch2a"
+  top: "reshg4_low6_low6_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -24241,7 +24646,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 128
+    num_output: 256
     bias_term: true
     pad: 1
     kernel_size: 3
@@ -24257,10 +24662,10 @@ layer {
   }
 }
 layer {
-  name: "bnhg4_low6_low6_up2_branch2b"
+  name: "bnhg4_low6_low6_up4_branch2b"
   type: "BatchNorm"
-  bottom: "reshg4_low6_low6_up2_branch2b"
-  top: "reshg4_low6_low6_up2_branch2b"
+  bottom: "reshg4_low6_low6_up4_branch2b"
+  top: "reshg4_low6_low6_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -24279,10 +24684,10 @@ layer {
   }
 }
 layer {
-  name: "scalehg4_low6_low6_up2_branch2b"
+  name: "scalehg4_low6_low6_up4_branch2b"
   type: "EltwiseAffine"
-  bottom: "reshg4_low6_low6_up2_branch2b"
-  top: "reshg4_low6_low6_up2_branch2b"
+  bottom: "reshg4_low6_low6_up4_branch2b"
+  top: "reshg4_low6_low6_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -24296,16 +24701,16 @@ layer {
   }
 }
 layer {
-  name: "reshg4_low6_low6_up2_branch2b_relu"
+  name: "reshg4_low6_low6_up4_branch2b_relu"
   type: "ReLU"
-  bottom: "reshg4_low6_low6_up2_branch2b"
-  top: "reshg4_low6_low6_up2_branch2b"
+  bottom: "reshg4_low6_low6_up4_branch2b"
+  top: "reshg4_low6_low6_up4_branch2b"
 }
 layer {
-  name: "reshg4_low6_low6_up2_branch2c"
+  name: "reshg4_low6_low6_up4_branch2c"
   type: "Convolution"
-  bottom: "reshg4_low6_low6_up2_branch2b"
-  top: "reshg4_low6_low6_up2_branch2c"
+  bottom: "reshg4_low6_low6_up4_branch2b"
+  top: "reshg4_low6_low6_up4_branch2c"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -24315,7 +24720,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -24329,11 +24734,11 @@ layer {
   }
 }
 layer {
-  name: "reshg4_low6_low6_up2"
+  name: "reshg4_low6_low6_up4"
   type: "Eltwise"
-  bottom: "reshg4_low6_low6_up1"
-  bottom: "reshg4_low6_low6_up2_branch2c"
-  top: "reshg4_low6_low6_up2"
+  bottom: "reshg4_low6_low6_up4_branch1"
+  bottom: "reshg4_low6_low6_up4_branch2c"
+  top: "reshg4_low6_low6_up4"
 }
 layer {
   name: "hg4_low6_low6_pool1"
@@ -25255,6 +25660,33 @@ layer {
   top: "reshg4_low6_low6_low6_up1"
 }
 layer {
+  name: "reshg4_low6_low6_low6_up4_branch1"
+  type: "Convolution"
+  bottom: "reshg4_low6_low6_low6_up1"
+  top: "reshg4_low6_low6_low6_up4_branch1"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 512
+    pad: 0
+    kernel_size: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
   name: "reshg4_low6_low6_low6_up1_bn"
   type: "BatchNorm"
   bottom: "reshg4_low6_low6_low6_up1"
@@ -25300,10 +25732,10 @@ layer {
   top: "reshg4_low6_low6_low6_up1_bn"
 }
 layer {
-  name: "reshg4_low6_low6_low6_up2_branch2a"
+  name: "reshg4_low6_low6_low6_up4_branch2a"
   type: "Convolution"
   bottom: "reshg4_low6_low6_low6_up1_bn"
-  top: "reshg4_low6_low6_low6_up2_branch2a"
+  top: "reshg4_low6_low6_low6_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -25313,7 +25745,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 128
+    num_output: 256
     bias_term: true
     pad: 0
     kernel_size: 1
@@ -25329,10 +25761,10 @@ layer {
   }
 }
 layer {
-  name: "bnhg4_low6_low6_low6_up2_branch2a"
+  name: "bnhg4_low6_low6_low6_up4_branch2a"
   type: "BatchNorm"
-  bottom: "reshg4_low6_low6_low6_up2_branch2a"
-  top: "reshg4_low6_low6_low6_up2_branch2a"
+  bottom: "reshg4_low6_low6_low6_up4_branch2a"
+  top: "reshg4_low6_low6_low6_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -25351,10 +25783,10 @@ layer {
   }
 }
 layer {
-  name: "scalehg4_low6_low6_low6_up2_branch2a"
+  name: "scalehg4_low6_low6_low6_up4_branch2a"
   type: "EltwiseAffine"
-  bottom: "reshg4_low6_low6_low6_up2_branch2a"
-  top: "reshg4_low6_low6_low6_up2_branch2a"
+  bottom: "reshg4_low6_low6_low6_up4_branch2a"
+  top: "reshg4_low6_low6_low6_up4_branch2a"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -25368,16 +25800,16 @@ layer {
   }
 }
 layer {
-  name: "reshg4_low6_low6_low6_up2_branch2a_relu"
+  name: "reshg4_low6_low6_low6_up4_branch2a_relu"
   type: "ReLU"
-  bottom: "reshg4_low6_low6_low6_up2_branch2a"
-  top: "reshg4_low6_low6_low6_up2_branch2a"
+  bottom: "reshg4_low6_low6_low6_up4_branch2a"
+  top: "reshg4_low6_low6_low6_up4_branch2a"
 }
 layer {
-  name: "reshg4_low6_low6_low6_up2_branch2b"
+  name: "reshg4_low6_low6_low6_up4_branch2b"
   type: "Convolution"
-  bottom: "reshg4_low6_low6_low6_up2_branch2a"
-  top: "reshg4_low6_low6_low6_up2_branch2b"
+  bottom: "reshg4_low6_low6_low6_up4_branch2a"
+  top: "reshg4_low6_low6_low6_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -25387,7 +25819,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 128
+    num_output: 256
     bias_term: true
     pad: 1
     kernel_size: 3
@@ -25403,10 +25835,10 @@ layer {
   }
 }
 layer {
-  name: "bnhg4_low6_low6_low6_up2_branch2b"
+  name: "bnhg4_low6_low6_low6_up4_branch2b"
   type: "BatchNorm"
-  bottom: "reshg4_low6_low6_low6_up2_branch2b"
-  top: "reshg4_low6_low6_low6_up2_branch2b"
+  bottom: "reshg4_low6_low6_low6_up4_branch2b"
+  top: "reshg4_low6_low6_low6_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -25425,10 +25857,10 @@ layer {
   }
 }
 layer {
-  name: "scalehg4_low6_low6_low6_up2_branch2b"
+  name: "scalehg4_low6_low6_low6_up4_branch2b"
   type: "EltwiseAffine"
-  bottom: "reshg4_low6_low6_low6_up2_branch2b"
-  top: "reshg4_low6_low6_low6_up2_branch2b"
+  bottom: "reshg4_low6_low6_low6_up4_branch2b"
+  top: "reshg4_low6_low6_low6_up4_branch2b"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -25442,16 +25874,16 @@ layer {
   }
 }
 layer {
-  name: "reshg4_low6_low6_low6_up2_branch2b_relu"
+  name: "reshg4_low6_low6_low6_up4_branch2b_relu"
   type: "ReLU"
-  bottom: "reshg4_low6_low6_low6_up2_branch2b"
-  top: "reshg4_low6_low6_low6_up2_branch2b"
+  bottom: "reshg4_low6_low6_low6_up4_branch2b"
+  top: "reshg4_low6_low6_low6_up4_branch2b"
 }
 layer {
-  name: "reshg4_low6_low6_low6_up2_branch2c"
+  name: "reshg4_low6_low6_low6_up4_branch2c"
   type: "Convolution"
-  bottom: "reshg4_low6_low6_low6_up2_branch2b"
-  top: "reshg4_low6_low6_low6_up2_branch2c"
+  bottom: "reshg4_low6_low6_low6_up4_branch2b"
+  top: "reshg4_low6_low6_low6_up4_branch2c"
   param {
     lr_mult: 0
     decay_mult: 0
@@ -25461,7 +25893,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 512
     pad: 0
     kernel_size: 1
     stride: 1
@@ -25475,11 +25907,11 @@ layer {
   }
 }
 layer {
-  name: "reshg4_low6_low6_low6_up2"
+  name: "reshg4_low6_low6_low6_up4"
   type: "Eltwise"
-  bottom: "reshg4_low6_low6_low6_up1"
-  bottom: "reshg4_low6_low6_low6_up2_branch2c"
-  top: "reshg4_low6_low6_low6_up2"
+  bottom: "reshg4_low6_low6_low6_up4_branch1"
+  bottom: "reshg4_low6_low6_low6_up4_branch2c"
+  top: "reshg4_low6_low6_low6_up4"
 }
 layer {
   name: "hg4_low6_low6_low6_pool1"
@@ -26678,7 +27110,7 @@ layer {
 layer {
   name: "hg4_low6_low6_low6"
   type: "Eltwise"
-  bottom: "reshg4_low6_low6_low6_up2"
+  bottom: "reshg4_low6_low6_low6_up4"
   bottom: "hg4_low6_low6_low6_Up5"
   top: "hg4_low6_low6_low6"
 }
@@ -26933,7 +27365,7 @@ layer {
 layer {
   name: "hg4_low6_low6"
   type: "Eltwise"
-  bottom: "reshg4_low6_low6_up2"
+  bottom: "reshg4_low6_low6_up4"
   bottom: "hg4_low6_low6_Up5"
   top: "hg4_low6_low6"
 }
@@ -27188,7 +27620,7 @@ layer {
 layer {
   name: "hg4_low6"
   type: "Eltwise"
-  bottom: "reshg4_low6_up2"
+  bottom: "reshg4_low6_up4"
   bottom: "hg4_low6_Up5"
   top: "hg4_low6"
 }
@@ -27443,7 +27875,7 @@ layer {
 layer {
   name: "hg4"
   type: "Eltwise"
-  bottom: "reshg4_up2"
+  bottom: "reshg4_up4"
   bottom: "hg4_Up5"
   top: "hg4"
 }
