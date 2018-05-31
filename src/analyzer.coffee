@@ -14,7 +14,7 @@ module.exports =
             # Setup Default Values for Analysis
             d = n.analysis
             d.wIn = d.hIn = d.wOut = d.hOut = d.chIn = d.chOut = 0
-            d.comp = {macc: 0, comp: 0, add: 0, div: 0, exp: 0}
+            d.comp = {macc: 0, biasAdd: 0, comp: 0, mul:0, add: 0, div: 0, exp: 0}
             d.mem  = {activation: 0, param: 0}
             d.variants = [];
 
@@ -88,7 +88,8 @@ module.exports =
                     d.mem.param = (kernel_w*kernel_h*d.chIn/group + has_bias)*d.chOut
                     d.mem.activation = (d.wOut*d.hOut)*d.chOut*d.batchOut
                     #computation
-                    d.comp.macc = d.mem.param * d.wOut*d.hOut*d.batchOut
+                    d.comp.macc = kernel_w*kernel_h*d.chIn/group * d.chOut * d.wOut*d.hOut*d.batchOut * 2
+                    d.comp.biasAdd = has_bias*d.chOut*d.wOut*d.hOut*d.batchOut
 
                     # CACHE AND BANDWIDTH for Implementation Variants
                     if (do_variants_analysis)
@@ -152,7 +153,8 @@ module.exports =
                     d.mem.param = (d.wIn*d.hIn*d.chIn + has_bias)*d.chOut
                     d.mem.activation = d.wOut*d.hOut*d.chOut*d.batchOut
                     #computation
-                    d.comp.macc = d.mem.param * d.batchOut
+                    d.comp.macc = d.wIn*d.hIn*d.chIn *d.chOut * d.batchOut * 2
+                    d.comp.biasAdd = has_bias*d.chOut * d.batchOut
 
                 when "pooling"
                     #dimensions
@@ -208,7 +210,7 @@ module.exports =
                     #computation
                     #  Each input value is divided by (1+(α/n)∑xi^2)^β
                     num_inputs = d.wIn*d.hIn*d.chIn*d.batchOut
-                    d.comp.macc = num_inputs*size   # (∑xi^2)
+                    d.comp.mul = num_inputs*size   # (∑xi^2)
                     d.comp.add = num_inputs         # (1+...)
                     d.comp.exp = num_inputs         # (...)^β
                     d.comp.div = num_inputs*2       # (α/n)*... + divide by sum
@@ -283,7 +285,7 @@ module.exports =
                     else if op == 'MAX'
                         d.comp.comp = d.wIn*d.hIn*d.chIn*d.batchOut
                     else if op == 'PROD'
-                        d.comp.macc = d.wIn*d.hIn*d.chIn*d.batchOut
+                        d.comp.mul = d.wIn*d.hIn*d.chIn*d.batchOut
                     else
                         onerror 'ELTWISE: unknown operation '+op
                     #memory
@@ -303,7 +305,7 @@ module.exports =
                     d.mem.param = if n.attribs.eltwise_affine_param.channel_shared then 2 else 2 * d.chOut
                     d.mem.activation = d.wOut*d.hOut*d.chOut*d.batchOut
                     # computation
-                    d.comp.macc = d.wIn*d.hIn*d.chIn*d.batchOut
+                    d.comp.mul = d.wIn*d.hIn*d.chIn*d.batchOut
                     d.comp.add = d.wIn*d.hIn*d.chIn*d.batchOut
 
                 when "spatialtransformer"
@@ -313,9 +315,9 @@ module.exports =
                     d.wOut = n.attribs.st_param?.output_w ? d.wIn
                     # memory
                     d.mem.param = d.batchIn * 6
-                    # computation
-                    d.comp.macc = d.wOut*d.hOut*d.chOut*d.batchOut*8 + 6*d.wOut*d.hOut*d.batchOut
-                    d.comp.add = d.wOut*d.hOut*d.chOut*d.batchOut*8
+                    # computation (macc)
+                    d.comp.mul = d.wOut*d.hOut*d.chOut*d.batchOut*8 + 6*d.wOut*d.hOut*d.batchOut
+                    d.comp.add = d.wOut*d.hOut*d.chOut*d.batchOut*8 + 6*d.wOut*d.hOut*d.batchOut
 
                 when "deconvolution"
                     #dimensions
@@ -331,7 +333,7 @@ module.exports =
                     d.hOut = (stride_h*(d.hIn-1)+kernel_h-2*pad_h)
                     d.chOut = numout
                     #computation
-                    d.comp.macc = d.chIn*d.chOut*d.wOut*d.hOut*(kernel_w/stride_w)*(kernel_h/stride_h)*d.batchOut
+                    d.comp.macc = d.chIn*d.chOut*d.wOut*d.hOut*(kernel_w/stride_w)*(kernel_h/stride_h)*d.batchOut * 2
                     #memory
                     d.mem.param = kernel_w*kernel_h*d.chIn*d.chOut
                     d.mem.activation = d.wOut*d.hOut*d.chOut*d.batchOut
@@ -356,7 +358,7 @@ module.exports =
                     d.hOut = d.hIn
                     d.chOut = d.chIn
                     #computation: scale = multiplication
-                    d.comp.macc = d.wOut*d.hOut*d.chOut*d.batchOut
+                    d.comp.mul = d.wOut*d.hOut*d.chOut*d.batchOut
                     #memory
                     d.mem.activation = d.wOut*d.hOut*d.chOut*d.batchOut
 
@@ -403,7 +405,7 @@ module.exports =
                     d.chOut = d.chIn
                     #computation
                     n_elements = d.wOut * d.hOut * d.chOut
-                    d.comp.macc = if scale != 1 then n_elements else 0
+                    d.comp.mul = if scale != 1 then n_elements else 0
                     d.comp.add = if shift != 0 then n_elements else 0
                     d.comp.exp = if power != 1 then n_elements else 0
                     #memory
@@ -481,7 +483,7 @@ module.exports =
 
                         #computation
                         d.comp.div  = (num_region_proposals*(num_region_proposals-1))/2
-                        d.comp.macc = d.batchIn * (4+4) * 9*(d.wIn*d.hIn) + 2*(d.comp.div)
+                        d.comp.mul = d.batchIn * (4+4) * 9*(d.wIn*d.hIn) + 2*(d.comp.div)
                         d.comp.add  = d.batchIn * (8+2) * 9*(d.wIn*d.hIn) + 6*(d.comp.div)
                         d.comp.comp = d.batchIn * (4+2) * 9*(d.wIn*d.hIn) + (9*(d.wIn*d.hIn))**2 + 7*(d.comp.div)
                         d.comp.exp  = d.batchIn * (2) * 9*(d.wIn*d.hIn)
@@ -508,7 +510,7 @@ module.exports =
                       #computation
                       d.comp.add = d.batchOut
                       d.comp.div = d.batchOut
-                      d.comp.macc = d.batchOut
+                      d.comp.mul = d.batchOut
                       d.comp.comp = d.batchOut * d.chIn * d.wIn * d.hIn
                       #memory
                       d.mem.activation = d.wOut*d.hOut*d.chOut*d.batchOut

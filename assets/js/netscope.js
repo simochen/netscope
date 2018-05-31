@@ -16227,7 +16227,9 @@ module.exports = Analyzer = (function() {
       d.wIn = d.hIn = d.wOut = d.hOut = d.chIn = d.chOut = 0;
       d.comp = {
         macc: 0,
+        biasAdd: 0,
         comp: 0,
+        mul: 0,
         add: 0,
         div: 0,
         exp: 0
@@ -16293,7 +16295,8 @@ module.exports = Analyzer = (function() {
           d.chOut = numout;
           d.mem.param = (kernel_w * kernel_h * d.chIn / group + has_bias) * d.chOut;
           d.mem.activation = (d.wOut * d.hOut) * d.chOut * d.batchOut;
-          d.comp.macc = d.mem.param * d.wOut * d.hOut * d.batchOut;
+          d.comp.macc = kernel_w * kernel_h * d.chIn / group * d.chOut * d.wOut * d.hOut * d.batchOut * 2;
+          d.comp.biasAdd = has_bias * d.chOut * d.wOut * d.hOut * d.batchOut;
           if (do_variants_analysis) {
             d.variants.push({
               name: "complete outputs, input cache",
@@ -16348,7 +16351,8 @@ module.exports = Analyzer = (function() {
           d.chOut = numout;
           d.mem.param = (d.wIn * d.hIn * d.chIn + has_bias) * d.chOut;
           d.mem.activation = d.wOut * d.hOut * d.chOut * d.batchOut;
-          d.comp.macc = d.mem.param * d.batchOut;
+          d.comp.macc = d.wIn * d.hIn * d.chIn * d.chOut * d.batchOut * 2;
+          d.comp.biasAdd = has_bias * d.chOut * d.batchOut;
           break;
         case "pooling":
           params = n.attribs.pooling_param;
@@ -16394,7 +16398,7 @@ module.exports = Analyzer = (function() {
           d.hOut = d.hIn;
           d.chOut = d.chIn;
           num_inputs = d.wIn * d.hIn * d.chIn * d.batchOut;
-          d.comp.macc = num_inputs * size;
+          d.comp.mul = num_inputs * size;
           d.comp.add = num_inputs;
           d.comp.exp = num_inputs;
           d.comp.div = num_inputs * 2;
@@ -16468,7 +16472,7 @@ module.exports = Analyzer = (function() {
           } else if (op === 'MAX') {
             d.comp.comp = d.wIn * d.hIn * d.chIn * d.batchOut;
           } else if (op === 'PROD') {
-            d.comp.macc = d.wIn * d.hIn * d.chIn * d.batchOut;
+            d.comp.mul = d.wIn * d.hIn * d.chIn * d.batchOut;
           } else {
             onerror('ELTWISE: unknown operation ' + op);
           }
@@ -16489,7 +16493,7 @@ module.exports = Analyzer = (function() {
           }
           d.mem.param = n.attribs.eltwise_affine_param.channel_shared ? 2 : 2 * d.chOut;
           d.mem.activation = d.wOut * d.hOut * d.chOut * d.batchOut;
-          d.comp.macc = d.wIn * d.hIn * d.chIn * d.batchOut;
+          d.comp.mul = d.wIn * d.hIn * d.chIn * d.batchOut;
           d.comp.add = d.wIn * d.hIn * d.chIn * d.batchOut;
           break;
         case "spatialtransformer":
@@ -16497,8 +16501,8 @@ module.exports = Analyzer = (function() {
           d.hOut = (ref42 = (ref43 = n.attribs.st_param) != null ? ref43.output_h : void 0) != null ? ref42 : d.hIn;
           d.wOut = (ref44 = (ref45 = n.attribs.st_param) != null ? ref45.output_w : void 0) != null ? ref44 : d.wIn;
           d.mem.param = d.batchIn * 6;
-          d.comp.macc = d.wOut * d.hOut * d.chOut * d.batchOut * 8 + 6 * d.wOut * d.hOut * d.batchOut;
-          d.comp.add = d.wOut * d.hOut * d.chOut * d.batchOut * 8;
+          d.comp.mul = d.wOut * d.hOut * d.chOut * d.batchOut * 8 + 6 * d.wOut * d.hOut * d.batchOut;
+          d.comp.add = d.wOut * d.hOut * d.chOut * d.batchOut * 8 + 6 * d.wOut * d.hOut * d.batchOut;
           break;
         case "deconvolution":
           params = n.attribs.convolution_param;
@@ -16512,7 +16516,7 @@ module.exports = Analyzer = (function() {
           d.wOut = stride_w * (d.wIn - 1) + kernel_w - 2 * pad_w;
           d.hOut = stride_h * (d.hIn - 1) + kernel_h - 2 * pad_h;
           d.chOut = numout;
-          d.comp.macc = d.chIn * d.chOut * d.wOut * d.hOut * (kernel_w / stride_w) * (kernel_h / stride_h) * d.batchOut;
+          d.comp.macc = d.chIn * d.chOut * d.wOut * d.hOut * (kernel_w / stride_w) * (kernel_h / stride_h) * d.batchOut * 2;
           d.mem.param = kernel_w * kernel_h * d.chIn * d.chOut;
           d.mem.activation = d.wOut * d.hOut * d.chOut * d.batchOut;
           break;
@@ -16527,7 +16531,7 @@ module.exports = Analyzer = (function() {
           d.wOut = d.wIn;
           d.hOut = d.hIn;
           d.chOut = d.chIn;
-          d.comp.macc = d.wOut * d.hOut * d.chOut * d.batchOut;
+          d.comp.mul = d.wOut * d.hOut * d.chOut * d.batchOut;
           d.mem.activation = d.wOut * d.hOut * d.chOut * d.batchOut;
           break;
         case "implicit":
@@ -16558,7 +16562,7 @@ module.exports = Analyzer = (function() {
           d.hOut = d.hIn;
           d.chOut = d.chIn;
           n_elements = d.wOut * d.hOut * d.chOut;
-          d.comp.macc = scale !== 1 ? n_elements : 0;
+          d.comp.mul = scale !== 1 ? n_elements : 0;
           d.comp.add = shift !== 0 ? n_elements : 0;
           d.comp.exp = power !== 1 ? n_elements : 0;
           d.mem.activation = n_elements;
@@ -16626,7 +16630,7 @@ module.exports = Analyzer = (function() {
             d.chOut = 5;
             d.batchOut = num_region_proposals;
             d.comp.div = (num_region_proposals * (num_region_proposals - 1)) / 2;
-            d.comp.macc = d.batchIn * (4 + 4) * 9 * (d.wIn * d.hIn) + 2 * d.comp.div;
+            d.comp.mul = d.batchIn * (4 + 4) * 9 * (d.wIn * d.hIn) + 2 * d.comp.div;
             d.comp.add = d.batchIn * (8 + 2) * 9 * (d.wIn * d.hIn) + 6 * d.comp.div;
             d.comp.comp = d.batchIn * (4 + 2) * 9 * (d.wIn * d.hIn) + Math.pow(9 * (d.wIn * d.hIn), 2) + 7 * d.comp.div;
             d.comp.exp = d.batchIn * 2 * 9 * (d.wIn * d.hIn);
@@ -16648,7 +16652,7 @@ module.exports = Analyzer = (function() {
           d.batchIn = d.batchOut = roi_proposals.batchOut;
           d.comp.add = d.batchOut;
           d.comp.div = d.batchOut;
-          d.comp.macc = d.batchOut;
+          d.comp.mul = d.batchOut;
           d.comp.comp = d.batchOut * d.chIn * d.wIn * d.hIn;
           d.mem.activation = d.wOut * d.hOut * d.chOut * d.batchOut;
           break;
